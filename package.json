@@ -2,7 +2,7 @@
   "name": "node-red-contrib-alice",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "alice.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -16,7 +16,7 @@
     "alice"
   ],
   "node-red":{
-    "alice": "index.js"
+    "alice": "alice.js"
   },
   "author": "Efa2000",
   "license": "MIT",
