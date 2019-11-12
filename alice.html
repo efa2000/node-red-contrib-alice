@@ -1,0 +1,113 @@
+<script type="text/javascript">
+    RED.nodes.registerType('alice-service',{
+        category: 'config',
+        defaults: {
+            name: {value:null}
+        },
+        credentials:{
+            email: {type: "text", required:true},
+            password: {type: "password", required:true}
+        },
+        label: function() {
+            return this.name || "Alice-Credentials";
+        },
+        oneditsave: function(){
+            nodename = $('#node-config-input-email').val();
+            $('#node-config-input-name').val(nodename);
+        }
+    })
+</script>
+
+<script type="text/x-red" data-template-name="alice-service">
+    <input type="hidden" id="node-config-input-name">
+    <div class="form-row"><b>Credentials</b></div>
+    <div class="form-row">
+        <label for="node-config-input-email">Email</label>
+        <input type="text" id="node-config-input-email" placeholder="user@example.com">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-password"><i class="icon-bookmark"></i> Password</label>
+        <input type="password" id="node-config-input-password">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('alice-device',{
+        category: 'config',
+        defaults:{
+            service: {value:"", type:"alice-service"},
+            name: {value:null, required: true},
+            description: {value:null},
+            room: {value:"room"},
+            dtype: {value:"devices.types.light", required: true}
+        },
+        label: function(){
+            return this.room+":"+this.name || "Alice-Device";
+        }
+    })
+</script>
+
+<script type="text/x-red" data-template-name="alice-device">
+    <div class="form-row">
+        <label for="node-config-input-service">Credentials</label>
+        <input id="node-config-input-service">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-name">Name</label>
+        <input type="text" id="node-config-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-description">Description</label>
+        <input type="text" id="node-config-input-description" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-room">Room</label>
+        <input type="text" id="node-config-input-room" placeholder="Room">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-dtype">Type</label>
+        <select id="node-config-input-dtype" style="width: 70%;">
+            <option value="devices.types.light">Light</option>
+            <option value="devices.types.socket">Socket</option>
+            <option value="devices.types.switch" >Switch</option>
+            <option value="devices.types.thermostat">Thermostat</option>
+            <option value="devices.types.thermostat.ac">Air conditioning</option>
+            <option value="devices.types.media_device">Multimedia</option>
+            <option value="devices.types.media_device.tv">TV</option>
+            <option value="devices.types.cooking">Kitchen appliances</option>
+            <option value="devices.types.cooking.coffee_maker">Coffee machine</option>
+            <option value="devices.types.cooking.kettle">Smart kettle</option>
+            <option value="devices.types.openable">Door, gate, window, shutters</option>
+            <option value="devices.types.openable.curtain">Curtains, blinds</option>
+            <option value="devices.types.humidifier">Humidifier</option>
+            <option value="devices.types.purifier">Air purifier</option>
+            <option value="devices.types.vacuum_cleaner">Vacuum cleaner robot</option>
+            <option value="devices.types.other">Other</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('On_Off',{
+        category: 'alice',
+        defaults:{
+            device: {value:"", type:"alice-device"},
+            name: {value:null}
+        },
+        label: function(){
+            return this.name + ":On/Off";
+        },
+        oneditsave: function(){
+            deivcename = $('#node-input-device option:selected').text();
+            $('#node-input-name').val(deivcename);
+        }
+    })
+</script>
+
+<script type="text/x-red" data-template-name="On_Off">
+    <input type="hidden" id="node-input-name">
+    <div class="form-row">
+        <label for="node-input-device">Device</label>
+        <input id="node-input-device">
+    </div>
+</script>

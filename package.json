@@ -15,13 +15,18 @@
     "yandex",
     "alice"
   ],
-  "node-red":{
-    "alice": "alice.js"
+  "node-red": {
+    "nodes": {
+      "alice": "alice.js"
+    }
   },
   "author": "Efa2000",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/efa2000/node-red-contrib-alice/issues"
   },
-  "homepage": "https://github.com/efa2000/node-red-contrib-alice#readme"
+  "homepage": "https://github.com/efa2000/node-red-contrib-alice#readme",
+  "dependencies": {
+    "firebase": "^7.3.0"
+  }
 }
