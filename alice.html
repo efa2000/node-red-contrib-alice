@@ -92,8 +92,12 @@
         category: 'alice',
         defaults:{
             device: {value:"", type:"alice-device"},
-            name: {value:null}
+            name: {value:""}
         },
+        inputs:1,
+        outputs:1,
+        icon: "alice.png",
+        color: "#D8BFD8",
         label: function(){
             return this.name + ":On/Off";
         },
@@ -111,3 +115,35 @@
         <input id="node-input-device">
     </div>
 </script>
+
+<script type="text/x-red" data-help-name="On_Off">
+    <p>Allows the device to turn on and off</p>
+    
+    <h3>Property</h3>
+    <dl class="message-properties">
+        <dt>Device
+            <span class="property-type">Select</span>
+        </dt>
+        <dd> The device to which this feature is connected </dd>
+    </dl>
+
+    <h3>Inputs</h3>
+        <dl class="message-properties">
+            <dt>payload
+                <span class="property-type">boolean</span>
+            </dt>
+            <dd> true or false </dd>
+        </dl>
+    
+     <h3>Outputs</h3>
+         <dl class="message-properties">
+            <dt>payload
+                <span class="property-type">boolean</span>
+            </dt>
+            <dd> true or false </dd>
+        </dl>
+    <h3>References</h3>
+        <ul>
+            <li><a href="https://yandex.ru/dev/dialogs/alice/doc/smart-home/concepts/capability-types-docpage/"> - Yandex documentation</a></li>
+        </ul>
+    </script>
