@@ -63,7 +63,7 @@ module.exports = function(RED) {
     }
   });
   
-
+// ***************************** Alice DEVICE ****************************
   function AliceDevice(config){
     RED.nodes.createNode(this,config);
     this.service = RED.nodes.getNode(config.service);
@@ -72,6 +72,7 @@ module.exports = function(RED) {
     this.room = config.room;
     this.initState = false;
     this.ref = null;
+    this.capabilites = {};
 
     this.init = ()=>{
       this.ref = this.service.getRef(this.id);
@@ -79,32 +80,72 @@ module.exports = function(RED) {
         name: config.name,
         description: config.description,
         room: config.room
-      }).then(ref=>{
+      })
+      .then(ref=>{
+        return this.ref.collection('capabilities').get()
+          .then(snapshot=>{
+            snapshot.forEach(doc=>{
+              let d = doc.data();
+              let capab = d.type + "." + d.parametrs.instance
+              this.capabilites[capab] = doc.id;
+            })
+            return this.ref;
+          })
+      })
+      .then(ref=>{
         this.initState = true;
         this.status({fill:"green",shape:"dot",text:"online"});
         this.emit("online");
       });
     }
-    
+
+    this.startObserver = ()=>{
+      this.observer = this.ref.collection('capabilities')
+      .where('state.updated', '>', new Date())
+      .onSnapshot(querySnapshot=>{
+        querySnapshot.docChanges().forEach(change => {
+          let doc = change.doc.data();
+          if ((change.type === 'added' || change.type === 'modified') && doc.state.updatedfrom != "node-red") {
+            this.emit(change.doc.id,doc.state.value)
+          }
+        });
+        
+      })
+    };
+
     this.getRef=(capId)=>{
       return this.ref.collection('capabilities').doc(capId);
     }
     
+    this.isDubCap=(capId,type,instance)=>{
+      let capab = type+"."+instance;
+      if (this.capabilites[capab] && this.capabilites[capab]!=capId){
+        return true;
+      }else{
+        this.capabilites[capab] = capId;
+        return false
+      }
+    };
+
     this.service.on("online",()=>{
       if (!this.initState){
-        this.init();
+        this.init()
       }else{
         this.ref = this.service.getRef(this.id);
         this.emit("online");
       }
+      this.startObserver();
     });
+    
     this.service.on("offline",()=>{
       this.emit("offline");
       this.ref = null;
+      if (this.observer)this.observer();
       this.status({fill:"red",shape:"dot",text:"offline"});
     })
 
     this.on('close', (removed, done)=>{
+      this.observer();
       if (removed){
         this.ref.delete();
         done();
@@ -114,6 +155,9 @@ module.exports = function(RED) {
     });
   };
   RED.nodes.registerType("alice-device",AliceDevice);
+
+
+// *********************** Alice capabilites ***********************************
 
   function AliceOnOff(config){
     RED.nodes.createNode(this,config);
@@ -131,17 +175,21 @@ module.exports = function(RED) {
           instance: "on",
         },
         state: {
-          value: false
-        },
-        action:{
-          value: false
+          value: false,
+          updatedfrom:"node-red",
+          updated: firebase.firestore.Timestamp.now()
         }
       };
-      this.ref.set(capab)
-        .then(ref=>{
-          this.status({fill:"green",shape:"dot",text:"online"});
-          this.initState = true;
-        });
+      if (!this.device.isDubCap(this.id,capab.type, capab.parametrs.instance)){
+        this.ref.set(capab)
+          .then(ref=>{
+            this.status({fill:"green",shape:"dot",text:"online"});
+            this.initState = true;
+          });
+      }else{
+        this.status({fill:"red",shape:"dot",text:"error"});
+        this.error("Dublicated capability on same device!");
+      }
     };
 
     this.device.on("online",()=>{
@@ -156,6 +204,12 @@ module.exports = function(RED) {
     this.device.on("offline",()=>{
       this.ref = null;
       this.status({fill:"red",shape:"dot",text:"offline"});
+    });
+
+    this.device.on(this.id,(val)=>{
+      this.send({
+        payload: val
+      });
     })
 
     this.on('input', (msg, send, done)=>{
@@ -169,13 +223,28 @@ module.exports = function(RED) {
         this.status({fill:"red",shape:"dot",text:"offline"});
         if (done) {done();}
         return;
-      };      
-    })
+      };
+      this.ref.update({
+        state:{
+          value: msg.payload,
+          updatedfrom: "node-red",
+          updated: firebase.firestore.Timestamp.now()
+        }
+      }).then(ref=>{
+        if (done) {done();}
+      }).catch(err=>{
+        this.error("err.message");
+      })
+    });
 
-    this.on('close', (removed, done)=>{
-      if (removed){
-        this.ref.delete();
-        done();
+    this.on('close', function(removed, done) {
+      if (removed) {
+        this.ref.delete().then(res=>{
+                done()
+              }).catch(err=>{
+                this.error(err.message);
+                done();
+              })
       }else{
         done();
       }
