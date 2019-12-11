@@ -70,6 +70,7 @@ module.exports = function(RED) {
     this.name = config.name;
     this.description = config.description,
     this.room = config.room;
+    this.dtype = config.dtype;
     this.initState = false;
     this.ref = null;
     this.capabilites = {};
@@ -79,7 +80,8 @@ module.exports = function(RED) {
       this.ref.set({
         name: config.name,
         description: config.description,
-        room: config.room
+        room: config.room,
+        type: config.dtype
       })
       .then(ref=>{
         return this.ref.collection('capabilities').get()

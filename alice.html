@@ -1,4 +1,17 @@
+<script defer src="https://www.gstatic.com/firebasejs/7.5.2/firebase-app.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/7.5.2/firebase-auth.js"></script>
+
 <script type="text/javascript">
+    const firebaseConfig = {
+            apiKey: "AIzaSyDQUn6EhNOgSAV15do8DKwwx3KHDyvLGJc",
+            authDomain: "node-red-alice-4462f.firebaseapp.com",
+            databaseURL: "https://node-red-alice-4462f.firebaseio.com",
+            projectId: "node-red-alice-4462f",
+            storageBucket: "node-red-alice-4462f.appspot.com",
+            messagingSenderId: "1049686868440",
+            appId: "1:1049686868440:web:e5f5ef6a70ead338b6f2ad",
+            measurementId: "G-MD0L6R9N79"
+        };
     RED.nodes.registerType('alice-service',{
         category: 'config',
         defaults: {
@@ -15,19 +28,108 @@
             nodename = $('#node-config-input-email').val();
             $('#node-config-input-name').val(nodename);
         }
-    })
+    });
+    function Activete(div){
+        if (div=="singup"){
+            document.getElementById("singin").hidden = true;
+            document.getElementById("singup").hidden = false;
+            document.getElementById("restore").hidden = true;
+        }else if (div=="restore"){
+            document.getElementById("singin").hidden = true;
+            document.getElementById("singup").hidden = true;
+            document.getElementById("restore").hidden = false;
+        }else{
+            document.getElementById("singin").hidden = false;
+            document.getElementById("singup").hidden = true;
+            document.getElementById("restore").hidden = true;
+        };
+    };
+    function SingUp(){
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        };
+        document.getElementById("register_error").innerHTML = "";
+        var email = document.getElementById("register_email").value;
+        var password = document.getElementById("register_password").value;
+        firebase.auth().createUserWithEmailAndPassword(email, password)
+            .then(function(r){
+                document.getElementById("node-config-input-email").value = email;
+                document.getElementById("node-config-input-password").value = password;
+                Activete();
+            })
+            .catch(function(error) {
+                document.getElementById("register_error").innerHTML = error.message;
+            })
+    };
+    function Restore(){
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        };
+        document.getElementById("restore_error").innerHTML = "";
+        var emailAddress = document.getElementById("restore_email").value;
+        firebase.auth().sendPasswordResetEmail(emailAddress).then(function() {
+            alert("Password recovery email was sent successfully! Please check your email.");
+            Activete();
+        }).catch(function(error) {
+            document.getElementById("restore_error").innerHTML = error.message;
+        });
+    }
+</script>
+<script>
+       
 </script>
 
-<script type="text/x-red" data-template-name="alice-service">
+
+<script type="text/x-red" data-template-name="alice-service">    
     <input type="hidden" id="node-config-input-name">
-    <div class="form-row"><b>Credentials</b></div>
-    <div class="form-row">
-        <label for="node-config-input-email">Email</label>
-        <input type="text" id="node-config-input-email" placeholder="user@example.com">
+    <div id="singin" >
+        <div class="form-row"><b>Credentials</b></div>
+        <div class="form-row">
+            <label for="node-config-input-email">Email</label>
+            <input type="text" id="node-config-input-email" placeholder="user@example.com">
+        </div>
+        <div class="form-row">
+            <label for="node-config-input-password">Password</label>
+            <input type="password" id="node-config-input-password">
+        </div>
+
+        <div class="form-tips" style="margin-top:64px;">
+            <b>Tip:</b>
+            <p>If you don't have credentials, please <button class="ui-button" onclick="Activete('singup')">Register</button> before using </p>
+            <p>If you forgot your password <button class="ui-button" onclick="Activete('restore')">Restore password</button></p>
+        </div>
     </div>
-    <div class="form-row">
-        <label for="node-config-input-password"><i class="icon-bookmark"></i> Password</label>
-        <input type="password" id="node-config-input-password">
+    <div id="singup" hidden>
+        <form>
+            <div class="form-row"><b>Signup</b></div>
+            <div class="form-row">
+                <label>Email</label>
+                <input type="text" id="register_email" placeholder="user@example.com">
+            </div>
+            <div class="form-row">
+                <label> Password</label>
+                <input type="password" id="register_password">
+            </div>
+            <div class="form-row" style="text-align: end; margin-right: 32px;">
+                <button onclick="Activete()" class="ui-button">Cancel</button>
+                <button onclick="SingUp()" class="ui-button primary">Signup</button>
+            </div>
+        </form>
+        <p style="color:red;" id="register_error"></p>
+    </div>
+    <div id="restore" hidden>
+        <div class="form-row"><b>Password recovery</b></div>
+        <div class="form-row">
+            <label> Email</label>
+            <input type="text" id="restore_email" placeholder="user@example.com">
+        </div>
+        <div class="form-row" style="text-align: end; margin-right: 32px;">
+                <button onclick="Activete()" class="ui-button">Cancel</button>
+                <button onclick="Restore()" class="ui-button primary">Recover</button>
+        </div>
+        <p style="color:red;" id="restore_error"></p>
     </div>
 </script>
 
