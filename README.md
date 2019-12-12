@@ -1,5 +1,6 @@
 # Node-Red-Alice (node-red-contrib-alice)
 
+
 ## Инструкция (RUS)
 Модуль позволяет использовать Node-Red совместно с сервисом голосового помошника Yandex.Alice (голосовое управление устройствами умного дома)
 
@@ -25,15 +26,15 @@ The module allows you to use Node-Red together with the Yandex.Alice voice assis
 
 ### Use
 In the directory with Node-Red installed, run
-`` ``
+```
 npm install node-red-contrib-alice
-`` ``
-Then add skills to your circuit and match with your device
+```
+Then add capability to your circuit and match with your device
 
 at the first use it is necessary to register
 
 ### Concept
-Each device can have an unlimited number of skills (functionality)
-For example, a light bulb may have the ability to turn on / off, but also the additional ability to set the color and brightness
-Device skills can be combined in any order
-You can read more about skills and devices in the Yandex documentation [Yandex Documentation] (https://yandex.ru/dev/dialogs/alice/doc/smart-home/concepts/capability-types-docpage/)
+Each device can have an unlimited number of capability (functionality)
+For example, a light bulb may have the capability to turn on / off, but also the additional capability to set the color and brightness
+Device capabilites can be combined in any order
+You can read more about capability and devices in the Yandex documentation [Yandex Documentation] (https://yandex.ru/dev/dialogs/alice/doc/smart-home/concepts/capability-types-docpage/)
