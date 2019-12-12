@@ -1,7 +1,5 @@
 # Node-Red-Alice (node-red-contrib-alice)
 
-[RUS](Инструкция)
-
 ## Инструкция (RUS)
 Модуль позволяет использовать Node-Red совместно с сервисом голосового помошника Yandex.Alice (голосовое управление устройствами умного дома)
 
@@ -19,6 +17,8 @@ npm install node-red-contrib-alice
 К примеру, лампочка может иметь умение включения/выклюяения, но так же дополнительное умение установки цвета и яркости 
 Умения устройства можно объеденять в любом порядке 
 Более подробно о умениях и устройствах можно почитать в документации Yandex [Документация Яндекса](https://yandex.ru/dev/dialogs/alice/doc/smart-home/concepts/capability-types-docpage/)
+
+
 
 ## Instruction (ENG - Google Translate)
 The module allows you to use Node-Red together with the Yandex.Alice voice assistant service (voice control of smart home devices)
