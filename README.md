@@ -1,7 +1,6 @@
 # Node-Red-Alice (node-red-contrib-alice)
 
-[RUS] [id]:id
-[ENG] [eng]:
+[RUS][id]:
 
 ## Инструкция (RUS)
 [id]:Модуль позволяет использовать Node-Red совместно с сервисом голосового помошника Yandex.Alice (голосовое управление устройствами умного дома)
