@@ -1,6 +1,6 @@
 # Node-Red-Alice (node-red-contrib-alice)
 
-[RUS] [id]:
+[RUS] [id]:id
 [ENG] [eng]:
 
 ## Инструкция (RUS)
