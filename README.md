@@ -5,13 +5,18 @@
 Модуль позволяет использовать Node-Red совместно с сервисом голосового помошника Yandex.Alice (голосовое управление устройствами умного дома)
 
 ### Использование 
-В каталоге с установленным Node-Red запустите 
+#### Как настроить навык:
+1. Установите и настройте Node-Red
+2. Из интерфейса Node-Red добавьте модуль node-red-contrib-alice или с использованием npm
 ```
 npm install node-red-contrib-alice
 ```
-Затем добавьте в свою схему умения и споставьте с вашим устройством
+3. Добавьте в свою схему устройства и умения Алисы и зарегистрируйтесь на вкладке настройки 
+4. Настройте их связь с вашими устройствами
+5. В приложении Яндекс добавьте навык NodeRed Home
+6. Заведенные устройства появятся автоматически
 
-при первом использовании необходимо зарегистрироваться 
+На данный момент поддерживаются умения только вкл/выкл, но список будет в ближайшее время расширен.
 
 ### Концепция
 Кождое устройство может иметь неограниченное число умений (функционала)
@@ -25,13 +30,18 @@ npm install node-red-contrib-alice
 The module allows you to use Node-Red together with the Yandex.Alice voice assistant service (voice control of smart home devices)
 
 ### Use
-In the directory with Node-Red installed, run
+#### How to set up a skill:
+1. Install and configure Node-Red
+2. From the Node-Red interface add the node-red-contrib-alice module or using npm
 ```
 npm install node-red-contrib-alice
 ```
-Then add capability to your circuit and match with your device
+3. Add Alice’s devices and capability to your circuit and register on the settings tab
+4. Configure their connection with your devices
+5. In the Yandex application, add the NodeRed Home skill
+6. Started devices will appear automatically
 
-at the first use it is necessary to register
+Only on / off capabilites are currently supported, but the list will be expanded soon.
 
 ### Concept
 Each device can have an unlimited number of capability (functionality)
