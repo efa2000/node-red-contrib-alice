@@ -88,7 +88,7 @@ module.exports = function(RED) {
           .then(snapshot=>{
             snapshot.forEach(doc=>{
               let d = doc.data();
-              let capab = d.type + "." + d.parametrs.instance
+              let capab = d.type + "." + d.parameters.instance
               this.capabilites[capab] = doc.id;
             })
             return this.ref;
@@ -111,7 +111,6 @@ module.exports = function(RED) {
             this.emit(change.doc.id,doc.state.value)
           }
         });
-        
       })
     };
 
@@ -160,21 +159,23 @@ module.exports = function(RED) {
 
 
 // *********************** Alice capabilites ***********************************
-
+// ************** ON/OFF *******************
   function AliceOnOff(config){
     RED.nodes.createNode(this,config);
     this.device = RED.nodes.getNode(config.device);
     this.name = config.name;
+    this.ctype = 'devices.capabilities.on_off';
+    this.instance = 'on';
     this.initState = false;
     this.ref = null;
 
     this.init = ()=>{
       this.ref = this.device.getRef(this.id);
       let capab = {
-        type: "devices.capabilities.on_off",
+        type: this.ctype,
         retrievable: true,
-        parametrs: {
-          instance: "on",
+        parameters: {
+          instance: this.instance,
         },
         state: {
           value: false,
@@ -182,7 +183,7 @@ module.exports = function(RED) {
           updated: firebase.firestore.Timestamp.now()
         }
       };
-      if (!this.device.isDubCap(this.id,capab.type, capab.parametrs.instance)){
+      if (!this.device.isDubCap(this.id,capab.type, capab.parameters.instance)){
         this.ref.set(capab)
           .then(ref=>{
             this.status({fill:"green",shape:"dot",text:"online"});
@@ -254,4 +255,101 @@ module.exports = function(RED) {
   }  
   RED.nodes.registerType("On_Off",AliceOnOff);
 
+  // ************** Toggle *******************
+  function AliceToggle(config){
+    RED.nodes.createNode(this,config);
+    this.device = RED.nodes.getNode(config.device);
+    this.name = config.name;
+    this.ctype = 'devices.capabilities.toggle';
+    this.instance = config.instance;
+    this.initState = false;
+    this.ref = null;
+
+    this.init = ()=>{
+      this.ref = this.device.getRef(this.id);
+      let capab = {
+        type: this.ctype,
+        retrievable: true,
+        parameters: {
+          instance: this.instance,
+        },
+        state: {
+          value: false,
+          updatedfrom:"node-red",
+          updated: firebase.firestore.Timestamp.now()
+        }
+      };
+      if (!this.device.isDubCap(this.id,capab.type, capab.parameters.instance)){
+        this.ref.set(capab)
+          .then(ref=>{
+            this.status({fill:"green",shape:"dot",text:"online"});
+            this.initState = true;
+          });
+      }else{
+        this.status({fill:"red",shape:"dot",text:"error"});
+        this.error("Dublicated capability on same device!");
+      }
+    };
+
+    this.device.on("online",()=>{
+      if (!this.initState){
+        this.init();
+      }else{
+        this.ref = this.device.getRef(this.id);
+        this.status({fill:"green",shape:"dot",text:"online"});
+      }
+    });
+
+    this.device.on("offline",()=>{
+      this.ref = null;
+      this.status({fill:"red",shape:"dot",text:"offline"});
+    });
+
+    this.device.on(this.id,(val)=>{
+      this.send({
+        payload: val
+      });
+    })
+
+    this.on('input', (msg, send, done)=>{
+      if (typeof msg.payload != 'boolean'){
+        this.error("Wrong type! msg.payload must be boolean.");
+        if (done) {done();}
+        return;
+      }
+      if (!this.ref){
+        this.error("Device offline");
+        this.status({fill:"red",shape:"dot",text:"offline"});
+        if (done) {done();}
+        return;
+      };
+      this.ref.update({
+        state:{
+          value: msg.payload,
+          updatedfrom: "node-red",
+          updated: firebase.firestore.Timestamp.now()
+        }
+      }).then(ref=>{
+        if (done) {done();}
+      }).catch(err=>{
+        this.error("err.message");
+      })
+    });
+
+    this.on('close', function(removed, done) {
+      if (removed) {
+        this.ref.delete().then(res=>{
+                done()
+              }).catch(err=>{
+                this.error(err.message);
+                done();
+              })
+      }else{
+        done();
+      }
+    });
+  }  
+  RED.nodes.registerType("Toggle",AliceToggle);
+
 };
+
