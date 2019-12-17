@@ -303,6 +303,10 @@
                 <span class="property-type">Select</span>
             </dt>
             <dd> The device to which this feature is connected </dd>
+            <dt>Instance
+                <span class="property-type">Select</span>
+            </dt>
+            <dd> The name of the function for this skill. Affects which voice command is called </dd>
         </dl>
     
         <h3>Inputs</h3>
@@ -325,3 +329,111 @@
                 <li><a href="https://yandex.ru/dev/dialogs/alice/doc/smart-home/concepts/toggle-instance-docpage/"> - Yandex documentation</a></li>
             </ul>
         </script>
+
+        <script type="text/javascript">
+            RED.nodes.registerType('Color_Temp',{
+                category: 'alice',
+                defaults:{
+                    device: {value:"", type:"alice-device"},
+                    name: {value:""},
+                    min: {value:2700},
+                    max: {value:7500}
+                },
+                inputs:1,
+                outputs:1,
+                icon: "alice.png",
+                color: "#D8BFD8",
+                label: function(){
+                    return this.name + ":Color_Temp";
+                },
+                oneditsave: function(){
+                    deivcename = $('#node-input-device option:selected').text();
+                    $('#node-input-name').val(deivcename);
+                }
+            })
+        </script>
+        
+        <script type="text/x-red" data-template-name="Color_Temp">
+            <input type="hidden" id="node-input-name">
+            <div class="form-row">
+                <label for="node-input-device">Device</label>
+                <input id="node-input-device">
+            </div>
+            <div class="form-row">
+                <label for="node-input-min">Min</label>
+                <select id="node-input-min" style="width: 70%;">
+                    <option value=1500>1500K</option>
+                    <option value=2700>2700K</option>
+                    <option value=3400>3400K</option>
+                    <option value=4500>4500K</option>
+                    <option value=5600>5600K</option>
+                    <option value=6500>6500K</option>
+                    <option value=7500>7500K</option>
+                    <option value=9000>9000K</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="node-input-max">Max</label>
+                <select id="node-input-max" style="width: 70%;">
+                    <option value=1500>1500K</option>
+                    <option value=2700>2700K</option>
+                    <option value=3400>3400K</option>
+                    <option value=4500>4500K</option>
+                    <option value=5600>5600K</option>
+                    <option value=6500>6500K</option>
+                    <option value=7500>7500K</option>
+                    <option value=9000>9000K</option>
+                </select>
+            </div>
+        </script>
+        
+        <script type="text/x-red" data-help-name="Color_Temp">
+            <p>Change in color temperature in kelvins.</p>
+            
+            <h3>Property</h3>
+            <dl class="message-properties">
+                <dt>Device
+                    <span class="property-type">Select</span>
+                </dt>
+                <dd> The device to which this feature is connected </dd>
+                <dt>Min
+                    <span class="property-type">Select</span>
+                </dt>
+                <dd> Kelvin minimum value </dd>
+                <dt>Max
+                    <span class="property-type">Select</span>
+                </dt>
+                <dd> Maximum value in Kelvin </dd>
+            </dl>
+        
+            <h3>Inputs</h3>
+                <dl class="message-properties">
+                    <dt>payload
+                        <span class="property-type">Integer</span>
+                    </dt>
+                    <dd> integer from value table </dd>
+                </dl>
+            
+             <h3>Outputs</h3>
+                 <dl class="message-properties">
+                    <dt>payload
+                        <span class="property-type">Integer</span>
+                    </dt>
+                    <dd> integer from value table </dd>
+                </dl>
+            <h3>Value table</h3>
+            <ul>
+                <li>1500 - Fiery white (Огненный белый) </li>
+                <li>2700 - Soft white (Мягкий белый)</li>
+                <li>3400 - Warm white (Теплый белый)</li>
+                <li>4500 - White (Белый)</li>
+                <li>5600 - Daylight white (Дневной белый)</li>
+                <li>6500 - Cold white (Холодный белый)</li>
+                <li>7500 - Misty white (Туманный белый)</li>
+                <li>9000 - Sky white (Небесный белый)</li>
+            </ul>
+            <h3>References</h3>
+                <ul>
+                    <li><a href="https://yandex.ru/dev/dialogs/alice/doc/smart-home/concepts/color_setting-docpage/"> Yandex documentation</a></li>
+                </ul>
+            </script>
