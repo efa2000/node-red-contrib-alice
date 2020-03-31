@@ -350,8 +350,9 @@ module.exports = function(RED) {
     });
   }  
   RED.nodes.registerType("Toggle",AliceToggle);
-
-   // ************** Color temperature *******************
+/*
+  // NOT WORKING
+   // ************** Color temperature ******************* 
    function AliceColorTemp(config){
     RED.nodes.createNode(this,config);
     this.device = RED.nodes.getNode(config.device);
@@ -376,12 +377,12 @@ module.exports = function(RED) {
           }
         },
         state: {
-          value: 4500,
+          value: this.min,
           updatedfrom:"node-red",
           updated: firebase.firestore.Timestamp.now()
         }
       };
-      if (!this.device.isDubCap(this.id,capab.type, capab.parameters.instance)){
+      if (!this.device.isDubCap(this.id,capab.type,  null)){
         this.ref.set(capab)
           .then(ref=>{
             this.status({fill:"green",shape:"dot",text:"online"});
@@ -458,6 +459,119 @@ module.exports = function(RED) {
     });
   }  
   RED.nodes.registerType("Color_Temp",AliceColorTemp);
+*/
+
+  // ************** Color  *******************
+  function AliceColor(config){
+    RED.nodes.createNode(this,config);
+    this.device = RED.nodes.getNode(config.device);
+    this.name = config.name;
+    this.ctype = 'devices.capabilities.color_setting';
+    this.instance = 'color_model';
+    this.scheme = config.scheme;
+    this.initState = false;
+    this.ref = null;
+
+    this.init = ()=>{
+      this.ref = this.device.getRef(this.id);
+      var value = 0;
+      if (this.scheme=="hsv"){
+        value = {
+          h:0,
+          s:0,
+          v:0
+        };
+      };
+      let capab = {
+        type: this.ctype,
+        retrievable: true,
+        parameters: {
+          instance: this.scheme,//this.instance,
+          color_model: this.scheme
+        },
+        state: {
+          value: value,
+          updatedfrom:"node-red",
+          updated: firebase.firestore.Timestamp.now()
+        }
+      };
+      if (!this.device.isDubCap(this.id,capab.type, null/*capab.parameters.instance*/)){
+        this.ref.set(capab)
+          .then(ref=>{
+            this.status({fill:"green",shape:"dot",text:"online"});
+            this.initState = true;
+          });
+      }else{
+        this.status({fill:"red",shape:"dot",text:"error"});
+        this.error("Dublicated capability on same device!");
+      }
+    };
+
+    this.device.on("online",()=>{
+      if (!this.initState){
+        this.init();
+      }else{
+        this.ref = this.device.getRef(this.id);
+        this.status({fill:"green",shape:"dot",text:"online"});
+      }
+    });
+
+    this.device.on("offline",()=>{
+      this.ref = null;
+      this.status({fill:"red",shape:"dot",text:"offline"});
+    });
+
+    this.device.on(this.id,(val)=>{
+      this.send({
+        payload: val
+      });
+    })
+
+    this.on('input', (msg, send, done)=>{
+      const value = parseInt(msg.payload)
+      if (typeof value != 'number'){
+        this.error("Wrong type! msg.payload must be Integer.");
+        if (done) {done();}
+        return;
+      }
+      if (value<this.min || value>this.max){
+        this.error("Incorrect value! The value must be in the range "+this.min+" - "+this.max);
+        if (done) {done();}
+        return;
+      }
+      if (!this.ref){
+        this.error("Device offline");
+        this.status({fill:"red",shape:"dot",text:"offline"});
+        if (done) {done();}
+        return;
+      };
+      this.ref.update({
+        state:{
+          value: value,
+          updatedfrom: "node-red",
+          updated: firebase.firestore.Timestamp.now()
+        }
+      }).then(ref=>{
+        if (done) {done();}
+      }).catch(err=>{
+        this.error("err.message");
+      })
+    });
+
+    this.on('close', function(removed, done) {
+      if (removed) {
+        this.ref.delete().then(res=>{
+                done()
+              }).catch(err=>{
+                this.error(err.message);
+                done();
+              })
+      }else{
+        done();
+      }
+    });
+  }  
+  RED.nodes.registerType("Color",AliceColor);
 
 };
 

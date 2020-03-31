@@ -1,7 +1,5 @@
 # Node-Red-Alice (node-red-contrib-alice)
 
-!!!!! Навык NodeRed Home пока не опубликован и находится на модерации Яндекса
-
 ## Инструкция (RUS)
 Модуль позволяет использовать Node-Red совместно с сервисом голосового помошника Yandex.Alice (голосовое управление устройствами умного дома)
 
@@ -16,8 +14,6 @@ npm install node-red-contrib-alice
 4. Настройте их связь с вашими устройствами
 5. В приложении Яндекс добавьте навык NodeRed Home
 6. Заведенные устройства появятся автоматически
-
-На данный момент поддерживаются умения только вкл/выкл, но список будет в ближайшее время расширен.
 
 ### Концепция
 Кождое устройство может иметь неограниченное число умений (функционала)
@@ -41,8 +37,6 @@ npm install node-red-contrib-alice
 4. Configure their connection with your devices
 5. In the Yandex application, add the NodeRed Home skill
 6. Started devices will appear automatically
-
-Only on / off capabilites are currently supported, but the list will be expanded soon.
 
 ### Concept
 Each device can have an unlimited number of capability (functionality)

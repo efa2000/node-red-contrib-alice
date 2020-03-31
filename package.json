@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-alice",
-  "version": "0.1.2",
+  "version": "0.2.1",
   "description": "",
   "main": "alice.js",
   "scripts": {
@@ -13,7 +13,9 @@
   "keywords": [
     "node-red",
     "yandex",
-    "alice"
+    "alice",
+    "яндекс",
+    "алиса"
   ],
   "node-red": {
     "nodes": {
