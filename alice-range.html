@@ -4,7 +4,7 @@
         defaults:{
             device: {value:"", type:"alice-device"},
             name: {value:""},
-            instance: {value:"brightness"},
+            instance: {value:undefined},
             unit: {value:""},
             min:{value:1},
             max:{value:100},
@@ -24,65 +24,119 @@
         oneditprepare: function(){
             var firstRun = true;
             function instanceChange(inst){
+                var unit, min, max, precision;
+                // проверяем первый ли это запуск редактирования или он уже был настроен
+                if (firstRun && typeof inst !== "undefined"){
+                    unit = $('#node-input-unit').find(":selected").val();
+                    min = $('#node-input-min').val();
+                    max = $('#node-input-max').val();
+                    precision = $('#node-input-precision').val();
+                };
                 switch (inst) {
                     case 'brightness':
+                        min = (typeof min !== "undefined") ? min : 0;
+                        max = (typeof max !== "undefined") ? max : 100;
+                        precision = (typeof precision !== "undefined") ? precision : 10;
                         $('#node-input-unit').replaceWith('<select id="node-input-unit" style="width: 70%;"></select>');
                         $('#node-input-unit').append('<option value="unit.percent">%</option>');
                         $('#node-input-unit select').val("unit.percent");
                         $('#node-input-unit').prop( "disabled", true );
-                        $('#node-input-min').val(0);
-                        $('#node-input-max').val(100);
-                        $('#node-input-precision').val(10);
+                        $('#node-input-min').val(min);
+                        $('#node-input-min').prop( "disabled", false );
+                        $('#node-input-max').val(max);
+                        $('#node-input-max').prop( "disabled", false );
+                        $('#node-input-precision').val(precision);
+                        $('#node-input-precision').prop( "disabled", false );
                     break;
                     case 'channel':
+                        min = (typeof min !== "undefined") ? min : 1;
+                        max = (typeof max !== "undefined") ? max : 1000;
+                        precision = (typeof precision !== "undefined") ? precision : 1;
                         $('#node-input-unit').replaceWith('<select id="node-input-unit" style="width: 70%;"></select>');
                         $('#node-input-unit').append('<option value="unit.number">Number</option>');
                         $('#node-input-unit select').val("unit.number");
                         $('#node-input-unit').prop( "disabled", true );
-                        $('#node-input-min').val(0);
-                        $('#node-input-max').val(1000);
-                        $('#node-input-precision').val(1);
+                        $('#node-input-min').val(min);
+                        $('#node-input-min').prop( "disabled", false );
+                        $('#node-input-max').val(max);
+                        $('#node-input-max').prop( "disabled", false );
+                        $('#node-input-precision').val(precision);
+                        $('#node-input-precision').prop( "disabled", false );
                     break;
                     case 'humidity':
+                        min = (typeof min !== "undefined") ? min : 0;
+                        max = (typeof max !== "undefined") ? max : 100;
+                        precision = (typeof precision !== "undefined") ? precision : 10;
+
                         $('#node-input-unit').replaceWith('<select id="node-input-unit" style="width: 70%;"></select>');
                         $('#node-input-unit').append('<option value="unit.percent">%</option>');
                         $('#node-input-unit select').val("unit.percent");
                         $('#node-input-unit').prop( "disabled", true );
-                        $('#node-input-min').val(0);
-                        $('#node-input-max').val(100);
-                        $('#node-input-precision').val(10);
+                        $('#node-input-min').val(min);
+                        $('#node-input-min').prop( "disabled", false );
+                        $('#node-input-max').val(max);
+                        $('#node-input-max').prop( "disabled", false );
+                        $('#node-input-precision').val(precision);
+                        $('#node-input-precision').prop( "disabled", false );
                     break;
                     case 'open':
+                        min = (typeof min !== "undefined") ? min : 0;
+                        max = (typeof max !== "undefined") ? max : 100;
+                        precision = (typeof precision !== "undefined") ? precision : 10;
+
                         $('#node-input-unit').replaceWith('<select id="node-input-unit" style="width: 70%;"></select>');
                         $('#node-input-unit').append('<option value="unit.percent">%</option>');
                         $('#node-input-unit select').val("unit.percent");
                         $('#node-input-unit').prop( "disabled", true );
-                        $('#node-input-min').val(0);
-                        $('#node-input-max').val(100);
-                        $('#node-input-precision').val(10);
+                        $('#node-input-min').val(min);
+                        $('#node-input-min').prop( "disabled", false );
+                        $('#node-input-max').val(max);
+                        $('#node-input-max').prop( "disabled", false );
+                        $('#node-input-precision').val(precision);
+                        $('#node-input-precision').prop( "disabled", false );
                     break;
                     case 'temperature':
+                        unit = (typeof unit !== "unit") ? unit : "unit.temperature.celsius";
+                        min = (typeof min !== "undefined") ? min : 0;
+                        max = (typeof max !== "undefined") ? max : 100;
+                        precision = (typeof precision !== "undefined") ? precision : 2;
+
                         $('#node-input-unit').replaceWith('<select id="node-input-unit" style="width: 70%;"></select>');
                         $('#node-input-unit').append('<option value="unit.temperature.celsius">Celsius (C)</option>');
                         $('#node-input-unit').append('<option value="unit.temperature.kelvin">Kelvin (K)</option>');
-                        $('#node-input-unit select').val("unit.temperature.celsius");
+                        $('#node-input-unit select').val(unit);
                         $('#node-input-unit').prop( "disabled", false );
-                        $('#node-input-min').val(0);
-                        $('#node-input-max').val(100);
-                        $('#node-input-precision').val(2);
+                        $('#node-input-min').val(min);
+                        $('#node-input-min').prop( "disabled", false );
+                        $('#node-input-max').val(max);
+                        $('#node-input-max').prop( "disabled", false );
+                        $('#node-input-precision').val(precision);
+                        $('#node-input-precision').prop( "disabled", false );
                     break;
                     case 'volume':
-                    $('#node-input-unit').replaceWith('<select id="node-input-unit" style="width: 70%;"></select>');
+                        min = (typeof min !== "undefined") ? min : 0;
+                        max = (typeof max !== "undefined") ? max : 100;
+                        precision = (typeof precision !== "undefined") ? precision : 10;
+
+                        $('#node-input-unit').replaceWith('<select id="node-input-unit" style="width: 70%;"></select>');
                         $('#node-input-unit').append('<option value="unit.number">Number</option>');
                         $('#node-input-unit select').val("unit.number");
                         $('#node-input-unit').prop( "disabled", true );
-                        $('#node-input-min').val(0);
-                        $('#node-input-max').val(100);
-                        $('#node-input-precision').val(3);
+                        $('#node-input-min').val(min);
+                        $('#node-input-min').prop( "disabled", false );
+                        $('#node-input-max').val(max);
+                        $('#node-input-max').prop( "disabled", false );
+                        $('#node-input-precision').val(precision);
+                        $('#node-input-precision').prop( "disabled", false );
                     break;
+                    default:
+                        $('#node-input-unit').prop( "disabled", true );
+                        $('#node-input-min').prop( "disabled", true );
+                        $('#node-input-max').prop( "disabled", true );
+                        $('#node-input-precision').prop( "disabled", true );
                 }
+                firstRun = false;
             }
-
             $('#node-input-instance').on('change',()=>{
                 var val = $('#node-input-instance').find(":selected").val();
                 instanceChange(val);
@@ -131,7 +185,7 @@
 </script>
 
 <script type="text/x-red" data-help-name="Range">
-    <p>Change the color of their luminous elements to any one from the HSV model or from the RGB model;</p>
+    <p>Manage device settings that have a range. For example, lamp brightness, sound volume, heater temperature, etc.</p>
     
     <h3>Property</h3>
     <dl class="message-properties">
@@ -139,31 +193,46 @@
             <span class="property-type">Select</span>
         </dt>
         <dd> The device to which this feature is connected </dd>
-        <dt>Scheme
+        <dt>Range Type
             <span class="property-type">Select</span>
         </dt>
-        <dd> Color scheme selection (RGB or HSV) </dd>
+        <dd> Selection of the type of ranges (brightness, sound, channel, temperature, etc.) </dd>
+        <dt>Unit
+            <span class="property-type">Select</span>
+        </dt>
+        <dd> Unit of measure for the range </dd>
+        <dt>Min
+            <span class="property-type">Float</span>
+        </dt>
+        <dd> Minimum value </dd>
+        <dt>Max
+            <span class="property-type">Float</span>
+        </dt>
+        <dd> Maximum value </dd>
+        <dt>precision
+            <span class="property-type">Float</span>
+        </dt>
+        <dd> The minimum step of changing values within the range </dd>
+    </dl>
     </dl>
 
     <h3>Inputs</h3>
         <dl class="message-properties">
             <dt>payload
-                <span class="property-type">Object || Integer</span>
+                <span class="property-type">Float</span>
             </dt>
-            <dd> If the color scheme is RGB, then payload must be presented in 24-bit format (<a href="https://ru.wikipedia.org/wiki/TrueColor" target="_blank">TrueColor</a>). </dd>
-            <dd> If the color scheme is HSV, then payload HSV Object (hue,saturation,value) </br><i>{h:Integer,s:Integer,v:Integer}</i></dd>
+            <dd> Value </dd>
         </dl>
     
      <h3>Outputs</h3>
         <dl class="message-properties">
             <dt>payload
-                <span class="property-type">Object || Integer</span>
+                <span class="property-type">Float</span>
             </dt>
-            <dd> If the color scheme is RGB, then payload must be presented in 24-bit format (<a href="https://ru.wikipedia.org/wiki/TrueColor" target="_blank">TrueColor</a>). </dd>
-            <dd> If the color scheme is HSV, then payload HSV Object (hue,saturation,value) </br><i>{h:Integer,s:Integer,v:Integer}</i></dd>
+            <dd> Value </dd>
         </dl>
     <h3>References</h3>
         <ul>
-            <li><a href="https://yandex.ru/dev/dialogs/alice/doc/smart-home/concepts/color_setting-docpage/"> Yandex documentation</a></li>
+            <li><a href="https://yandex.ru/dev/dialogs/alice/doc/smart-home/concepts/range-docpage/"> Yandex documentation</a></li>
         </ul>
 </script>
