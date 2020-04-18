@@ -117,6 +117,10 @@ module.exports = function(RED) {
     this.getRef=(capId)=>{
       return this.ref.collection('capabilities').doc(capId);
     }
+
+    this.getTime=()=>{
+      return firebase.firestore.Timestamp.now();
+    }
     
     this.isDubCap=(capId,type,instance)=>{
       let capab = type+"."+instance;

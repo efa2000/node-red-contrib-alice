@@ -19,7 +19,8 @@
   ],
   "node-red": {
     "nodes": {
-      "alice": "alice.js"
+      "alice": "alice.js",
+      "alice-range": "alice-range.js"
     }
   },
   "author": "Efa2000",
