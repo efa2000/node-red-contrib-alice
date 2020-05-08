@@ -9,7 +9,7 @@ module.exports = function(RED) {
     this.instance = config.instance;
     this.unit = config.unit;
     this.random_access = config.random_access || true;
-    this.min = parseFloat(config.min) || 1;
+    this.min = parseFloat(config.min) || 0;
     this.max = parseFloat(config.max) || 100;
     this.precision = parseFloat(config.precision) || 1;
     this.initState = false;
@@ -17,7 +17,6 @@ module.exports = function(RED) {
 
     this.init = ()=>{
       this.ref = this.device.getRef(this.id);
-      var value = 0;
       let capab = {
         type: this.ctype,
         retrievable: this.retrievable,
@@ -32,11 +31,16 @@ module.exports = function(RED) {
           }
         },
         state: {
-          value: value,
+          value: this.min,
           updatedfrom:"node-red",
           updated: this.device.getTime()
         }
       };
+      // если unit не пременим к параметру, то нужно удалить 
+      if (this.unit == "unit.number"){
+        delete capab.parameters.unit;
+      };
+
       if (!this.device.isDubCap(this.id,capab.type, capab.parameters.instance)){
         this.ref.set(capab)
           .then(ref=>{
@@ -71,8 +75,8 @@ module.exports = function(RED) {
 
     this.on('input', (msg, send, done)=>{
       const value = msg.payload;
-      if (typeof value != 'number' && typeof value !='object'){
-        this.error("Wrong type! msg.payload must be Integer or Object.");
+      if (typeof value != 'number'){
+        this.error("Wrong type! msg.payload must be Integer or Float.");
         if (done) {done();}
         return;
       }
