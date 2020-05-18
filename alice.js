@@ -3,9 +3,11 @@ module.exports = function(RED) {
   function AliceService(config) {
     RED.nodes.createNode(this,config);
     var firebase = require('firebase');
+    const https = require('https');
     var checkInterval;
     var fb;
-    const INTERVAL = 30000; // Интервал проверок (мс) 
+    const INTERVAL = 60000; // Интервал проверок (мс) 
+    const CHECKURL = 'https://api.node-red-alice.ru/v1.0/'; 
     const email = this.credentials.email;
     const password = this.credentials.password;
     const firebaseConfig = {
@@ -19,6 +21,7 @@ module.exports = function(RED) {
       measurementId: "G-MD0L6R9N79"
     };
 
+    this.isOnline = false;
     try {
       fb = firebase.initializeApp(firebaseConfig,this.id); 
     } catch (error) {
@@ -29,29 +32,23 @@ module.exports = function(RED) {
         this.error(error);
       }
     }
-    
-    // this.authStateSubs =  fb.auth().onAuthStateChanged(u=>{
-    //   clearInterval(checkInterval);
-    //   if (u){
-    //     this.emit("online");
-    //     this.checkInterval = setInterval(()=>{
-    //       fb.auth().signOut();
-    //       this.signIn();
-    //     },10000);
-    //   }else{
-    //     this.emit("offline");
-    //   }
-    // });
-
+  
     this.signIn = ()=>{
       fb.auth().signInWithEmailAndPassword(email, password)
       .then(u=>{
         this.emit('online');
-        // if (!checkInterval){
-        //   checkInterval = setInterval(()=>{
-        //     this.signIn();
-        //   },INTERVAL);
-        // };
+        checkInterval = setInterval(()=>{
+          https.get(CHECKURL, (res)=>{
+            if (!this.isOnline){
+              this.emit('online')
+            };
+          }).on('error',(err)=>{
+            if (this.isOnline){
+              this.emit('offline');
+              this.error('Alica Service: Server is unreachable');
+            };
+          })
+        },INTERVAL);
       })
       .catch(err=>{
         this.error(err.message);
@@ -69,6 +66,14 @@ module.exports = function(RED) {
     this.getTime = ()=>{
       return firebase.firestore.Timestamp.now();
     }
+
+    this.on('offline', ()=>{
+      this.isOnline = false;
+    })
+
+    this.on('online', ()=>{
+      this.isOnline = true;
+    })
 
     this.on('close',(done)=>{
       clearInterval(checkInterval);
@@ -135,8 +140,8 @@ module.exports = function(RED) {
             this.emit(change.doc.id,doc.state.value, doc.state)
           }
         });
-      }, err=>{
-        this.error(err);
+      }, (err)=>{
+        this.error(err.message);
       })
     };
     this.getRef=(capId)=>{
