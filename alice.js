@@ -132,7 +132,7 @@ module.exports = function(RED) {
         querySnapshot.docChanges().forEach(change => {
           let doc = change.doc.data();
           if ((change.type === 'added' || change.type === 'modified') && doc.state.updatedfrom != "node-red") {
-            this.emit(change.doc.id,doc.state.value)
+            this.emit(change.doc.id,doc.state.value, doc.state)
           }
         });
       }, err=>{

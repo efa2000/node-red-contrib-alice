@@ -5,15 +5,16 @@ module.exports = function(RED) {
     this.device = RED.nodes.getNode(config.device);
     this.name = config.name;
     this.ctype = 'devices.capabilities.range';
-    this.retrievable = config.retrievable || true;
+    this.retrievable = true;
     this.instance = config.instance;
     this.unit = config.unit;
-    this.random_access = config.random_access || true;
+    this.random_access = true;
     this.min = parseFloat(config.min) || 0;
     this.max = parseFloat(config.max) || 100;
     this.precision = parseFloat(config.precision) || 1;
     this.initState = false;
     this.ref = null;
+    this.value = null;
 
     this.init = ()=>{
       this.ref = this.device.getRef(this.id);
@@ -44,8 +45,9 @@ module.exports = function(RED) {
       if (!this.device.isDubCap(this.id,capab.type, capab.parameters.instance)){
         this.ref.set(capab)
           .then(ref=>{
-            this.status({fill:"green",shape:"dot",text:"online"});
             this.initState = true;
+            this.value = capab.state.value;
+            this.status({fill:"green",shape:"dot",text:"online"});
           });
       }else{
         this.status({fill:"red",shape:"dot",text:"error"});
@@ -67,10 +69,18 @@ module.exports = function(RED) {
       this.status({fill:"red",shape:"dot",text:"offline"});
     });
 
-    this.device.on(this.id,(val)=>{
+    this.device.on(this.id,(val,state)=>{
+      let value = val;
+      //проверка является ли значение относительным
+      if (state.relative){
+        value = this.value + val;
+        if (val<0 && value<this.min) value=this.min;
+        if (val>0 && value>this.max) value=this.max;
+      };
       this.send({
-        payload: val
+        payload: value
       });
+      this.value = value;
     })
 
     this.on('input', (msg, send, done)=>{
@@ -93,6 +103,7 @@ module.exports = function(RED) {
           updated: this.device.getTime()
         }
       }).then(ref=>{
+        this.value = value;
         if (done) {done();}
       }).catch(err=>{
         this.error("err.message");
