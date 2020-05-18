@@ -1,21 +1,24 @@
-var firebase = require('firebase');
-const firebaseConfig = {
-    apiKey: "AIzaSyDQUn6EhNOgSAV15do8DKwwx3KHDyvLGJc",
-    authDomain: "node-red-alice-4462f.firebaseapp.com",
-    databaseURL: "https://node-red-alice-4462f.firebaseio.com",
-    projectId: "node-red-alice-4462f",
-    storageBucket: "node-red-alice-4462f.appspot.com",
-    messagingSenderId: "1049686868440",
-    appId: "1:1049686868440:web:e5f5ef6a70ead338b6f2ad",
-    measurementId: "G-MD0L6R9N79"
-  };
-
 module.exports = function(RED) {
   //Sevice node, Alice-Service (credential)
   function AliceService(config) {
     RED.nodes.createNode(this,config);
+    var firebase = require('firebase');
+    var checkInterval;
     var fb;
-  
+    const INTERVAL = 30000; // Интервал проверок (мс) 
+    const email = this.credentials.email;
+    const password = this.credentials.password;
+    const firebaseConfig = {
+      apiKey: "AIzaSyDQUn6EhNOgSAV15do8DKwwx3KHDyvLGJc",
+      authDomain: "node-red-alice-4462f.firebaseapp.com",
+      databaseURL: "https://node-red-alice-4462f.firebaseio.com",
+      projectId: "node-red-alice-4462f",
+      storageBucket: "node-red-alice-4462f.appspot.com",
+      messagingSenderId: "1049686868440",
+      appId: "1:1049686868440:web:e5f5ef6a70ead338b6f2ad",
+      measurementId: "G-MD0L6R9N79"
+    };
+
     try {
       fb = firebase.initializeApp(firebaseConfig,this.id); 
     } catch (error) {
@@ -27,29 +30,50 @@ module.exports = function(RED) {
       }
     }
     
-    const email = this.credentials.email;
-    const password = this.credentials.password;
-    
-    this.authStateSubs =  fb.auth().onAuthStateChanged(u=>{
-      if (u){
-        this.emit("online");
-      }else{
-        this.emit("offline");
-      }
-    });
+    // this.authStateSubs =  fb.auth().onAuthStateChanged(u=>{
+    //   clearInterval(checkInterval);
+    //   if (u){
+    //     this.emit("online");
+    //     this.checkInterval = setInterval(()=>{
+    //       fb.auth().signOut();
+    //       this.signIn();
+    //     },10000);
+    //   }else{
+    //     this.emit("offline");
+    //   }
+    // });
 
-    fb.auth().signInWithEmailAndPassword(email, password)
+    this.signIn = ()=>{
+      fb.auth().signInWithEmailAndPassword(email, password)
+      .then(u=>{
+        this.emit('online');
+        // if (!checkInterval){
+        //   checkInterval = setInterval(()=>{
+        //     this.signIn();
+        //   },INTERVAL);
+        // };
+      })
       .catch(err=>{
         this.error(err.message);
+        this.emit('offline');
       });
+    }
+
+    this.signIn();
     
     this.getRef = function(deviceid){
       var user = fb.auth().currentUser;
       return fb.firestore().collection('users').doc(user.uid).collection('devices').doc(deviceid)
     };
 
+    this.getTime = ()=>{
+      return firebase.firestore.Timestamp.now();
+    }
+
     this.on('close',(done)=>{
+      clearInterval(checkInterval);
       setTimeout(()=>{
+        this.emit('offline');
         fb.auth().signOut();
         fb.delete().finally(r=>{done()});
       },500)
@@ -111,15 +135,16 @@ module.exports = function(RED) {
             this.emit(change.doc.id,doc.state.value)
           }
         });
+      }, err=>{
+        this.error(err);
       })
     };
-
     this.getRef=(capId)=>{
       return this.ref.collection('capabilities').doc(capId);
     }
 
     this.getTime=()=>{
-      return firebase.firestore.Timestamp.now();
+      return this.service.getTime();
     }
     
     this.isDubCap=(capId,type,instance)=>{
@@ -139,6 +164,7 @@ module.exports = function(RED) {
         this.ref = this.service.getRef(this.id);
         this.emit("online");
       }
+      if (this.observer) this.observer();
       this.startObserver();
     });
     
@@ -184,7 +210,7 @@ module.exports = function(RED) {
         state: {
           value: false,
           updatedfrom:"node-red",
-          updated: firebase.firestore.Timestamp.now()
+          updated: this.device.getTime()
         }
       };
       if (!this.device.isDubCap(this.id,capab.type, capab.parameters.instance)){
@@ -235,7 +261,7 @@ module.exports = function(RED) {
         state:{
           value: msg.payload,
           updatedfrom: "node-red",
-          updated: firebase.firestore.Timestamp.now()
+          updated: this.device.getTime()
         }
       }).then(ref=>{
         if (done) {done();}
@@ -280,7 +306,7 @@ module.exports = function(RED) {
         state: {
           value: false,
           updatedfrom:"node-red",
-          updated: firebase.firestore.Timestamp.now()
+          updated: this.device.getTime()
         }
       };
       if (!this.device.isDubCap(this.id,capab.type, capab.parameters.instance)){
@@ -331,7 +357,7 @@ module.exports = function(RED) {
         state:{
           value: msg.payload,
           updatedfrom: "node-red",
-          updated: firebase.firestore.Timestamp.now()
+          updated: this.device.getTime()
         }
       }).then(ref=>{
         if (done) {done();}
@@ -386,7 +412,7 @@ module.exports = function(RED) {
         state: {
           value: value,
           updatedfrom:"node-red",
-          updated: firebase.firestore.Timestamp.now()
+          updated: this.device.getTime()
         }
       };
       if (!this.device.isDubCap(this.id,capab.type, null/*capab.parameters.instance*/)){
@@ -438,7 +464,7 @@ module.exports = function(RED) {
         state:{
           value: value,
           updatedfrom: "node-red",
-          updated: firebase.firestore.Timestamp.now()
+          updated: this.device.getTime()
         }
       }).then(ref=>{
         if (done) {done();}

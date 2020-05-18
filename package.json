@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-alice",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "",
   "main": "alice.js",
   "scripts": {
@@ -30,6 +30,6 @@
   },
   "homepage": "https://github.com/efa2000/node-red-contrib-alice#readme",
   "dependencies": {
-    "firebase": "^7.14.1"
+    "firebase": "^7.14.3"
   }
 }
