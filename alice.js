@@ -3,7 +3,7 @@ module.exports = function(RED) {
   function AliceService(config) {
     RED.nodes.createNode(this,config);
     var firebase = require('firebase');
-    const https = require('https');
+    // const https = require('https');
     var checkInterval;
     var fb;
     const INTERVAL = 60000; // Интервал проверок (мс) 
@@ -37,18 +37,18 @@ module.exports = function(RED) {
       fb.auth().signInWithEmailAndPassword(email, password)
       .then(u=>{
         this.emit('online');
-        checkInterval = setInterval(()=>{
-          https.get(CHECKURL, (res)=>{
-            if (!this.isOnline){
-              this.emit('online')
-            };
-          }).on('error',(err)=>{
-            if (this.isOnline){
-              this.emit('offline');
-              this.error('Alica Service: Server is unreachable');
-            };
-          })
-        },INTERVAL);
+        // checkInterval = setInterval(()=>{
+        //   https.get(CHECKURL, (res)=>{
+        //     if (!this.isOnline){
+        //       this.emit('online')
+        //     };
+        //   }).on('error',(err)=>{
+        //     if (this.isOnline){
+        //       this.emit('offline');
+        //       this.error('Alica Service: Server is unreachable');
+        //     };
+        //   })
+        // },INTERVAL);
       })
       .catch(err=>{
         this.error(err.message);
@@ -76,7 +76,7 @@ module.exports = function(RED) {
     })
 
     this.on('close',(done)=>{
-      clearInterval(checkInterval);
+      // clearInterval(checkInterval);
       setTimeout(()=>{
         this.emit('offline');
         fb.auth().signOut();
