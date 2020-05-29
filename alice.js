@@ -3,11 +3,9 @@ module.exports = function(RED) {
   function AliceService(config) {
     RED.nodes.createNode(this,config);
     var firebase = require('firebase');
-    // const https = require('https');
     var checkInterval;
     var fb;
     const INTERVAL = 60000; // Интервал проверок (мс) 
-    const CHECKURL = 'https://api.node-red-alice.ru/v1.0/'; 
     const email = this.credentials.email;
     const password = this.credentials.password;
     const firebaseConfig = {
@@ -37,16 +35,17 @@ module.exports = function(RED) {
       fb.auth().signInWithEmailAndPassword(email, password)
       .then(u=>{
         this.emit('online');
+        // clearInterval(checkInterval);
         // checkInterval = setInterval(()=>{
-        //   https.get(CHECKURL, (res)=>{
-        //     if (!this.isOnline){
-        //       this.emit('online')
-        //     };
-        //   }).on('error',(err)=>{
-        //     if (this.isOnline){
-        //       this.emit('offline');
-        //       this.error('Alica Service: Server is unreachable');
-        //     };
+        //   console.log("Check!");
+        //   fb.firestore().collection('users').doc(fb.auth().currentUser.uid).update({
+        //     keepalive: firebase.firestore.Timestamp.now()
+        //   })
+        //   .then(ref=>{
+        //     console.log("Updeted ",ref.id);
+        //   })
+        //   .catch(err=>{
+        //     this.error(err.message);
         //   })
         // },INTERVAL);
       })
@@ -76,7 +75,7 @@ module.exports = function(RED) {
     })
 
     this.on('close',(done)=>{
-      // clearInterval(checkInterval);
+      clearInterval(checkInterval);
       setTimeout(()=>{
         this.emit('offline');
         fb.auth().signOut();

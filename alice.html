@@ -1,5 +1,7 @@
-<script defer src="https://www.gstatic.com/firebasejs/7.5.2/firebase-app.js"></script>
-<script defer src="https://www.gstatic.com/firebasejs/7.5.2/firebase-auth.js"></script>
+
+<script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-app.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-auth.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-firestore.js"></script>
 
 <script type="text/javascript">
     const firebaseConfig = {
@@ -30,26 +32,58 @@
         }
     });
     function Activete(div){
-        if (div=="singup"){
-            document.getElementById("singin").hidden = true;
-            document.getElementById("singup").hidden = false;
-            document.getElementById("restore").hidden = true;
-        }else if (div=="restore"){
-            document.getElementById("singin").hidden = true;
-            document.getElementById("singup").hidden = true;
-            document.getElementById("restore").hidden = false;
-        }else{
-            document.getElementById("singin").hidden = false;
-            document.getElementById("singup").hidden = true;
-            document.getElementById("restore").hidden = true;
-        };
+        switch(div){
+            case 'singup':
+                document.getElementById("singin").hidden = true;
+                document.getElementById("singup").hidden = false;
+                document.getElementById("restore").hidden = true;
+                document.getElementById("delete").hidden = true;
+                break
+            case 'restore':
+                document.getElementById("singin").hidden = true;
+                document.getElementById("singup").hidden = true;
+                document.getElementById("restore").hidden = false;
+                document.getElementById("delete").hidden = true;
+                break
+            case 'delete':
+                document.getElementById("singin").hidden = true;
+                document.getElementById("singup").hidden = true;
+                document.getElementById("restore").hidden = true;
+                document.getElementById("delete").hidden = false;
+                break
+            default:
+                document.getElementById("singin").hidden = false;
+                document.getElementById("singup").hidden = true;
+                document.getElementById("restore").hidden = true;
+                document.getElementById("delete").hidden = true;
+        }
+        // if (div=="singup"){
+        //     document.getElementById("singin").hidden = true;
+        //     document.getElementById("singup").hidden = false;
+        //     document.getElementById("restore").hidden = true;
+        //     document.getElementById("delete").hidden = true;
+        // }else if (div=="restore"){
+        //     document.getElementById("singin").hidden = true;
+        //     document.getElementById("singup").hidden = true;
+        //     document.getElementById("restore").hidden = false;
+        //     document.getElementById("delete").hidden = true;
+        // }else if(div=="delete"){
+        //     document.getElementById("singin").hidden = true;
+        //     document.getElementById("singup").hidden = true;
+        //     document.getElementById("restore").hidden = true;
+        //     document.getElementById("delete").hidden = true;
+        // } else {
+        //     document.getElementById("singin").hidden = false;
+        //     document.getElementById("singup").hidden = true;
+        //     document.getElementById("restore").hidden = true;
+        //     document.getElementById("delete").hidden = true;
+        // };
     };
     function SingUp(){
         // Initialize Firebase
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         };
-        document.getElementById("register_error").innerHTML = "";
         var email = document.getElementById("register_email").value;
         var password = document.getElementById("register_password").value;
         firebase.auth().createUserWithEmailAndPassword(email, password)
@@ -59,7 +93,7 @@
                 Activete();
             })
             .catch(function(error) {
-                document.getElementById("register_error").innerHTML = error.message;
+                RED.notify(error.message, 'error');
             })
     };
     function Restore(){
@@ -67,13 +101,44 @@
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         };
-        document.getElementById("restore_error").innerHTML = "";
         var emailAddress = document.getElementById("restore_email").value;
         firebase.auth().sendPasswordResetEmail(emailAddress).then(function() {
-            alert("Password recovery email was sent successfully! Please check your email.");
+            RED.notify("Password recovery email was sent successfully! Please check your email.", 'info');
             Activete();
         }).catch(function(error) {
-            document.getElementById("restore_error").innerHTML = error.message;
+            RED.notify(error.message, 'error');
+        });
+    }
+    function DeleteAllDevices() {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        };
+        var db = firebase.firestore();
+        var email = document.getElementById("delete_email").value;
+        var password = document.getElementById("delete_password").value;
+        firebase.auth().signInWithEmailAndPassword(email, password)
+        .then((res)=>{
+            var user = res.user;
+            db.collection('users').doc(user.uid).collection('devices').get()
+            .then(querySnapshot=>{
+                querySnapshot.forEach(doc=>{
+                    doc.ref.collection('capabilities').get().then(capabSnapshot=>{
+                        capabSnapshot.forEach(sdoc=>{
+                            sdoc.ref.delete()
+                        })
+                    });
+                    doc.ref.delete().catch(err=>{
+                        RED.notify(error.message, 'error');
+                    })
+                });
+                RED.notify("All devices deleted", 'info');
+            })
+            .catch(err=>{
+                RED.notify(error.message, 'error');
+            })
+        })
+        .catch(function(error) {
+            RED.notify(error.message, 'error');
         });
     }
 </script>
@@ -99,6 +164,7 @@
             <b>Tip:</b>
             <p>If you don't have credentials, please <button class="ui-button" onclick="Activete('singup')">Register</button> before using </p>
             <p>If you forgot your password <button class="ui-button" onclick="Activete('restore')">Restore password</button></p>
+            <p>If you want to delete all previously created devices <button class="ui-button" onclick="Activete('delete')">Remove all devices</button>
         </div>
     </div>
     <div id="singup" hidden>
@@ -129,7 +195,35 @@
                 <button onclick="Activete()" class="ui-button">Cancel</button>
                 <button onclick="Restore()" class="ui-button primary">Recover</button>
         </div>
-        <p style="color:red;" id="restore_error"></p>
+    </div>
+    <div id="delete" hidden>
+        <form>
+            <div class="form-row"><b>Delete all devices</b></div>
+            <div class="form-row">
+                <label>Email</label>
+                <input type="text" id="delete_email" placeholder="user@example.com">
+            </div>
+            <div class="form-row">
+                <label> Password</label>
+                <input type="password" id="delete_password">
+            </div>
+            <div class="form-row" style="text-align: end; margin-right: 32px;">
+                <button onclick="Activete()" class="ui-button">Cancel</button>
+                <button onclick="DeleteAllDevices()" class="ui-button primary">Delete</button>
+            </div>
+        </form>
+        <div class="form-tips" style="margin-top:64px;">
+            <b>Delete all previously created devices.</b>
+            <br>
+            <b>Devices will only be deleted from the remote server, but they will have to be manually removed from the Yandex application</b>
+            <ul>
+                <li>Enter a valid username and password</li>
+                <li>Click remove devices</li>
+                <li>Re-deploy Node-Red flows</li>
+                <li>In the Yandex application manually delete devices and update the list of devices</li>
+            </ul>
+            <p></p>
+        </div>
     </div>
 </script>
 
