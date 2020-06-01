@@ -19,8 +19,11 @@
   ],
   "node-red": {
     "nodes": {
-      "alice": "alice.js",
-      "alice-range": "alice-range.js"
+      "alice": "./nodes/alice.js",
+      "alice-range": "./nodes/alice-range.js",
+      "alice-onoff": "./nodes/alice-onoff.js",
+      "alice-togle": "./nodes/alice-togle.js",
+      "alice-color": "./nodes/alice-color.js"
     }
   },
   "author": "Efa2000",
@@ -30,6 +33,6 @@
   },
   "homepage": "https://github.com/efa2000/node-red-contrib-alice#readme",
   "dependencies": {
-    "firebase": "^7.14.3"
+    "firebase": "^7.14.5"
   }
 }

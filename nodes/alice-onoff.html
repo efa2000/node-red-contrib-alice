@@ -1,0 +1,77 @@
+<script type="text/javascript">
+    RED.nodes.registerType('On_Off',{
+        category: 'alice',
+        defaults:{
+            device: {value:"", type:"alice-device"},
+            name: {value:""},
+            response:{value:true}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "alice.png",
+        color: "#D8BFD8",
+        label: function(){
+            return this.name + ":On/Off";
+        },
+        oneditprepare: function(){
+            if (this.response === undefined){
+                $( "#node-input-response").prop('checked', true);
+            }
+        },
+        oneditsave: function(){
+            deivcename = $('#node-input-device option:selected').text();
+            $('#node-input-name').val(deivcename);
+        }
+    })
+</script>
+
+<script type="text/x-red" data-template-name="On_Off">
+    <input type="hidden" id="node-input-name">
+    <div class="form-row">
+        <label for="node-input-device">Device</label>
+        <input id="node-input-device">
+    </div>
+    <div class="form-row">
+        <label for="node-input-response"><i class="fa fa-refresh"></i> <span >Response</span></label>
+        <label for="node-input-response" style="width:70%">
+        <input type="checkbox" id="node-input-response" style="display:inline-block; width:22px; vertical-align:baseline;" autocomplete="off"><span>Always answer Alice with success</span>
+        </label>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="On_Off">
+    <p>Allows the device to turn on and off</p>
+    
+    <h3>Property</h3>
+    <dl class="message-properties">
+        <dt>Device
+            <span class="property-type">Select</span>
+        </dt>
+        <dd> The device to which this feature is connected </dd>
+        <dt>Response
+            <span class="property-type">checkbox</span>
+        </dt>
+        <dd> In order for the device to respond to Alice that the command was successful, the corresponding value should arrive at the input within 2.5 seconds.
+            If your device takes longer or doesn’t return a confirmation at all, just check this box. </dd>
+    </dl>
+
+    <h3>Inputs</h3>
+        <dl class="message-properties">
+            <dt>payload
+                <span class="property-type">boolean</span>
+            </dt>
+            <dd> true or false </dd>
+        </dl>
+    
+     <h3>Outputs</h3>
+         <dl class="message-properties">
+            <dt>payload
+                <span class="property-type">boolean</span>
+            </dt>
+            <dd> true or false </dd>
+        </dl>
+    <h3>References</h3>
+        <ul>
+            <li><a href="https://yandex.ru/dev/dialogs/alice/doc/smart-home/concepts/capability-types-docpage/"> - Yandex documentation</a></li>
+        </ul>
+    </script>

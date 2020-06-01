@@ -8,7 +8,8 @@
             unit: {value:""},
             min:{value:1},
             max:{value:100},
-            precision:{value: 1}
+            precision:{value: 1},
+            response:{value:true}
         },
         inputs:1,
         outputs:1,
@@ -136,11 +137,14 @@
                         $('#node-input-precision').prop( "disabled", true );
                 }
                 firstRun = false;
-            }
+            };
             $('#node-input-instance').on('change',()=>{
                 var val = $('#node-input-instance').find(":selected").val();
                 instanceChange(val);
-            })
+            });
+            if (this.response === undefined){
+                $( "#node-input-response").prop('checked', true);
+            }
         }
     })
 </script>
@@ -182,6 +186,12 @@
         <label for="node-input-precision">Step</label>
         <input type="number" id="node-input-precision">
     </div>
+    <div class="form-row">
+        <label for="node-input-response"><i class="fa fa-refresh"></i> <span >Response</span></label>
+        <label for="node-input-response" style="width:70%">
+        <input type="checkbox" id="node-input-response" style="display:inline-block; width:22px; vertical-align:baseline;" autocomplete="off"><span>Always answer Alice with success</span>
+        </label>
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="Range">
@@ -213,6 +223,11 @@
             <span class="property-type">Float</span>
         </dt>
         <dd> The minimum step of changing values within the range </dd>
+        <dt>Response
+            <span class="property-type">checkbox</span>
+        </dt>
+        <dd> In order for the device to respond to Alice that the command was successful, the corresponding value should arrive at the input within 2.5 seconds.
+            If your device takes longer or doesn’t return a confirmation at all, just check this box. </dd>
     </dl>
     </dl>
 

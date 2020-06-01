@@ -1,53 +1,38 @@
 module.exports = function(RED) {
-      // ************** Range  *******************
-  function AliceRange(config){
+// ************** ON/OFF *******************
+function AliceOnOff(config){
     RED.nodes.createNode(this,config);
     this.device = RED.nodes.getNode(config.device);
     this.name = config.name;
-    this.ctype = 'devices.capabilities.range';
-    this.retrievable = true;
-    this.instance = config.instance;
-    this.unit = config.unit;
-    this.random_access = true;
-    this.min = parseFloat(config.min) || 0;
-    this.max = parseFloat(config.max) || 100;
-    this.precision = parseFloat(config.precision) || 1;
+    this.response = config.response;
+    this.ctype = 'devices.capabilities.on_off';
+    this.instance = 'on';
     this.initState = false;
     this.ref = null;
-    this.value = null;
 
+    if (config.response === undefined){
+        this.response = true;
+    }
+    
     this.init = ()=>{
       this.ref = this.device.getRef(this.id);
       let capab = {
         type: this.ctype,
-        retrievable: this.retrievable,
+        retrievable: true,
         parameters: {
           instance: this.instance,
-          unit: this.unit,
-          random_access: this.random_access,
-          range: {
-              min: this.min,
-              max: this.max,
-              precision: this.precision
-          }
         },
         state: {
-          value: this.min,
+          value: false,
           updatedfrom:"node-red",
           updated: this.device.getTime()
         }
       };
-      // если unit не пременим к параметру, то нужно удалить 
-      if (this.unit == "unit.number"){
-        delete capab.parameters.unit;
-      };
-
       if (!this.device.isDubCap(this.id,capab.type, capab.parameters.instance)){
         this.ref.set(capab)
           .then(ref=>{
-            this.initState = true;
-            this.value = capab.state.value;
             this.status({fill:"green",shape:"dot",text:"online"});
+            this.initState = true;
           });
       }else{
         this.status({fill:"red",shape:"dot",text:"error"});
@@ -69,24 +54,26 @@ module.exports = function(RED) {
       this.status({fill:"red",shape:"dot",text:"offline"});
     });
 
-    this.device.on(this.id,(val,state)=>{
-      let value = val;
-      //проверка является ли значение относительным
-      if (state.relative){
-        value = this.value + val;
-        if (val<0 && value<this.min) value=this.min;
-        if (val>0 && value>this.max) value=this.max;
-      };
+    this.device.on(this.id,(val)=>{
       this.send({
-        payload: value
+        payload: val
       });
-      this.value = value;
+      if (this.response){
+          this.ref.update({
+            state:{
+                value: val,
+                updatedfrom: "node-red",
+                updated: this.device.getTime()
+            }
+          }).catch(err=>{
+            this.error("Response Errror: "+err.message);
+          })
+      };
     })
 
     this.on('input', (msg, send, done)=>{
-      const value = msg.payload;
-      if (typeof value != 'number'){
-        this.error("Wrong type! msg.payload must be Integer or Float.");
+      if (typeof msg.payload != 'boolean'){
+        this.error("Wrong type! msg.payload must be boolean.");
         if (done) {done();}
         return;
       }
@@ -98,15 +85,14 @@ module.exports = function(RED) {
       };
       this.ref.update({
         state:{
-          value: value,
+          value: msg.payload,
           updatedfrom: "node-red",
           updated: this.device.getTime()
         }
       }).then(ref=>{
-        this.value = value;
         if (done) {done();}
       }).catch(err=>{
-        this.error("err.message");
+        this.error(err.message);
       })
     });
 
@@ -123,5 +109,5 @@ module.exports = function(RED) {
       }
     });
   }  
-  RED.nodes.registerType("Range",AliceRange);
+  RED.nodes.registerType("On_Off",AliceOnOff);
 };
