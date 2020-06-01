@@ -20,9 +20,9 @@
   "node-red": {
     "nodes": {
       "alice": "./nodes/alice.js",
-      "alice-range": "./nodes/alice-range.js",
       "alice-onoff": "./nodes/alice-onoff.js",
       "alice-togle": "./nodes/alice-togle.js",
+      "alice-range": "./nodes/alice-range.js",
       "alice-color": "./nodes/alice-color.js"
     }
   },

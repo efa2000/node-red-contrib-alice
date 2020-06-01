@@ -69,6 +69,7 @@
             .then(function(r){
                 document.getElementById("node-config-input-email").value = email;
                 document.getElementById("node-config-input-password").value = password;
+                RED.notify("user created successfully", 'success');
                 Activete();
             })
             .catch(function(error) {
