@@ -6,6 +6,8 @@ function AliceOnOff(config){
     this.name = config.name;
     this.response = config.response;
     this.ctype = 'devices.capabilities.on_off';
+    this.retrievable = config.retrievable;
+    this.split = false;
     this.instance = 'on';
     this.initState = false;
     this.ref = null;
@@ -13,14 +15,22 @@ function AliceOnOff(config){
     if (config.response === undefined){
         this.response = true;
     }
+    if (config.retrievable === undefined){
+      this.retrievable = true;
+    }
     
+    if (!this.retrievable){
+      this.split = true;
+    }
+
     this.init = ()=>{
       this.ref = this.device.getRef(this.id);
       let capab = {
         type: this.ctype,
-        retrievable: true,
+        retrievable: this.retrievable,
         parameters: {
           instance: this.instance,
+          split: this.split
         },
         state: {
           value: false,

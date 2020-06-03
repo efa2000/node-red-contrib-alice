@@ -4,6 +4,7 @@
         defaults:{
             device: {value:"", type:"alice-device"},
             name: {value:""},
+            retrievable: {value:true},
             response:{value:true}
         },
         inputs:1,
@@ -16,6 +17,9 @@
         oneditprepare: function(){
             if (this.response === undefined){
                 $( "#node-input-response").prop('checked', true);
+            };
+            if (this.retrievable === undefined){
+                $( "#node-input-retrievable").prop('checked', true);
             }
         },
         oneditsave: function(){
@@ -30,6 +34,12 @@
     <div class="form-row">
         <label for="node-input-device">Device</label>
         <input id="node-input-device">
+    </div>
+    <div class="form-row">
+        <label for="node-input-retrievable"><i class="fa fa-power-off"></i> <span >Main button</span></label>
+        <label for="node-input-retrievable" style="width:70%">
+        <input type="checkbox" id="node-input-retrievable" style="display:inline-block; width:22px; vertical-align:baseline;" autocomplete="off"><span>Disable other controls if the device is turned off</span>
+        </label>
     </div>
     <div class="form-row">
         <label for="node-input-response"><i class="fa fa-refresh"></i> <span >Response</span></label>
@@ -48,6 +58,11 @@
             <span class="property-type">Select</span>
         </dt>
         <dd> The device to which this feature is connected </dd>
+        <dt>Main button
+            <span class="property-type">checkbox</span>
+        </dt>
+        <dd>The main button blocks access to other controls if the device is turned off.
+            When unchecking this, the controls will be available, but you will not be able to find out whether the device is on or off</dd>
         <dt>Response
             <span class="property-type">checkbox</span>
         </dt>
