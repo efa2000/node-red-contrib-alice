@@ -75,7 +75,7 @@ module.exports = function(RED) {
     })
 
     this.on('close',(done)=>{
-      clearInterval(checkInterval);
+//      clearInterval(checkInterval);
       setTimeout(()=>{
         this.emit('offline');
         fb.auth().signOut();
@@ -130,6 +130,8 @@ module.exports = function(RED) {
     }
 
     this.startObserver = ()=>{
+      if (this.observer) this.observer();
+      this.observer = null;
       this.observer = this.ref.collection('capabilities')
       .where('state.updated', '>', new Date())
       .onSnapshot(querySnapshot=>{
@@ -168,7 +170,6 @@ module.exports = function(RED) {
         this.ref = this.service.getRef(this.id);
         this.emit("online");
       }
-      if (this.observer) this.observer();
       this.startObserver();
     });
     
@@ -176,11 +177,12 @@ module.exports = function(RED) {
       this.emit("offline");
       this.ref = null;
       if (this.observer)this.observer();
+      this.observer = null;
       this.status({fill:"red",shape:"dot",text:"offline"});
     })
 
     this.on('close', (removed, done)=>{
-      this.observer();
+      if (this.observer)this.observer();
       if (removed){
         this.ref.delete();
         done();
