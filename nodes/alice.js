@@ -97,6 +97,7 @@ module.exports = function(RED) {
   function AliceDevice(config){
     RED.nodes.createNode(this,config);
     this.service = RED.nodes.getNode(config.service);
+    this.service.setMaxListeners(this.service.getMaxListeners() + 1); // увеличиваем лимит для event
     this.name = config.name;
     this.description = config.description,
     this.room = config.room;
