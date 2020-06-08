@@ -2,7 +2,9 @@ module.exports = function(RED) {
   //Sevice node, Alice-Service (credential)
   function AliceService(config) {
     RED.nodes.createNode(this,config);
-    var firebase = require('firebase');
+    var firebase = require('firebase/app');
+    require('firebase/auth');
+    require('firebase/firestore');
     var checkInterval;
     var fb;
     const INTERVAL = 60000; // Интервал проверок (мс) 
