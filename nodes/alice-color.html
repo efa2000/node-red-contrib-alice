@@ -4,7 +4,7 @@
         defaults:{
             device: {value:"", type:"alice-device"},
             name: {value:""},
-            scheme: {value:"rgb"},
+            scheme: {value:"rgb_normal"},
             response:{value:true}
         },
         inputs:1,
@@ -35,6 +35,7 @@
     <div class="form-row">
         <label for="node-input-scheme">Scheme</label>
         <select id="node-input-scheme" style="width: 70%;">
+            <option value="rgb_normal">RGB</option>
             <option value="rgb">RGB (24bit)</option>
             <option value="hsv">HSV</option>
         </select>
@@ -59,7 +60,7 @@
         <dt>Scheme
             <span class="property-type">Select</span>
         </dt>
-        <dd> Color scheme selection (RGB or HSV) </dd>
+        <dd> Color scheme selection (RGB, RGB (24bit) or HSV) </dd>
         <dt>Response
             <span class="property-type">checkbox</span>
         </dt>
@@ -72,8 +73,9 @@
             <dt>payload
                 <span class="property-type">Object || Integer</span>
             </dt>
-            <dd> If the color scheme is RGB, then payload must be presented in 24-bit format (<a href="https://ru.wikipedia.org/wiki/TrueColor" target="_blank">TrueColor</a>). </dd>
-            <dd> If the color scheme is HSV, then payload HSV Object (hue,saturation,value) </br><i>{h:Integer,s:Integer,v:Integer}</i></dd>
+            <dd> RGB, payload RGB Object </br><i>{r:Integer, g:Integer, b:Integer}</i></dd>
+            <dd> RGB (24bit), payload in 24-bit format (<a href="https://ru.wikipedia.org/wiki/TrueColor" target="_blank">TrueColor</a>). </dd>
+            <dd> HSV, payload HSV Object (hue,saturation,value) </br><i>{h:Integer,s:Integer,v:Integer}</i></dd>
         </dl>
     
      <h3>Outputs</h3>
@@ -81,8 +83,9 @@
             <dt>payload
                 <span class="property-type">Object || Integer</span>
             </dt>
-            <dd> If the color scheme is RGB, then payload must be presented in 24-bit format (<a href="https://ru.wikipedia.org/wiki/TrueColor" target="_blank">TrueColor</a>). </dd>
-            <dd> If the color scheme is HSV, then payload HSV Object (hue,saturation,value) </br><i>{h:Integer,s:Integer,v:Integer}</i></dd>
+            <dd> RGB, payload RGB Object </br><i>{r:Integer, g:Integer, b:Integer}</i></dd>
+            <dd> RGB (24bit), payload in 24-bit format (<a href="https://ru.wikipedia.org/wiki/TrueColor" target="_blank">TrueColor</a>). </dd>
+            <dd> HSV, payload HSV Object (hue,saturation,value) </br><i>{h:Integer,s:Integer,v:Integer}</i></dd>
         </dl>
     <h3>References</h3>
         <ul>

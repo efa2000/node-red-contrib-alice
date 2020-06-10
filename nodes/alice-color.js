@@ -8,9 +8,15 @@ module.exports = function(RED) {
     this.ctype = 'devices.capabilities.color_setting';
     this.instance = 'color_model';
     this.scheme = config.scheme;
+    this.needConvert = false;
     this.response = config.response;
     this.initState = false;
     this.ref = null;
+
+    if (this.scheme == "rgb_normal"){
+      this.scheme = "rgb";
+      this.needConvert = true;
+    };
 
     if (config.response === undefined){
         this.response = true;
@@ -66,8 +72,16 @@ module.exports = function(RED) {
     });
 
     this.device.on(this.id,(val)=>{
+        var value = val;
+        if (this.needConvert){
+          value = {
+            r: val >> 16,
+            g: val >> 8 & 0xFF,
+            b: val & 0xFF
+          }
+        };
         this.send({
-            payload: val
+            payload: value
         });
         if (this.response){
             this.ref.update({
@@ -83,18 +97,31 @@ module.exports = function(RED) {
     })
 
     this.on('input', (msg, send, done)=>{
-      const value = msg.payload;
-      if (typeof value != 'number' && typeof value !='object'){
-        this.error("Wrong type! msg.payload must be Integer or Object.");
+      var value = msg.payload;
+      if (this.scheme=='rgb' && !this.needConvert && typeof value !='number' ){
+        this.error("Wrong type! msg.payload must be Integer.");
         if (done) {done();}
         return;
-      }
+      };
+      if (this.scheme=='rgb' && this.needConvert && typeof value !='object' ){
+        this.error("Wrong type! msg.payload must be RGB Object.");
+        if (done) {done();}
+        return;
+      };
+      if (this.scheme=='hsv' && typeof value !='object' ){
+        this.error("Wrong type! msg.payload must be HSV Object.");
+        if (done) {done();}
+        return;
+      };
       if (!this.ref){
         this.error("Device offline");
         this.status({fill:"red",shape:"dot",text:"offline"});
         if (done) {done();}
         return;
       };
+      if (this.needConvert){
+        value = value.r << 16 | value.g << 8 | value.b;
+      }
       this.ref.update({
         state:{
           value: value,
