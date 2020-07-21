@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-alice",
-  "version": "0.3.13",
+  "version": "0.4.1",
   "description": "",
   "main": "alice.js",
   "scripts": {
@@ -23,7 +23,8 @@
       "alice-onoff": "./nodes/alice-onoff.js",
       "alice-togle": "./nodes/alice-togle.js",
       "alice-range": "./nodes/alice-range.js",
-      "alice-color": "./nodes/alice-color.js"
+      "alice-color": "./nodes/alice-color.js",
+      "alice-mode": "./nodes/alice-mode.js"
     }
   },
   "author": "Efa2000",

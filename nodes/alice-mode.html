@@ -1,0 +1,252 @@
+<script type="text/javascript">
+    RED.nodes.registerType('Mode',{
+        category: 'alice',
+        defaults:{
+            device: {value:"", type:"alice-device"},
+            name: {value:""},
+            instance: { value:null, validate: (v)=>{
+                    if (v){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                } 
+            },
+            modes:{value:[], validate:(ms)=>{
+                return ms.length > 0
+            }},
+            response:{value:true}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "alice.png",
+        color: "#D8BFD8",
+        label: function(){
+            return this.name + ":" + this.instance;
+        },
+        oneditsave: function(){
+            deivcename = $('#node-input-device option:selected').text();
+            $('#node-input-name').val(deivcename);
+            this.modes = getCurrentModes();
+        },
+        oneditprepare: function(){
+            var firstRun = true;            
+            $('#node-input-instance').on('change',()=>{
+                var val = $('#node-input-instance').find(":selected").val();
+                if (firstRun){
+                    firstRun=false;
+                    return;
+                };
+                switch (val) {
+                    case 'cleanup_mode':
+                        this.modes = ['auto','eco','express','normal','quiet']
+                        break;
+                    case 'coffee_mode':
+                        this.modes = ['americano','cappuccino','double_espresso','espresso','latte']
+                        break;
+                    case 'fan_speed':
+                        this.modes = ['auto','high','low','medium','turbo']
+                        break;
+                    case 'heat':
+                        this.modes = ['auto','max','min','normal','turbo']
+                        break;
+                    case 'input_source':
+                        this.modes = ['one','two','three','four','five','six','seven','eight','nine','ten']
+                        break;
+                    case 'program':
+                        this.modes = ['auto','express','one','two','three','four','five','six','seven','eight','nine','ten']
+                        break;
+                    case 'swing':
+                        this.modes = ['auto','horizontal','stationary','vertical']
+                        break;
+                    case 'thermostat':
+                        this.modes = ['auto','cool','dry','fan_only','heat','preheat']
+                        break;
+                    case 'work_speed':
+                        this.modes = ['auto','fast','max','medium','min','slow','turbo']
+                        break;
+                    default:
+                        this.modes = [];
+                        break;
+                };
+                updateAllModes(this.modes);  
+            });
+            updateAllModes(this.modes);
+        }
+    });
+    function updateAllModes(modes){
+        deleteAllMode();
+        modes.forEach((m,i)=>{
+            addMode2List(m,i);
+        });
+        if (modes.length<1){
+            $('#node-input-modes-container').parent().css('border-color', "rgb(214, 97, 95)")
+        }else{
+            $('#node-input-modes-container').parent().css('border-color', "")
+        }
+    };
+    function addMode2List(mode,index){
+        $('#node-input-modes-container').append('<li rel="'+mode+'" class="red-ui-editableList-item-sortable red-ui-editableList-item-removable"><div class="red-ui-editableList-item-content" style="overflow: hidden; white-space: nowrap;"><span>'+mode+'</span></div><a href="#" onclick="delMode('+index+')" class="red-ui-editableList-item-remove red-ui-button red-ui-button-small"><i class="fa fa-remove"></i></a></li>')        
+    };
+    function deleteAllMode() {
+        $('#node-input-modes-container').empty();
+    };
+    function delMode(index) {
+        var modes = getCurrentModes();
+        modes.splice(index, 1);
+        updateAllModes(modes);
+    };
+    function addMode() {
+        var mode = $('#select-custom-mode').find(":selected").val();
+        var modes = getCurrentModes();
+        if (modes.indexOf(mode)>-1){
+            return;
+        }else{
+            modes.push(mode);
+            updateAllModes(modes);
+        }
+    };
+    function getCurrentModes() {
+        var modes = [];
+        $('#node-input-modes-container li').each(function(){ 
+            modes.push($(this).attr('rel')); 
+        });
+        return modes;
+    }
+</script>
+
+<script type="text/x-red" data-template-name="Mode">
+    <input type="hidden" id="node-input-name">
+    <div class="form-row">
+        <label for="node-input-device">Device</label>
+        <input id="node-input-device">
+    </div>
+    <div class="form-row">
+        <label for="node-input-instance">Mode Type</label>
+        <select id="node-input-instance" style="width: 70%;">
+            <option value="cleanup_mode">Cleanup mode</option>
+            <option value="coffee_mode">Coffee mode</option>
+            <option value="fan_speed">Fan speed</option>
+            <option value="heat">Heat Mode</option>
+            <option value="input_source">Input source</option>
+            <option value="program">Program</option>
+            <option value="swing">Swing Mode</option>
+            <option value="thermostat">Thermostat</option>
+            <option value="work_speed">Work speed</option>
+        </select>
+    </div>
+    <div class="form-row node-input-rule-container-row">
+        <label for="node-input-modes" style="width:auto">Supported commands</label>
+        <div class="red-ui-editableList">
+            <div class="red-ui-editableList-border red-ui-editableList-container" style="min-height: 150px; max-height: none; overflow-y: scroll; height: 308.4px;">
+                <ol id="node-input-modes-container" class="red-ui-editableList-list" style="min-height: 0px; min-width: 450px; height: auto;">
+                    <li class="red-ui-editableList-item-sortable red-ui-editableList-item-removable">
+                        <div class="red-ui-editableList-item-content" style="overflow: hidden; white-space: nowrap;">
+                            <span>Tets</span>
+                        </div>
+                        <i class="red-ui-editableList-item-handle fa fa-bullhorn" style="cursor:auto"></i><a href="#" class="red-ui-editableList-item-remove red-ui-button red-ui-button-small"><i class="fa fa-remove"></i></a>
+                    </li>
+                    <li class="red-ui-editableList-item-sortable red-ui-editableList-item-removable">
+                        <div class="red-ui-editableList-item-content" style="overflow: hidden; white-space: nowrap;">
+                            <span>Tets2</span>
+                        </div>
+                    <i class="red-ui-editableList-item-handle fa fa-bullhorn" style="cursor:auto"></i><a href="#" class="red-ui-editableList-item-remove red-ui-button red-ui-button-small"><i class="fa fa-remove"></i></a>
+                    </li>
+                </ol>
+            </div>
+            <div style="margin-top:4px">
+                <select id="select-custom-mode">
+                    <option value="auto">auto</option>
+                    <option value="eco">eco</option>
+                    <option value="turbo">turbo</option>
+                    <option value="cool">cool</option>
+                    <option value="dry">dry</option>
+                    <option value="fan_only">fan_only</option>
+                    <option value="heat">heat</option>
+                    <option value="preheat">preheat</option>
+                    <option value="high">high</option>
+                    <option value="low">low</option>
+                    <option value="medium">medium</option>
+                    <option value="max">max</option>
+                    <option value="min">min</option>
+                    <option value="fast">fast</option>
+                    <option value="slow">slow</option>
+                    <option value="express">express</option>
+                    <option value="normal">normal</option>
+                    <option value="quiet">quiet</option>
+                    <option value="horizontal">horizontal</option>
+                    <option value="stationary">stationary</option>
+                    <option value="vertical">vertical</option>
+                    <option value="americano">americano</option>
+                    <option value="cappuccino">cappuccino</option>
+                    <option value="double_espresso">double_espresso</option>
+                    <option value="espresso">espresso</option>
+                    <option value="latte">latte</option>
+                    <option value="one">one</option>
+                    <option value="two">two</option>
+                    <option value="three">three</option>
+                    <option value="four">four</option>
+                    <option value="five">five</option>
+                    <option value="six">six</option>
+                    <option value="seven">seven</option>
+                    <option value="eight">eight</option>
+                    <option value="nine">nine</option>
+                    <option value="ten">ten</option>
+                </select>
+                <a id="button-addMode" href="#" class="red-ui-button" onclick="addMode()" style="margin-top: 4px;"><i class="fa fa-plus"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-response"><i class="fa fa-refresh"></i> <span >Response</span></label>
+        <label for="node-input-response" style="width:70%">
+        <input type="checkbox" id="node-input-response" style="display:inline-block; width:22px; vertical-align:baseline;" autocomplete="off"><span>Always answer Alice with success</span>
+        </label>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="Mode">
+    <p>Controlling the operating modes of the device, for example, switching between the temperature operating modes of the air conditioner: "Cooling", "Heating" or "Auto".</p>
+    
+    <h3>Property</h3>
+    <dl class="message-properties">
+        <dt>Device
+            <span class="property-type">Select</span>
+        </dt>
+        <dd> The device to which this feature is connected </dd>
+        <dt>Mode Type
+            <span class="property-type">Select</span>
+        </dt>
+        <dd> Selection of the type of modes (cleanup, coffee, input source, work speed, etc.) </dd>
+        <dt>Supported commands
+            <span class="property-type">List</span>
+        </dt>
+        <dd> List of commands that are supported by this mode. You can add other commands yourself. </dd>
+        <dt>Response
+            <span class="property-type">checkbox</span>
+        </dt>
+        <dd> In order for the device to respond to Alice that the command was successful, the corresponding value should arrive at the input within 2.5 seconds.
+            If your device takes longer or doesn’t return a confirmation at all, just check this box. </dd>
+    </dl>
+    </dl>
+
+    <h3>Inputs</h3>
+        <dl class="message-properties">
+            <dt>payload
+                <span class="property-type">String</span>
+            </dt>
+            <dd> command from the supported list of commands </dd>
+        </dl>
+    
+     <h3>Outputs</h3>
+        <dl class="message-properties">
+            <dt>payload
+                <span class="property-type">Strin</span>
+            </dt>
+            <dd> command from the supported list of commands </dd>
+        </dl>
+    <h3>References</h3>
+        <ul>
+            <li><a href="https://yandex.ru/dev/dialogs/alice/doc/smart-home/concepts/mode-instance-modes-docpage/"> Yandex documentation</a></li>
+        </ul>
+</script>
