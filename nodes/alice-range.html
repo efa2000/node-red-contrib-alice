@@ -4,12 +4,19 @@
         defaults:{
             device: {value:"", type:"alice-device"},
             name: {value:""},
-            instance: {value:undefined},
+            instance: {value:undefined, validate: (v)=>{
+                if (v){
+                    return true;
+                }else{
+                    return false;
+                }
+            }},
             unit: {value:""},
             min:{value:1},
             max:{value:100},
             precision:{value: 1},
-            response:{value:true}
+            response:{value:true},
+            retrievable: {value: true}
         },
         inputs:1,
         outputs:1,
@@ -187,11 +194,18 @@
         <input type="number" id="node-input-precision">
     </div>
     <div class="form-row">
+        <label for="node-input-retrievable"><i class="fa fa-sign-out"></i> <span >Output</span></label>
+        <label for="node-input-retrievable" style="width:70%">
+        <input type="checkbox" id="node-input-retrievable" style="display:inline-block; width:22px; vertical-align:baseline;" autocomplete="off"><span>full value/changes only</span>
+        </label>
+    </div>
+    <div class="form-row">
         <label for="node-input-response"><i class="fa fa-refresh"></i> <span >Response</span></label>
         <label for="node-input-response" style="width:70%">
         <input type="checkbox" id="node-input-response" style="display:inline-block; width:22px; vertical-align:baseline;" autocomplete="off"><span>Always answer Alice with success</span>
         </label>
     </div>
+    
 </script>
 
 <script type="text/x-red" data-help-name="Range">
@@ -223,6 +237,11 @@
             <span class="property-type">Float</span>
         </dt>
         <dd> The minimum step of changing values within the range </dd>
+        <dt>Output
+            <span class="property-type">checkbox</span>
+        </dt>
+        <dd> Determines what kind of value will be output. The full value that the device should set or the delta of the value change. 
+            When the checkbox is unchecked, the current device values are not stored in Yandex.. </dd>
         <dt>Response
             <span class="property-type">checkbox</span>
         </dt>

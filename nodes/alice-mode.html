@@ -5,13 +5,12 @@
             device: {value:"", type:"alice-device"},
             name: {value:""},
             instance: { value:null, validate: (v)=>{
-                    if (v){
-                        return true;
-                    }else{
-                        return false;
-                    }
-                } 
-            },
+                if (v){
+                    return true;
+                }else{
+                    return false;
+                }
+            }},
             modes:{value:[], validate:(ms)=>{
                 return ms.length > 0
             }},

@@ -5,7 +5,7 @@ module.exports = function(RED) {
     this.device = RED.nodes.getNode(config.device);
     this.name = config.name;
     this.ctype = 'devices.capabilities.range';
-    this.retrievable = true;
+    this.retrievable = config.retrievable;
     this.instance = config.instance;
     this.unit = config.unit;
     this.random_access = true;
@@ -53,6 +53,9 @@ module.exports = function(RED) {
             this.initState = true;
             this.value = capab.state.value;
             this.status({fill:"green",shape:"dot",text:"online"});
+          })
+          .catch(err=>{
+            console.log(err.message);
           });
       }else{
         this.status({fill:"red",shape:"dot",text:"error"});
@@ -76,8 +79,8 @@ module.exports = function(RED) {
 
     this.device.on(this.id,(val,state)=>{
       let value = val;
-      //проверка является ли значение относительным
-      if (state.relative){
+      //проверка является ли значение относительным и нужно ли отдавать полное значение
+      if (state.relative && this.retrievable){
         value = this.value + val;
         if (val<0 && value<this.min) value=this.min;
         if (val>0 && value>this.max) value=this.max;
