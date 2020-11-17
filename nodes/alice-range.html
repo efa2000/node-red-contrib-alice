@@ -149,6 +149,9 @@
                 var val = $('#node-input-instance').find(":selected").val();
                 instanceChange(val);
             });
+            if (this.retrievable === undefined){
+                $( "#node-input-retrievable").prop('checked', true);
+            }
             if (this.response === undefined){
                 $( "#node-input-response").prop('checked', true);
             }
