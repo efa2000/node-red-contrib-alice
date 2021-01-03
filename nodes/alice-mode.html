@@ -43,6 +43,9 @@
                     case 'coffee_mode':
                         this.modes = ['americano','cappuccino','double_espresso','espresso','latte']
                         break;
+                    case 'multicooker_mode':
+                        this.modes = ['vacuum','boiling','baking','dessert','baby_food','fowl','frying','yogurt','cereals','macaroni','milk_porridge','multicooker','steam','pasta','pizza','pilaf','sauce','soup','stewing','slow_cook','deep_fryer','bread','aspic','cheesecake','preheat']
+                        break;
                     case 'fan_speed':
                         this.modes = ['auto','high','low','medium','turbo']
                         break;
@@ -125,6 +128,7 @@
         <select id="node-input-instance" style="width: 70%;">
             <option value="cleanup_mode">Cleanup mode</option>
             <option value="coffee_mode">Coffee mode</option>
+            <option value="multicooker_mode">Multicooker Mode</option>
             <option value="fan_speed">Fan speed</option>
             <option value="heat">Heat Mode</option>
             <option value="input_source">Input source</option>
@@ -191,6 +195,31 @@
                     <option value="eight">eight</option>
                     <option value="nine">nine</option>
                     <option value="ten">ten</option>
+                    <option value="vacuum">vacuum</option>
+                    <option value="boiling">boiling</option>
+                    <option value="baking">baking</option>
+                    <option value="dessert">dessert</option>
+                    <option value="baby_food">baby_food</option>
+                    <option value="fowl">fowl</option>
+                    <option value="frying">frying</option>
+                    <option value="yogurt">yogurt</option>
+                    <option value="cereals">cereals</option>
+                    <option value="macaroni">macaroni</option>
+                    <option value="milk_porridge">milk_porridge</option>
+                    <option value="multicooker">multicooker</option>
+                    <option value="steam">steam</option>
+                    <option value="pasta">pasta</option>
+                    <option value="pizza">pizza</option>
+                    <option value="pilaf">pilaf</option>
+                    <option value="sauce">sauce</option>
+                    <option value="soup">soup</option>
+                    <option value="stewing">stewing</option>
+                    <option value="slow_cook">slow_cook</option>
+                    <option value="deep_fryer">deep_fryer</option>
+                    <option value="bread">bread</option>
+                    <option value="aspic">aspic</option>
+                    <option value="cheesecake">cheesecake</option>
+                    <option value="preheat">preheat</option>
                 </select>
                 <a id="button-addMode" href="#" class="red-ui-button" onclick="addMode()" style="margin-top: 4px;"><i class="fa fa-plus"></i></a>
             </div>
