@@ -148,13 +148,14 @@ module.exports = function(RED) {
         this.error(err.message);
       })
     };
+
     this.getRef=(capId)=>{
       return this.ref.collection('capabilities').doc(capId);
-    }
+    };
 
     this.getTime=()=>{
       return this.service.getTime();
-    }
+    };
     
     this.isDubCap=(capId,type,instance)=>{
       let capab = type+"."+instance;
@@ -164,6 +165,38 @@ module.exports = function(RED) {
         this.capabilites[capab] = capId;
         return false
       }
+    };
+
+// Установка параметров умения 
+    this.setCapability = (capId, capab)=>{
+      return this.ref.collection('capabilities').get().then(snapshot=>{
+        let allCapab = {};
+        snapshot.forEach(doc=>{
+          let d = doc.data();
+          let storedcapab = d.type + "." + d.parameters.instance
+          allCapab[storedcapab] = doc.id;
+        });
+        let capabtype = capab.type+"."+capab.parameters.instance;
+        console.log(allCapab);
+        console.log(capabtype);
+        if (allCapab[capabtype] && allCapab[capabtype]!=capId){
+          throw new Error("Dublicated capability on same device!");
+        }else{
+          return this.ref.collection('capabilities').doc(capId).set(capab);
+        }
+      })
+    };
+
+// обновление текущего state умения
+    this.updateState=(capId,state)=>{
+      return this.ref.collection('capabilities').doc(capId).update({
+        state: state
+      });
+    };
+
+// удаление умения 
+    this.delCapability=(capId)=>{
+      return this.ref.collection('capabilities').doc(capId).delete()
     };
 
     this.service.on("online",()=>{

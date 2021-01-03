@@ -10,21 +10,20 @@ function AliceOnOff(config){
     this.split = false;
     this.instance = 'on';
     this.initState = false;
-    this.ref = null;
 
     if (config.response === undefined){
         this.response = true;
-    }
+    };
     if (config.retrievable === undefined){
       this.retrievable = true;
-    }
-    
+    };
     if (!this.retrievable){
       this.split = true;
-    }
+    };
+
+    this.status({fill:"red",shape:"dot",text:"offline"});
 
     this.init = ()=>{
-      this.ref = this.device.getRef(this.id);
       let capab = {
         type: this.ctype,
         retrievable: this.retrievable,
@@ -38,29 +37,30 @@ function AliceOnOff(config){
           updated: this.device.getTime()
         }
       };
-      if (!this.device.isDubCap(this.id,capab.type, capab.parameters.instance)){
-        this.ref.set(capab)
-          .then(ref=>{
-            this.status({fill:"green",shape:"dot",text:"online"});
-            this.initState = true;
-          });
-      }else{
-        this.status({fill:"red",shape:"dot",text:"error"});
-        this.error("Dublicated capability on same device!");
-      }
+      // if (!this.device.isDubCap(this.id, capab.type, capab.parameters.instance)){
+        this.device.setCapability(this.id,capab)
+        .then(res=>{
+          this.status({fill:"green",shape:"dot",text:"online"});
+          this.initState = true;
+        })
+        .catch(err=>{
+          this.error(err.message);
+          this.status({fill:"red",shape:"dot",text:"error"});
+        });
+      // }else{
+      //   this.status({fill:"red",shape:"dot",text:"error"});
+      //   this.error("Dublicated capability on same device!");
+      // }
     };
 
+// Проверяем сам девайс уже инициирован 
+    if (this.device.initState) this.init();
+
     this.device.on("online",()=>{
-      if (!this.initState){
-        this.init();
-      }else{
-        this.ref = this.device.getRef(this.id);
-        this.status({fill:"green",shape:"dot",text:"online"});
-      }
+      this.init();
     });
 
     this.device.on("offline",()=>{
-      this.ref = null;
       this.status({fill:"red",shape:"dot",text:"offline"});
     });
 
@@ -69,14 +69,17 @@ function AliceOnOff(config){
         payload: val
       });
       if (this.response){
-          this.ref.update({
-            state:{
-                value: val,
-                updatedfrom: "node-red",
-                updated: this.device.getTime()
-            }
-          }).catch(err=>{
-            this.error("Response Errror: "+err.message);
+          this.device.updateState(this.id,{
+            value: val,
+            updatedfrom: "node-red",
+            updated: this.device.getTime()
+          })
+          .then (res=>{
+            this.status({fill:"green",shape:"dot",text:"online"});
+          })
+          .catch(err=>{
+            this.error(err.message);
+            this.status({fill:"red",shape:"dot",text:"Error"});
           })
       };
     })
@@ -86,34 +89,33 @@ function AliceOnOff(config){
         this.error("Wrong type! msg.payload must be boolean.");
         if (done) {done();}
         return;
-      }
-      if (!this.ref){
-        this.error("Device offline");
-        this.status({fill:"red",shape:"dot",text:"offline"});
-        if (done) {done();}
-        return;
       };
-      this.ref.update({
-        state:{
-          value: msg.payload,
-          updatedfrom: "node-red",
-          updated: this.device.getTime()
-        }
-      }).then(ref=>{
+      this.device.updateState(this.id,{
+        value: msg.payload,
+        updatedfrom: "node-red",
+        updated: this.device.getTime()
+      })
+      .then(ref=>{
+        this.status({fill:"green",shape:"dot",text:"online"});
         if (done) {done();}
-      }).catch(err=>{
+      })
+      .catch(err=>{
         this.error(err.message);
+        this.status({fill:"red",shape:"dot",text:"Error"});
+        if (done) {done();}
       })
     });
 
     this.on('close', function(removed, done) {
       if (removed) {
-        this.ref.delete().then(res=>{
-                done()
-              }).catch(err=>{
-                this.error(err.message);
-                done();
-              })
+        this.device.delCapability(this.id)
+        .then(res=>{
+          done()
+        })
+        .catch(err=>{
+          this.error(err.message);
+          done();
+        })
       }else{
         done();
       }
