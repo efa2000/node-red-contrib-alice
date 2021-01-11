@@ -26,6 +26,11 @@
         oneditsave: function(){
             deivcename = $('#node-input-device option:selected').text();
             $('#node-input-name').val(deivcename);
+            currentInstance = $('#node-input-instance').val();
+            if (currentInstance=='multicooker_mode'){
+                $('#node-input-instance')
+                $('#node-input-instance option[value=program]').prop('selected', true);
+            };
             this.modes = getCurrentModes();
         },
         oneditprepare: function(){
