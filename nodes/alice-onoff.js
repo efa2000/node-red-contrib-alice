@@ -37,8 +37,7 @@ function AliceOnOff(config){
           updated: this.device.getTime()
         }
       };
-      // if (!this.device.isDubCap(this.id, capab.type, capab.parameters.instance)){
-        this.device.setCapability(this.id,capab)
+      this.device.setCapability(this.id,capab)
         .then(res=>{
           this.status({fill:"green",shape:"dot",text:"online"});
           this.initState = true;
@@ -47,10 +46,6 @@ function AliceOnOff(config){
           this.error(err.message);
           this.status({fill:"red",shape:"dot",text:"error"});
         });
-      // }else{
-      //   this.status({fill:"red",shape:"dot",text:"error"});
-      //   this.error("Dublicated capability on same device!");
-      // }
     };
 
 // Проверяем сам девайс уже инициирован 

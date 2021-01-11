@@ -5,9 +5,7 @@ module.exports = function(RED) {
     var firebase = require('firebase/app');
     require('firebase/auth');
     require('firebase/firestore');
-    var checkInterval;
     var fb;
-    const INTERVAL = 60000; // Интервал проверок (мс) 
     const email = this.credentials.email;
     const password = this.credentials.password;
     const firebaseConfig = {
@@ -37,19 +35,6 @@ module.exports = function(RED) {
       fb.auth().signInWithEmailAndPassword(email, password)
       .then(u=>{
         this.emit('online');
-        // clearInterval(checkInterval);
-        // checkInterval = setInterval(()=>{
-        //   console.log("Check!");
-        //   fb.firestore().collection('users').doc(fb.auth().currentUser.uid).update({
-        //     keepalive: firebase.firestore.Timestamp.now()
-        //   })
-        //   .then(ref=>{
-        //     console.log("Updeted ",ref.id);
-        //   })
-        //   .catch(err=>{
-        //     this.error(err.message);
-        //   })
-        // },INTERVAL);
       })
       .catch(err=>{
         this.error(err.message);
@@ -77,7 +62,6 @@ module.exports = function(RED) {
     })
 
     this.on('close',(done)=>{
-//      clearInterval(checkInterval);
       setTimeout(()=>{
         this.emit('offline');
         fb.auth().signOut();
@@ -106,6 +90,19 @@ module.exports = function(RED) {
     this.ref = null;
     this.capabilites = {};
 
+    this._updateCapabList = _=>{
+      this.capabilites = {};
+      return this.ref.collection('capabilities').get()
+      .then(snapshot=>{
+        snapshot.forEach(doc=>{
+          let d = doc.data();
+          let capab = d.type + "." + d.parameters.instance
+          this.capabilites[capab] = doc.id;
+        })
+        return this.ref;
+      })
+    };
+
     this.init = ()=>{
       this.ref = this.service.getRef(this.id);
       this.ref.set({
@@ -115,15 +112,7 @@ module.exports = function(RED) {
         type: config.dtype
       })
       .then(ref=>{
-        return this.ref.collection('capabilities').get()
-          .then(snapshot=>{
-            snapshot.forEach(doc=>{
-              let d = doc.data();
-              let capab = d.type + "." + d.parameters.instance
-              this.capabilites[capab] = doc.id;
-            })
-            return this.ref;
-          })
+        return this._updateCapabList() // обновляем уже заведенные в базе умения 
       })
       .then(ref=>{
         this.initState = true;
@@ -169,20 +158,13 @@ module.exports = function(RED) {
 
 // Установка параметров умения 
     this.setCapability = (capId, capab)=>{
-      return this.ref.collection('capabilities').get().then(snapshot=>{
-        let allCapab = {};
-        snapshot.forEach(doc=>{
-          let d = doc.data();
-          let storedcapab = d.type + "." + d.parameters.instance
-          allCapab[storedcapab] = doc.id;
-        });
-        let capabtype = capab.type+"."+capab.parameters.instance;
-        console.log(allCapab);
-        console.log(capabtype);
-        if (allCapab[capabtype] && allCapab[capabtype]!=capId){
-          throw new Error("Dublicated capability on same device!");
+      return new Promise((resolve,reject)=>{
+        let capabIndex = capab.type+"."+capab.parameters.instance;
+        if (this.capabilites[capabIndex] && this.capabilites[capabIndex]!=capId){
+          reject(new Error("Dublicated capability on same device!"))
         }else{
-          return this.ref.collection('capabilities').doc(capId).set(capab);
+          this.capabilites[capab] = capId; // добавляем новое уменя в локальный список 
+          resolve(this.ref.collection('capabilities').doc(capId).set(capab))
         }
       })
     };
@@ -197,6 +179,10 @@ module.exports = function(RED) {
 // удаление умения 
     this.delCapability=(capId)=>{
       return this.ref.collection('capabilities').doc(capId).delete()
+        .then(res=>{
+          this._updateCapabList()
+          return res;
+        })
     };
 
     this.service.on("online",()=>{
@@ -219,12 +205,11 @@ module.exports = function(RED) {
 
     this.on('close', (removed, done)=>{
       if (this.observer)this.observer();
-      if (removed){
-        this.ref.delete();
+      setTimeout(()=>{
+        this.emit('offline');
+        if (removed){this.ref.delete()};
         done();
-      }else{
-        done();
-      }
+      },400)
     });
   };
   RED.nodes.registerType("alice-device",AliceDevice);
