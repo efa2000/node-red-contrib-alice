@@ -1,0 +1,211 @@
+<script type="text/javascript">
+    RED.nodes.registerType('Sensor',{
+        category: 'alice',
+        defaults:{
+            device: {value:"", type:"alice-device"},
+            name: {value:"Sensor"},
+            stype: {value:undefined},
+            instance: {value:undefined, validate: (v)=>{
+                if (v){
+                    return true;
+                }else{
+                    return false;
+                }
+            }},
+            unit:{value:undefined}
+        },
+        inputs:1,
+        outputs:0,
+        icon: "alice.png",
+        color: "#D8BFD8",
+        label: function(){
+            return this.name + ":"  + this.instance;
+        },
+        oneditprepare: function(){
+            $('#node-input-instance').on('change',()=>{
+                var val = $('#node-input-instance').find(":selected").val();
+                switch (val) {
+                    case 'contact':
+                    $('#node-input-stype').val("devices.properties.bool");
+                    $('#node-input-unit')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="null"></option>')
+                        .val('null')
+                        .prop('disabled', 'disabled');
+                    break;
+                    case 'motion':
+                    $('#node-input-stype').val("devices.properties.bool");
+                    $('#node-input-unit')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="null"></option>')
+                        .val('null')
+                        .prop('disabled', 'disabled');
+                    break;
+                    case 'amperage':
+                    $('#node-input-stype').val("devices.properties.float");
+                    $('#node-input-unit')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="unit.ampere">Ampere (A)</option>')
+                        .val('unit.ampere')
+                        .prop('disabled', 'disabled');
+                    break;
+                    case 'battery_level':
+                    $('#node-input-stype').val("devices.properties.float");
+                    $('#node-input-unit')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="unit.percent">Percent (%)</option>')
+                        .val('unit.percent')
+                        .prop('disabled', 'disabled');
+                    break;
+                    case 'co2_level':
+                    $('#node-input-stype').val("devices.properties.float");
+                    $('#node-input-unit')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="unit.ppm">Parts per million (ppm)</option>')
+                        .val('unit.ppm')
+                        .prop('disabled', 'disabled');
+                    break;
+                    case 'humidity':
+                    $('#node-input-stype').val("devices.properties.float");
+                    $('#node-input-unit')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="unit.percent">Percent (%)</option>')
+                        .val('unit.percent')
+                        .prop('disabled', 'disabled');
+                    break;
+                    case 'power':
+                    $('#node-input-stype').val("devices.properties.float");
+                    $('#node-input-unit')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="unit.watt">Watt (W)</option>')
+                        .val('unit.watt')
+                        .prop('disabled', 'disabled');
+                    break;
+                    case 'temperature':
+                    $('#node-input-stype').val("devices.properties.float");
+                    $('#node-input-unit')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="unit.temperature.celsius">Celsius</option>')
+                        .append('<option value="unit.temperature.kelvin">Kelvin</option>')
+                        .val('unit.temperature.celsius')
+                        .prop('disabled', false);
+                    break;
+                    case 'voltage':
+                    $('#node-input-stype').val("devices.properties.float");
+                    $('#node-input-unit')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="unit.volt">Volt (V)</option>')
+                        .val('unit.volt')
+                        .prop('disabled', 'disabled');
+                    break;
+                    case 'water_level':
+                    $('#node-input-stype').val("devices.properties.float");
+                    $('#node-input-unit')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="unit.percent">Percent (%)</option>')
+                        .val('unit.percent')
+                        .prop('disabled', 'disabled');
+                    break;
+                    default:
+                    $('#node-input-unit').prop('disabled', 'disabled');
+                        break;
+                };
+            });
+        },
+        oneditsave: function(){
+            deivcename = $('#node-input-device option:selected').text();
+            $('#node-input-name').val(deivcename);
+        }
+    })
+</script>
+
+<script type="text/x-red" data-template-name="Sensor">
+    <input type="hidden" id="node-input-name">
+    <div class="form-row">
+        <label for="node-input-device">Device</label>
+        <input id="node-input-device">
+    </div>
+    <div class="form-row">
+        <label for="node-input-instance">Sensor Type</label>
+        <select id="node-input-instance" style="width: 70%;">
+            <!-- <option value="contact">Contact</option> -->
+            <!-- <option value="motion">Motion</option> -->
+            <option value="battery_level">Battery level</option>
+            <option value="co2_level">CO2 level</option>
+            <option value="humidity">Humidity</option>
+            <option value="temperature">Temperature</option>
+            <option value="power">Power</option>
+            <option value="voltage">Voltage</option>
+            <option value="amperage">Amperage</option>
+            <option value="water_level">Water level</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-stype">Data Type</label>
+        <select id="node-input-stype" style="width: 70%;" disabled>
+            <option value="devices.properties.float">Number (float)</option>
+            <option value="devices.properties.bool">Boolean (true/false)</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-unit">Unit</label>
+        <select id="node-input-unit" style="width: 70%;">
+            <option value="unit.percent">Percent (%)</option>
+            <option value="unit.ppm">Parts per million (ppm)</option>
+            <option value="unit.temperature.celsius">Celsius</option>
+            <option value="unit.temperature.kelvin">Kelvin</option>
+            <option value="unit.ampere">Ampere (A)</option>
+            <option value="unit.volt">Volt (V)</option>
+            <option value="unit.watt">Watt (W)</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="Sensor">
+    <p>Transmits data from sensors built into the device.</p>
+    
+    <h3>Property</h3>
+    <dl class="message-properties">
+        <dt>Device
+            <span class="property-type">Select</span>
+        </dt>
+        <dd> The device to which this sensor is connected </dd>
+        <dt>Sensor Type
+            <span class="property-type">Select</span>
+        </dt>
+        <dd>a type of sensor that helps to better understand the area of its use and the data it collects</dd>
+    </dl>
+
+    <h3>Inputs</h3>
+        <dl class="message-properties">
+            <dt>payload
+                <span class="property-type">boolean/float</span>
+            </dt>
+            <dd>bollean or float</dd>
+        </dl>
+    
+    <h3>References</h3>
+        <ul>
+            <li><a href="https://yandex.ru/dev/dialogs/alice/doc/smart-home/concepts/properties-types.html"> - Yandex documentation</a></li>
+        </ul>
+    </script>

@@ -89,6 +89,7 @@ module.exports = function(RED) {
     this.initState = false;
     this.ref = null;
     this.capabilites = {};
+    this.sensors = {};
 
     this._updateCapabList = _=>{
       this.capabilites = {};
@@ -98,6 +99,19 @@ module.exports = function(RED) {
           let d = doc.data();
           let capab = d.type + "." + d.parameters.instance
           this.capabilites[capab] = doc.id;
+        })
+        return this.ref;
+      })
+    };
+
+    this._updateSensorList = _=>{
+      this.sensors = {};
+      return this.ref.collection('properties').get()
+      .then(snapshot=>{
+        snapshot.forEach(doc=>{
+          let d = doc.data();
+          let sensor = d.type + "." + d.parameters.instance
+          this.sensors[sensor] = doc.id;
         })
         return this.ref;
       })
@@ -115,9 +129,15 @@ module.exports = function(RED) {
         return this._updateCapabList() // обновляем уже заведенные в базе умения 
       })
       .then(ref=>{
+        return this._updateSensorList() // обновляем уже заведенные в базе сенсоры 
+      })
+      .then(ref=>{
         this.initState = true;
         this.status({fill:"green",shape:"dot",text:"online"});
         this.emit("online");
+      })
+      .catch(err=>{
+        this.error(err.message);
       });
     }
 
@@ -163,15 +183,35 @@ module.exports = function(RED) {
         if (this.capabilites[capabIndex] && this.capabilites[capabIndex]!=capId){
           reject(new Error("Dublicated capability on same device!"))
         }else{
-          this.capabilites[capab] = capId; // добавляем новое уменя в локальный список 
-          resolve(this.ref.collection('capabilities').doc(capId).set(capab))
+          this.capabilites[capabIndex] = capId; // добавляем новое уменя в локальный список
+          this.setMaxListeners(this.getMaxListeners() + 1); // увеличиваем количество слушателей  
+          resolve(this.ref.collection('capabilities').doc(capId).set(capab));
+        }
+      })
+    };
+// Установка параметров сенсора 
+    this.setSensor = (sensId, sensor)=>{
+      return new Promise((resolve,reject)=>{
+        let sensorIndex = sensor.type+"."+sensor.parameters.instance;
+        if (this.sensors[sensorIndex] && this.sensors[sensorIndex]!=sensId){
+          reject(new Error("Dublicated sensor on same device!"))
+        }else{
+          this.sensors[sensorIndex] = sensId; // добавляем новый сенсор в локальный список 
+          this.setMaxListeners(this.getMaxListeners() + 1); // увеличиваем количество слушателей 
+          resolve(this.ref.collection('properties').doc(sensId).set(sensor));
         }
       })
     };
 
 // обновление текущего state умения
-    this.updateState=(capId,state)=>{
+    this.updateCapabState=(capId,state)=>{
       return this.ref.collection('capabilities').doc(capId).update({
+        state: state
+      });
+    };
+// обновление текущего state сенсора
+    this.updateSensorState=(sensID,state)=>{
+      return this.ref.collection('properties').doc(sensID).update({
         state: state
       });
     };
@@ -181,6 +221,15 @@ module.exports = function(RED) {
       return this.ref.collection('capabilities').doc(capId).delete()
         .then(res=>{
           this._updateCapabList()
+          return res;
+        })
+    };
+
+// удаление сенсора
+    this.delSensor=(sensID)=>{
+      return this.ref.collection('properties').doc(sensID).delete()
+        .then(res=>{
+          this._updateSensorList()
           return res;
         })
     };

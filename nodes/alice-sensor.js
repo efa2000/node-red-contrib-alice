@@ -1,43 +1,38 @@
 module.exports = function(RED) {
 // ************** ON/OFF *******************
-function AliceOnOff(config){
+function AliceSensor(config){
     RED.nodes.createNode(this,config);
     this.device = RED.nodes.getNode(config.device);
     this.name = config.name;
-    this.response = config.response;
-    this.ctype = 'devices.capabilities.on_off';
-    this.retrievable = config.retrievable;
-    this.split = false;
-    this.instance = 'on';
+    this.stype = config.stype;
+    this.reportable = true;
+    this.retrievable = true;
+    this.unit = config.unit;
+    this.instance = config.instance;
     this.initState = false;
-
-    if (config.response === undefined){
-        this.response = true;
-    };
-    if (config.retrievable === undefined){
-      this.retrievable = true;
-    };
-    if (!this.retrievable){
-      this.split = true;
-    };
 
     this.status({fill:"red",shape:"dot",text:"offline"});
 
     this.init = ()=>{
-      let capab = {
-        type: this.ctype,
+      let sensor = {
+        type: this.stype,
+        reportable: this.reportable,
         retrievable: this.retrievable,
         parameters: {
           instance: this.instance,
-          split: this.split
+          unit: this.unit
         },
         state: {
-          value: false,
+          value: 0,
           updatedfrom:"node-red",
           updated: this.device.getTime()
         }
       };
-      this.device.setCapability(this.id,capab)
+      if (this.stype == 'devices.properties.bool'){
+        delete sensor.parameters.unit;
+        sensor.state.value=false;
+      }
+      this.device.setSensor(this.id,sensor)
         .then(res=>{
           this.status({fill:"green",shape:"dot",text:"online"});
           this.initState = true;
@@ -59,39 +54,24 @@ function AliceOnOff(config){
       this.status({fill:"red",shape:"dot",text:"offline"});
     });
 
-    this.device.on(this.id,(val)=>{
-      this.send({
-        payload: val
-      });
-      if (this.response){
-          this.device.updateCapabState(this.id,{
-            value: val,
-            updatedfrom: "node-red",
-            updated: this.device.getTime()
-          })
-          .then (res=>{
-            this.status({fill:"green",shape:"dot",text:"online"});
-          })
-          .catch(err=>{
-            this.error(err.message);
-            this.status({fill:"red",shape:"dot",text:"Error"});
-          })
-      };
-    })
-
     this.on('input', (msg, send, done)=>{
-      if (typeof msg.payload != 'boolean'){
+      if (this.stype =='bool' && typeof msg.payload != 'boolean'){
         this.error("Wrong type! msg.payload must be boolean.");
         if (done) {done();}
         return;
       };
-      this.device.updateCapabState(this.id,{
+      if (this.stype =='float' && typeof msg.payload != 'number'){
+        this.error("Wrong type! msg.payload must be number.");
+        if (done) {done();}
+        return;
+      };
+      this.device.updateSensorState(this.id,{
         value: msg.payload,
         updatedfrom: "node-red",
         updated: this.device.getTime()
       })
       .then(ref=>{
-        this.status({fill:"green",shape:"dot",text:"online"});
+        this.status({fill:"green",shape:"dot",text: msg.payload});
         if (done) {done();}
       })
       .catch(err=>{
@@ -103,7 +83,7 @@ function AliceOnOff(config){
 
     this.on('close', function(removed, done) {
       if (removed) {
-        this.device.delCapability(this.id)
+        this.device.delSensor(this.id)
         .then(res=>{
           done()
         })
@@ -116,5 +96,5 @@ function AliceOnOff(config){
       }
     });
   }  
-  RED.nodes.registerType("On_Off",AliceOnOff);
+  RED.nodes.registerType("Sensor",AliceSensor);
 };
