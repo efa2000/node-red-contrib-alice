@@ -1,10 +1,11 @@
 # Node-Red-Contrib-Alice (NodeRed Home)
 
-## Инструкция (RUS)
 Модуль позволяет использовать Node-Red совместно с сервисом голосового помошника Yandex.Alice (голосовое управление устройствами умного дома через Алису)
+The module allows you to use Node-Red together with the Yandex.Alice voice assistant service (voice control of smart home devices)
 
 #### Этот проект некоммерческий, но Вы можете поддержать проект через пожертвования [ЗДЕСЬ](https://dialogs.yandex.ru/store/skills/d4f5cc21-nodered-home?action=donation)
 
+## Инструкция (RUS)
 ### Использование 
 #### Как настроить навык:
 1. Установите и настройте Node-Red
