@@ -55,12 +55,12 @@ function AliceSensor(config){
     });
 
     this.on('input', (msg, send, done)=>{
-      if (this.stype =='bool' && typeof msg.payload != 'boolean'){
+      if (this.stype =='devices.properties.bool' && typeof msg.payload != 'boolean'){
         this.error("Wrong type! msg.payload must be boolean.");
         if (done) {done();}
         return;
       };
-      if (this.stype =='float' && typeof msg.payload != 'number'){
+      if (this.stype =='devices.properties.float' && typeof msg.payload != 'number'){
         this.error("Wrong type! msg.payload must be number.");
         if (done) {done();}
         return;

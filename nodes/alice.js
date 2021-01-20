@@ -79,6 +79,7 @@ module.exports = function(RED) {
   
 // ***************************** Alice DEVICE ****************************
   function AliceDevice(config){
+    var pjson = require('../package.json');
     RED.nodes.createNode(this,config);
     this.service = RED.nodes.getNode(config.service);
     this.service.setMaxListeners(this.service.getMaxListeners() + 1); // увеличиваем лимит для event
@@ -123,7 +124,12 @@ module.exports = function(RED) {
         name: config.name,
         description: config.description,
         room: config.room,
-        type: config.dtype
+        type: config.dtype,
+        device_info:{
+          manufacturer: "NodeRed Home",
+          model: "virtual device",
+          sw_version: pjson.version
+        }
       })
       .then(ref=>{
         return this._updateCapabList() // обновляем уже заведенные в базе умения 

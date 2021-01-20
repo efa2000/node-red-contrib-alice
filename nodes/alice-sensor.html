@@ -19,7 +19,7 @@
         icon: "alice.png",
         color: "#D8BFD8",
         label: function(){
-            return this.name + ":"  + this.instance;
+            return this.name;
         },
         oneditprepare: function(){
             $('#node-input-instance').on('change',()=>{
@@ -134,7 +134,8 @@
         },
         oneditsave: function(){
             deivcename = $('#node-input-device option:selected').text();
-            $('#node-input-name').val(deivcename);
+            instance = $('#node-input-instance option:selected').text();
+            $('#node-input-name').val(deivcename+":"+instance);
         }
     })
 </script>
