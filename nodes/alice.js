@@ -41,7 +41,7 @@ module.exports = function(RED) {
       fb.auth().signInWithEmailAndPassword(email, password)
       .then(u=>{
         this.emit('online');
-        // this._startClient(u.user.uid);
+        this._startClient(u.user.uid);
       })
       .catch(err=>{
         this.error(err.message);
