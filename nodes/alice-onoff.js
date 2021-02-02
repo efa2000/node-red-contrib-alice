@@ -43,7 +43,7 @@ function AliceOnOff(config){
           this.initState = true;
         })
         .catch(err=>{
-          this.error(err.message);
+          this.error("Error on create capability: " + err.message);
           this.status({fill:"red",shape:"dot",text:"error"});
         });
     };
@@ -73,7 +73,7 @@ function AliceOnOff(config){
             this.status({fill:"green",shape:"dot",text:"online"});
           })
           .catch(err=>{
-            this.error(err.message);
+            this.error("Error on update capability state: " + err.message);
             this.status({fill:"red",shape:"dot",text:"Error"});
           })
       };
@@ -91,11 +91,11 @@ function AliceOnOff(config){
         updated: this.device.getTime()
       })
       .then(ref=>{
-        this.status({fill:"green",shape:"dot",text:"online"});
+        this.status({fill:"green",shape:"dot",text:msg.payload.toString()});
         if (done) {done();}
       })
       .catch(err=>{
-        this.error(err.message);
+        this.error("Error on update capability state: " + err.message);
         this.status({fill:"red",shape:"dot",text:"Error"});
         if (done) {done();}
       })
@@ -108,7 +108,7 @@ function AliceOnOff(config){
           done()
         })
         .catch(err=>{
-          this.error(err.message);
+          this.error("Error on delete capability: " + err.message);
           done();
         })
       }else{

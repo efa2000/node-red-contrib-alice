@@ -28,7 +28,6 @@
             $('#node-input-name').val(deivcename);
             currentInstance = $('#node-input-instance').val();
             if (currentInstance=='multicooker_mode'){
-                $('#node-input-instance')
                 $('#node-input-instance option[value=program]').prop('selected', true);
             };
             this.modes = getCurrentModes();
@@ -71,6 +70,9 @@
                         break;
                     case 'work_speed':
                         this.modes = ['auto','fast','max','medium','min','slow','turbo']
+                        break;
+                    case 'tea_mode':
+                        this.modes = ['black_tea','flower_tea','green_tea','herbal_tea','oolong_tea','puerh_tea','red_tea','white_tea']
                         break;
                     default:
                         this.modes = [];
@@ -134,6 +136,7 @@
             <option value="cleanup_mode">Cleanup mode</option>
             <option value="coffee_mode">Coffee mode</option>
             <option value="multicooker_mode">Multicooker Mode</option>
+            <option value="tea_mode">Tea Mode</option>
             <option value="fan_speed">Fan speed</option>
             <option value="heat">Heat Mode</option>
             <option value="input_source">Input source</option>
@@ -225,6 +228,14 @@
                     <option value="aspic">aspic</option>
                     <option value="cheesecake">cheesecake</option>
                     <option value="preheat">preheat</option>
+                    <option value="black_tea">black_tea</option>
+                    <option value="flower_tea">flower_tea</option>
+                    <option value="green_tea">green_tea</option>
+                    <option value="herbal_tea">herbal_tea</option>
+                    <option value="oolong_tea">oolong_tea</option>
+                    <option value="puerh_tea">puerh_tea</option>
+                    <option value="red_tea">red_tea</option>
+                    <option value="white_tea">white_tea</option>
                 </select>
                 <a id="button-addMode" href="#" class="red-ui-button" onclick="addMode()" style="margin-top: 4px;"><i class="fa fa-plus"></i></a>
             </div>

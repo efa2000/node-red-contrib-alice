@@ -5,6 +5,7 @@ module.exports = function(RED) {
     var firebase = require('firebase/app');
     require('firebase/auth');
     require('firebase/firestore');
+    var mqtt = require('mqtt');
     var fb;
     const email = this.credentials.email;
     const password = this.credentials.password;
@@ -20,6 +21,11 @@ module.exports = function(RED) {
     };
 
     this.isOnline = false;
+    this._mqttClient;
+    this._mqttPath;
+    this._mqttQueue=[];
+    this._mqttSending=false;
+
     try {
       fb = firebase.initializeApp(firebaseConfig,this.id); 
     } catch (error) {
@@ -35,6 +41,7 @@ module.exports = function(RED) {
       fb.auth().signInWithEmailAndPassword(email, password)
       .then(u=>{
         this.emit('online');
+        // this._startClient(u.user.uid);
       })
       .catch(err=>{
         this.error(err.message);
@@ -43,14 +50,72 @@ module.exports = function(RED) {
     }
 
     this.signIn();
-    
-    this.getRef = function(deviceid){
+
+    this._startClient= (uid)=>{
+      fb.firestore().collection('users').doc(uid).get()
+          .then(doc=>{
+            let data = doc.data();
+            if (!data.yiot){return};
+            this._mqttPath = '$devices/' + data.yiot.id;
+            this._mqttClient = mqtt.connect(data.yiot.url,{
+              port: 8883,
+              clientId: uid,
+              rejectUnauthorized: false,
+              username: data.yiot.id,
+              password: data.yiot.p,
+              reconnectPeriod: 30000
+            });
+            this._mqttClient.on("connect",()=>{
+              console.log("Connect");
+            })
+            this._mqttClient.on("offline",()=>{
+              console.log("offline");
+            })
+            this._mqttClient.on("disconnect",()=>{
+              console.log("disconnect");
+            })
+            this._mqttClient.on("error",(err)=>{
+              console.log("error",err.message);
+            })
+          })
+          .catch(err=>{
+            this.error("Error on start mqtt client: " + err.message)
+          })
+    }
+    this.getRef = (deviceid)=>{
       var user = fb.auth().currentUser;
       return fb.firestore().collection('users').doc(user.uid).collection('devices').doc(deviceid)
     };
 
     this.getTime = ()=>{
       return firebase.firestore.Timestamp.now();
+    }
+
+    this.send = (path,data)=>{
+      this._mqttQueue.push({
+        path: this._mqttPath+path,
+        data: JSON.stringify(data)
+      });
+      if (!this._mqttSending){
+        this._mqttSend()
+      };
+    };
+
+    this._mqttSend=()=>{
+      this._mqttSending = true;
+      let packet = this._mqttQueue[0];
+      if (packet && this._mqttClient){
+        console.log("send",packet.path,packet.data);
+        this._mqttClient.publish(packet.path,packet.data);
+      };
+      this._mqttQueue.shift();
+      if (this._mqttQueue.length>0){
+        setTimeout(_=>{
+          this._mqttSend()
+        },1000);
+      }else{
+        this._mqttSending = false;
+      }
     }
 
     this.on('offline', ()=>{
@@ -88,7 +153,7 @@ module.exports = function(RED) {
     this.room = config.room;
     this.dtype = config.dtype;
     this.initState = false;
-    this.ref = null;
+    this.ref;
     this.capabilites = {};
     this.sensors = {};
 
@@ -138,14 +203,16 @@ module.exports = function(RED) {
         return this._updateSensorList() // обновляем уже заведенные в базе сенсоры 
       })
       .then(ref=>{
-        this.initState = true;
         this.status({fill:"green",shape:"dot",text:"online"});
         this.emit("online");
+        this.initState = true;
       })
       .catch(err=>{
         this.error(err.message);
       });
     }
+    // проверяем а сервис уже онлайн 
+    if (this.service.isOnline)this.init();
 
     this.startObserver = ()=>{
       if (this.observer) this.observer();
@@ -217,6 +284,7 @@ module.exports = function(RED) {
     };
 // обновление текущего state сенсора
     this.updateSensorState=(sensID,state)=>{
+      this.service.send('/events/'+this.id,state);
       return this.ref.collection('properties').doc(sensID).update({
         state: state
       });
@@ -252,7 +320,7 @@ module.exports = function(RED) {
     
     this.service.on("offline",()=>{
       this.emit("offline");
-      this.ref = null;
+      // this.ref = null;
       if (this.observer)this.observer();
       this.observer = null;
       this.status({fill:"red",shape:"dot",text:"offline"});
@@ -262,7 +330,7 @@ module.exports = function(RED) {
       if (this.observer)this.observer();
       setTimeout(()=>{
         this.emit('offline');
-        if (removed){this.ref.delete()};
+        if (removed && this.ref){this.ref.delete()};
         done();
       },400)
     });

@@ -38,7 +38,7 @@ function AliceSensor(config){
           this.initState = true;
         })
         .catch(err=>{
-          this.error(err.message);
+          this.error("Error on create property: " +err.message);
           this.status({fill:"red",shape:"dot",text:"error"});
         });
     };
@@ -75,7 +75,7 @@ function AliceSensor(config){
         if (done) {done();}
       })
       .catch(err=>{
-        this.error(err.message);
+        this.error("Error on update property state: " +err.message);
         this.status({fill:"red",shape:"dot",text:"Error"});
         if (done) {done();}
       })
@@ -88,7 +88,7 @@ function AliceSensor(config){
           done()
         })
         .catch(err=>{
-          this.error(err.message);
+          this.error("Error on delete property: " +err.message);
           done();
         })
       }else{

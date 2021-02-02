@@ -100,11 +100,13 @@ module.exports = function(RED) {
       const value = msg.payload;
       if (typeof value != 'string'){
         this.error("Wrong type! msg.payload must be String.");
+        this.status({fill:"red",shape:"dot",text:"Error"});
         if (done) {done();}
         return;
       };
       if (this.modes.indexOf(value)<0){
         this.error("Error! Unsupported command.");
+        this.status({fill:"red",shape:"dot",text:"Error"});
         if (done) {done();}
         return;
       }
@@ -122,9 +124,11 @@ module.exports = function(RED) {
         }
       }).then(ref=>{
         this.value = value;
+        this.status({fill:"green",shape:"dot",text:value});
         if (done) {done();}
       }).catch(err=>{
-        this.error("err.message");
+        this.error("Error on update capability state:",err.message);
+        this.status({fill:"red",shape:"dot",text:"Error"});
       })
     });
 
