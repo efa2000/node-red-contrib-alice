@@ -10,6 +10,7 @@ function AliceSensor(config){
     this.unit = config.unit;
     this.instance = config.instance;
     this.initState = false;
+    this.value;
 
     this.status({fill:"red",shape:"dot",text:"offline"});
 
@@ -32,13 +33,14 @@ function AliceSensor(config){
         delete sensor.parameters.unit;
         sensor.state.value=false;
       }
+      this.value = sensor.state.value;
       this.device.setSensor(this.id,sensor)
         .then(res=>{
           this.status({fill:"green",shape:"dot",text:"online"});
           this.initState = true;
         })
         .catch(err=>{
-          this.error("Error on create property: " +err.message);
+          this.error("Error on create sensor: " +err.message);
           this.status({fill:"red",shape:"dot",text:"error"});
         });
     };
@@ -65,17 +67,23 @@ function AliceSensor(config){
         if (done) {done();}
         return;
       };
+      if (msg.payload === this.value){
+        this.debug("Value not changed. Cancel update");
+        if (done) {done();}
+        return;
+      };
       this.device.updateSensorState(this.id,{
         value: msg.payload,
         updatedfrom: "node-red",
         updated: this.device.getTime()
       })
       .then(ref=>{
+        this.value = msg.payload;
         this.status({fill:"green",shape:"dot",text: msg.payload});
         if (done) {done();}
       })
       .catch(err=>{
-        this.error("Error on update property state: " +err.message);
+        this.error("Error on update sensor state: " +err.message);
         this.status({fill:"red",shape:"dot",text:"Error"});
         if (done) {done();}
       })

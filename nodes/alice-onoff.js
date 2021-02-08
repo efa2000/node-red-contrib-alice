@@ -10,6 +10,7 @@ function AliceOnOff(config){
     this.split = false;
     this.instance = 'on';
     this.initState = false;
+    this.value;
 
     if (config.response === undefined){
         this.response = true;
@@ -38,17 +39,18 @@ function AliceOnOff(config){
         }
       };
       this.device.setCapability(this.id,capab)
-        .then(res=>{
-          this.status({fill:"green",shape:"dot",text:"online"});
-          this.initState = true;
-        })
-        .catch(err=>{
-          this.error("Error on create capability: " + err.message);
-          this.status({fill:"red",shape:"dot",text:"error"});
-        });
+      .then(res=>{
+        this.initState = true;
+        this.value = capab.state.value;
+        this.status({fill:"green",shape:"dot",text:"online"});
+      })
+      .catch(err=>{
+        this.error("Error on create capability: " + err.message);
+        this.status({fill:"red",shape:"dot",text:"error"});
+      });
     };
 
-// Проверяем сам девайс уже инициирован 
+    // Проверяем сам девайс уже инициирован 
     if (this.device.initState) this.init();
 
     this.device.on("online",()=>{
@@ -63,13 +65,15 @@ function AliceOnOff(config){
       this.send({
         payload: val
       });
+      let state = {
+        value: val,
+        updatedfrom: "node-red",
+        updated: this.device.getTime()
+      };
       if (this.response){
-          this.device.updateCapabState(this.id,{
-            value: val,
-            updatedfrom: "node-red",
-            updated: this.device.getTime()
-          })
+          this.device.updateCapabState(this.id,state)
           .then (res=>{
+            this.value = val;
             this.status({fill:"green",shape:"dot",text:"online"});
           })
           .catch(err=>{
@@ -85,12 +89,19 @@ function AliceOnOff(config){
         if (done) {done();}
         return;
       };
-      this.device.updateCapabState(this.id,{
+      if (msg.payload === this.value){
+        this.debug("Value not changed. Cancel update");
+        if (done) {done();}
+        return;
+      };
+      let state = {
         value: msg.payload,
         updatedfrom: "node-red",
         updated: this.device.getTime()
-      })
+      };
+      this.device.updateCapabState(this.id,state)
       .then(ref=>{
+        this.value = msg.payload;
         this.status({fill:"green",shape:"dot",text:msg.payload.toString()});
         if (done) {done();}
       })
@@ -101,7 +112,7 @@ function AliceOnOff(config){
       })
     });
 
-    this.on('close', function(removed, done) {
+    this.on('close', (removed, done)=>{
       if (removed) {
         this.device.delCapability(this.id)
         .then(res=>{

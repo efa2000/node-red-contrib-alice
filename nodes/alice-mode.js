@@ -10,16 +10,14 @@ module.exports = function(RED) {
     this.response = config.response;
     this.instance = config.instance;
     this.modes = config.modes;
-
     this.initState = false;
-    this.ref = null;
-    this.value = null;
+    this.value;
 
     if (config.response === undefined){
       this.response = true;
     }
 
-    this.init = ()=>{
+    this.init = _=>{
       if (this.modes.length<1){
         this.status({fill:"red",shape:"dot",text:"error"});
         this.error("In the list of supported commands, there must be at least one command");
@@ -30,7 +28,6 @@ module.exports = function(RED) {
         this.error("Mode type not selected");
         return;
       };
-      this.ref = this.device.getRef(this.id);
       var cfgModes = [];
       this.modes.forEach(v=>{
         cfgModes.push({value:v});
@@ -48,50 +45,48 @@ module.exports = function(RED) {
           updated: this.device.getTime()
         }
       };
-
-      if (!this.device.isDubCap(this.id, capab.type, capab.parameters.instance)){
-        this.ref.set(capab)
-          .then(ref=>{
-            this.initState = true;
-            this.value = capab.state.value;
-            this.status({fill:"green",shape:"dot",text:"online"});
-          });
-      }else{
+      this.device.setCapability(this.id,capab)
+      .then(res=>{
+        this.initState = true;
+        this.value = capab.state.value;
+        this.status({fill:"green",shape:"dot",text:"online"});
+      })
+      .catch(err=>{
+        this.error("Error on create capability: " + err.message);
         this.status({fill:"red",shape:"dot",text:"error"});
-        this.error("Dublicated capability on same device!");
-      }
+      });
     };
 
+    // Проверяем сам девайс уже инициирован 
+    if (this.device.initState) this.init();
+
     this.device.on("online",()=>{
-      if (!this.initState){
-        this.init();
-      }else{
-        this.ref = this.device.getRef(this.id);
-        this.status({fill:"green",shape:"dot",text:"online"});
-      }
+      this.init();
     });
 
     this.device.on("offline",()=>{
-      this.ref = null;
       this.status({fill:"red",shape:"dot",text:"offline"});
     });
 
-    this.device.on(this.id,(val,state)=>{
+    this.device.on(this.id,(val,fullstate)=>{
       let value = val;
       this.send({
         payload: value
       });
-      this.value = value;
-      // если установлено требование немедленно отвечать, отвечаем
+      let state = {
+        value: value,
+        updatedfrom: "node-red",
+        updated: this.device.getTime()
+      };
       if (this.response){
-        this.ref.update({
-          state:{
-              value: value,
-              updatedfrom: "node-red",
-              updated: this.device.getTime()
-          }
-        }).catch(err=>{
-          this.error("Response Errror: "+err.message);
+        this.device.updateCapabState(this.id,state)
+        .then (res=>{
+          this.value = val;
+          this.status({fill:"green",shape:"dot",text:"online"});
+        })
+        .catch(err=>{
+          this.error("Error on update capability state: " + err.message);
+          this.status({fill:"red",shape:"dot",text:"Error"});
         })
       };
     })
@@ -109,37 +104,40 @@ module.exports = function(RED) {
         this.status({fill:"red",shape:"dot",text:"Error"});
         if (done) {done();}
         return;
-      }
-      if (!this.ref){
-        this.error("Device offline");
-        this.status({fill:"red",shape:"dot",text:"offline"});
+      };
+      if (value === this.value){
+        this.debug("Value not changed. Cancel update");
         if (done) {done();}
         return;
       };
-      this.ref.update({
-        state:{
-          value: value,
-          updatedfrom: "node-red",
-          updated: this.device.getTime()
-        }
-      }).then(ref=>{
+      let state = {
+        value: value,
+        updatedfrom: "node-red",
+        updated: this.device.getTime()
+      };
+      this.device.updateCapabState(this.id,state)
+      .then(ref=>{
         this.value = value;
         this.status({fill:"green",shape:"dot",text:value});
         if (done) {done();}
-      }).catch(err=>{
-        this.error("Error on update capability state:",err.message);
-        this.status({fill:"red",shape:"dot",text:"Error"});
       })
+      .catch(err=>{
+        this.error("Error on update capability state: " + err.message);
+        this.status({fill:"red",shape:"dot",text:"Error"});
+        if (done) {done();}
+      });
     });
 
     this.on('close', function(removed, done) {
       if (removed) {
-        this.ref.delete().then(res=>{
-                done()
-              }).catch(err=>{
-                this.error(err.message);
-                done();
-              })
+        this.device.delCapability(this.id)
+        .then(res=>{
+          done()
+        })
+        .catch(err=>{
+          this.error("Error on delete capability: " + err.message);
+          done();
+        })
       }else{
         done();
       }

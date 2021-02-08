@@ -2,6 +2,7 @@ module.exports = function(RED) {
   //Sevice node, Alice-Service (credential)
   function AliceService(config) {
     RED.nodes.createNode(this,config);
+    this.debug("Starting Alice service...");
     var firebase = require('firebase/app');
     require('firebase/auth');
     require('firebase/firestore');
@@ -27,6 +28,7 @@ module.exports = function(RED) {
     this._mqttSending=false;
 
     try {
+      this.debug("Initialize firebase App ...");
       fb = firebase.initializeApp(firebaseConfig,this.id); 
     } catch (error) {
       if (error.code == 'app/duplicate-app'){
@@ -38,10 +40,12 @@ module.exports = function(RED) {
     }
   
     this.signIn = ()=>{
+      this.debug("SignIn to firebase ...");
       fb.auth().signInWithEmailAndPassword(email, password)
       .then(u=>{
         this.emit('online');
-        this._startClient(u.user.uid);
+        this.debug("SignIn to firebase Success. Send signal to online");
+        // this._startClient(u.user.uid);
       })
       .catch(err=>{
         this.error(err.message);
@@ -52,31 +56,40 @@ module.exports = function(RED) {
     this.signIn();
 
     this._startClient= (uid)=>{
+      this.debug("Initialize Yandex IOT client ...");
       fb.firestore().collection('users').doc(uid).get()
           .then(doc=>{
             let data = doc.data();
-            if (!data.yiot){return};
+            if (!data.yiot){
+              this.debug("No settings for connection Yandex IOT client. Connection canceled");
+              return;
+            };
             this._mqttPath = '$devices/' + data.yiot.id;
+            this.debug("Yandex IOT client connecting to "+data.yiot.url);
             this._mqttClient = mqtt.connect(data.yiot.url,{
               port: 8883,
               clientId: uid,
               rejectUnauthorized: false,
               username: data.yiot.id,
               password: data.yiot.p,
-              reconnectPeriod: 30000
+              reconnectPeriod: 10000
             });
             this._mqttClient.on("connect",()=>{
-              console.log("Connect");
-            })
+              this.debug("Yandex IOT client connected. " +uid);
+            });
             this._mqttClient.on("offline",()=>{
-              console.log("offline");
-            })
+              this.debug("Yandex IOT client offline. ");
+            });
             this._mqttClient.on("disconnect",()=>{
-              console.log("disconnect");
-            })
+              this.debug("Yandex IOT client disconnect.");
+            });
+            this._mqttClient.on("reconnect",(err)=>{
+              this.debug("Yandex IOT client reconnecting ...");
+            });
             this._mqttClient.on("error",(err)=>{
-              console.log("error",err.message);
-            })
+              this.debug("Yandex IOT client Error: "+ err.message);
+              return err;
+            });
           })
           .catch(err=>{
             this.error("Error on start mqtt client: " + err.message)
@@ -92,10 +105,12 @@ module.exports = function(RED) {
     }
 
     this.send = (path,data)=>{
+      let fullpath = this._mqttPath+path;
       this._mqttQueue.push({
-        path: this._mqttPath+path,
+        path: fullpath,
         data: JSON.stringify(data)
       });
+      this.trace("YIOT: Packet added to quere. path: "+fullpath)
       if (!this._mqttSending){
         this._mqttSend()
       };
@@ -104,11 +119,13 @@ module.exports = function(RED) {
     this._mqttSend=()=>{
       this._mqttSending = true;
       let packet = this._mqttQueue[0];
+      this.trace("YIOT: Sending packet.")
       if (packet && this._mqttClient){
-        console.log("send",packet.path,packet.data);
         this._mqttClient.publish(packet.path,packet.data);
+        this.trace("YIOT: Sended packet. path: "+packet.path);
       };
       this._mqttQueue.shift();
+      this.trace("YIOT: Query length "+this._mqttQueue.length);
       if (this._mqttQueue.length>0){
         setTimeout(_=>{
           this._mqttSend()
@@ -254,12 +271,16 @@ module.exports = function(RED) {
       return new Promise((resolve,reject)=>{
         let capabIndex = capab.type+"."+capab.parameters.instance;
         if (this.capabilites[capabIndex] && this.capabilites[capabIndex]!=capId){
-          reject(new Error("Dublicated capability on same device!"))
-        }else{
-          this.capabilites[capabIndex] = capId; // добавляем новое уменя в локальный список
-          this.setMaxListeners(this.getMaxListeners() + 1); // увеличиваем количество слушателей  
-          resolve(this.ref.collection('capabilities').doc(capId).set(capab));
-        }
+          reject(new Error("Dublicated capability on same device!"));
+          return;
+        };
+        if (!this.ref){
+          reject(new Error("Device not ready"));
+          return;
+        };
+        this.capabilites[capabIndex] = capId; // добавляем новое уменя в локальный список
+        this.setMaxListeners(this.getMaxListeners() + 1); // увеличиваем количество слушателей  
+        resolve(this.ref.collection('capabilities').doc(capId).set(capab));
       })
     };
 // Установка параметров сенсора 
@@ -267,45 +288,73 @@ module.exports = function(RED) {
       return new Promise((resolve,reject)=>{
         let sensorIndex = sensor.type+"."+sensor.parameters.instance;
         if (this.sensors[sensorIndex] && this.sensors[sensorIndex]!=sensId){
-          reject(new Error("Dublicated sensor on same device!"))
-        }else{
-          this.sensors[sensorIndex] = sensId; // добавляем новый сенсор в локальный список 
-          this.setMaxListeners(this.getMaxListeners() + 1); // увеличиваем количество слушателей 
-          resolve(this.ref.collection('properties').doc(sensId).set(sensor));
+          reject(new Error("Dublicated sensor on same device!"));
+          return;
         }
+        if (!this.ref){
+          reject(new Error("Device not ready"));
+          return;
+        }
+        this.sensors[sensorIndex] = sensId; // добавляем новый сенсор в локальный список 
+        this.setMaxListeners(this.getMaxListeners() + 1); // увеличиваем количество слушателей 
+        resolve(this.ref.collection('properties').doc(sensId).set(sensor));
       })
     };
 
 // обновление текущего state умения
-    this.updateCapabState=(capId,state)=>{
-      return this.ref.collection('capabilities').doc(capId).update({
-        state: state
-      });
+    this.updateCapabState = (capId,state)=>{
+      return new Promise((resolve,reject)=>{
+        if (!this.ref){
+          reject(new Error("Device not ready"));
+          return;
+        }
+        resolve(this.ref.collection('capabilities').doc(capId).update({state: state}))
+      })
     };
 // обновление текущего state сенсора
-    this.updateSensorState=(sensID,state)=>{
-      this.service.send('/events/'+this.id,state);
-      return this.ref.collection('properties').doc(sensID).update({
-        state: state
-      });
+    this.updateSensorState=  (sensID,state)=>{
+      return new Promise((resolve,reject)=>{
+        // this.service.send('/events/'+this.id,state);
+        if (!this.ref){
+          reject(new Error("Device not ready"));
+          return;
+        }
+        resolve(this.ref.collection('properties').doc(sensID).update({state: state}));
+      })
     };
 
 // удаление умения 
-    this.delCapability=(capId)=>{
-      return this.ref.collection('capabilities').doc(capId).delete()
-        .then(res=>{
-          this._updateCapabList()
-          return res;
-        })
+    this.delCapability=  (capId)=>{
+      return new Promise((resolve,reject)=>{
+        if (!this.ref){
+          reject(new Error("Device not ready"));
+          return;
+        }
+        resolve(
+          this.ref.collection('capabilities').doc(capId).delete()
+          .then(res=>{
+            this._updateCapabList()
+            return res;
+          })
+        );
+      })
     };
 
 // удаление сенсора
-    this.delSensor=(sensID)=>{
-      return this.ref.collection('properties').doc(sensID).delete()
-        .then(res=>{
-          this._updateSensorList()
-          return res;
-        })
+    this.delSensor= (sensID)=>{
+      return new Promise((resolve,reject)=>{
+        if (!this.ref){
+          reject(new Error("Device not ready"));
+          return;
+        }
+        resolve(
+          this.ref.collection('properties').doc(sensID).delete()
+          .then(res=>{
+            this._updateSensorList()
+            return res;
+          })
+        )
+      })
     };
 
     this.service.on("online",()=>{

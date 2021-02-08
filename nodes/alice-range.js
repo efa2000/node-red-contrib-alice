@@ -14,12 +14,13 @@ module.exports = function(RED) {
     this.precision = parseFloat(config.precision) || 1;
     this.response = config.response;
     this.initState = false;
-    this.ref = null;
     this.value = null;
 
     if (config.response === undefined){
       this.response = true;
     }
+
+    this.status({fill:"red",shape:"dot",text:"offline"});
 
     this.init = ()=>{
       this.ref = this.device.getRef(this.id);
@@ -47,40 +48,33 @@ module.exports = function(RED) {
         delete capab.parameters.unit;
       };
 
-      if (!this.device.isDubCap(this.id,capab.type, capab.parameters.instance)){
-        this.ref.set(capab)
-          .then(ref=>{
-            this.initState = true;
-            this.value = capab.state.value;
-            this.status({fill:"green",shape:"dot",text:"online"});
-          })
-          .catch(err=>{
-            console.log(err.message);
-          });
-      }else{
+      this.device.setCapability(this.id,capab)
+      .then(res=>{
+        this.initState = true;
+        this.value = capab.state.value;
+        this.status({fill:"green",shape:"dot",text:"online"});
+      })
+      .catch(err=>{
+        this.error("Error on create capability: " + err.message);
         this.status({fill:"red",shape:"dot",text:"error"});
-        this.error("Dublicated capability on same device!");
-      }
+      });
     };
 
+    // Проверяем сам девайс уже инициирован 
+    if (this.device.initState) this.init();
+
     this.device.on("online",()=>{
-      if (!this.initState){
-        this.init();
-      }else{
-        this.ref = this.device.getRef(this.id);
-        this.status({fill:"green",shape:"dot",text:"online"});
-      }
+      this.init();
     });
 
     this.device.on("offline",()=>{
-      this.ref = null;
       this.status({fill:"red",shape:"dot",text:"offline"});
     });
 
-    this.device.on(this.id,(val,state)=>{
+    this.device.on(this.id,(val, fullstate)=>{
       let value = val;
       //проверка является ли значение относительным и нужно ли отдавать полное значение
-      if (state.relative && this.retrievable){
+      if (fullstate.relative && this.retrievable){
         value = this.value + val;
         if (val<0 && value<this.min) value=this.min;
         if (val>0 && value>this.max) value=this.max;
@@ -88,17 +82,22 @@ module.exports = function(RED) {
       this.send({
         payload: value
       });
-      this.value = value;
+//      this.value = value;
+      let state = {
+        value: value,
+        updatedfrom: "node-red",
+        updated: this.device.getTime()
+      };
       // если установлено требование немедленно отвечать, отвечаем
       if (this.response){
-        this.ref.update({
-          state:{
-              value: value,
-              updatedfrom: "node-red",
-              updated: this.device.getTime()
-          }
-        }).catch(err=>{
-          this.error("Response Errror: "+err.message);
+        this.device.updateCapabState(this.id,state)
+        .then (res=>{
+          this.value = value;
+          this.status({fill:"green",shape:"dot",text:"online"});
+        })
+        .catch(err=>{
+          this.error("Error on update capability state: " + err.message);
+          this.status({fill:"red",shape:"dot",text:"Error"});
         })
       };
     })
@@ -106,38 +105,43 @@ module.exports = function(RED) {
     this.on('input', (msg, send, done)=>{
       const value = msg.payload;
       if (typeof value != 'number'){
-        this.error("Wrong type! msg.payload must be Integer or Float.");
+        this.error("Wrong type! msg.payload must be Number.");
         if (done) {done();}
         return;
       }
-      if (!this.ref){
-        this.error("Device offline");
-        this.status({fill:"red",shape:"dot",text:"offline"});
+      if (value === this.value){
+        this.debug("Value not changed. Cancel update");
         if (done) {done();}
         return;
       };
-      this.ref.update({
-        state:{
-          value: value,
-          updatedfrom: "node-red",
-          updated: this.device.getTime()
-        }
-      }).then(ref=>{
+      let state = {
+        value: value,
+        updatedfrom: "node-red",
+        updated: this.device.getTime()
+      };
+      this.device.updateCapabState(this.id,state)
+      .then(ref=>{
         this.value = value;
+        this.status({fill:"green",shape:"dot",text:value});
         if (done) {done();}
-      }).catch(err=>{
-        this.error("err.message");
+      })
+      .catch(err=>{
+        this.error("Error on update capability state: " + err.message);
+        this.status({fill:"red",shape:"dot",text:"Error"});
+        if (done) {done();}
       })
     });
 
     this.on('close', function(removed, done) {
       if (removed) {
-        this.ref.delete().then(res=>{
-                done()
-              }).catch(err=>{
-                this.error(err.message);
-                done();
-              })
+        this.device.delCapability(this.id)
+        .then(res=>{
+          done()
+        })
+        .catch(err=>{
+          this.error("Error on delete capability: " + err.message);
+          done();
+        })
       }else{
         done();
       }

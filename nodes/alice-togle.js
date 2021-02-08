@@ -8,11 +8,13 @@ module.exports = function(RED) {
     this.instance = config.instance;
     this.response = config.response;
     this.initState = false;
-    this.ref = null;
+    this.value;
 
     if (config.response === undefined){
         this.response = true;
     }
+
+    this.status({fill:"red",shape:"dot",text:"offline"});
 
     this.init = ()=>{
       this.ref = this.device.getRef(this.id);
@@ -28,29 +30,26 @@ module.exports = function(RED) {
           updated: this.device.getTime()
         }
       };
-      if (!this.device.isDubCap(this.id,capab.type, capab.parameters.instance)){
-        this.ref.set(capab)
-          .then(ref=>{
-            this.status({fill:"green",shape:"dot",text:"online"});
-            this.initState = true;
-          });
-      }else{
-        this.status({fill:"red",shape:"dot",text:"error"});
-        this.error("Dublicated capability on same device!");
-      }
+      this.device.setCapability(this.id,capab)
+        .then(res=>{
+          this.initState = true;
+          this.value = capab.state.value;
+          this.status({fill:"green",shape:"dot",text:"online"});
+        })
+        .catch(err=>{
+          this.error("Error on create capability: " + err.message);
+          this.status({fill:"red",shape:"dot",text:"error"});
+        });
     };
 
+    // Проверяем сам девайс уже инициирован 
+    if (this.device.initState) this.init();
+
     this.device.on("online",()=>{
-      if (!this.initState){
-        this.init();
-      }else{
-        this.ref = this.device.getRef(this.id);
-        this.status({fill:"green",shape:"dot",text:"online"});
-      }
+      this.init();
     });
 
     this.device.on("offline",()=>{
-      this.ref = null;
       this.status({fill:"red",shape:"dot",text:"offline"});
     });
 
@@ -58,17 +57,24 @@ module.exports = function(RED) {
       this.send({
         payload: val
       });
+      let state = {
+        state:{
+          value: val,
+          updatedfrom: "node-red",
+          updated: this.device.getTime()
+        }
+      };
       if (this.response){
-        this.ref.update({
-            state:{
-              value: val,
-              updatedfrom: "node-red",
-              updated: this.device.getTime()
-            }
-        }).catch(err=>{
-            this.error("Response Errror: "+err.message);
+        this.device.updateCapabState(this.id,state)
+        .then (res=>{
+          this.value = val;
+          this.status({fill:"green",shape:"dot",text:"online"});
         })
-      }
+        .catch(err=>{
+          this.error("Error on update capability state: " + err.message);
+          this.status({fill:"red",shape:"dot",text:"Error"});
+        })
+      };
     })
 
     this.on('input', (msg, send, done)=>{
@@ -76,34 +82,40 @@ module.exports = function(RED) {
         this.error("Wrong type! msg.payload must be boolean.");
         if (done) {done();}
         return;
-      }
-      if (!this.ref){
-        this.error("Device offline");
-        this.status({fill:"red",shape:"dot",text:"offline"});
+      };
+      if (msg.payload === this.value){
+        this.debug("Value not changed. Cancel update");
         if (done) {done();}
         return;
       };
-      this.ref.update({
-        state:{
-          value: msg.payload,
-          updatedfrom: "node-red",
-          updated: this.device.getTime()
-        }
-      }).then(ref=>{
+      let state = {
+        value: msg.payload,
+        updatedfrom: "node-red",
+        updated: this.device.getTime()
+      };
+      this.device.updateCapabState(this.id,state)
+      .then(ref=>{
+        this.value = msg.payload;
+        this.status({fill:"green",shape:"dot",text:msg.payload.toString()});
         if (done) {done();}
-      }).catch(err=>{
-        this.error(err.message);
+      })
+      .catch(err=>{
+        this.error("Error on update capability state: " + err.message);
+        this.status({fill:"red",shape:"dot",text:"Error"});
+        if (done) {done();}
       })
     });
 
-    this.on('close', function(removed, done) {
+    this.on('close', (removed, done)=>{
       if (removed) {
-        this.ref.delete().then(res=>{
-                done()
-              }).catch(err=>{
-                this.error(err.message);
-                done();
-              })
+        this.device.delCapability(this.id)
+        .then(res=>{
+          done()
+        })
+        .catch(err=>{
+          this.error("Error on delete capability: " + err.message);
+          done();
+        })
       }else{
         done();
       }
