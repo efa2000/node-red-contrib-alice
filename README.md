@@ -8,6 +8,10 @@ The module allows you to use Node-Red together with the Yandex.Alice voice assis
 
 #### Этот проект некоммерческий, но Вы можете поддержать его развитие через пожертвования [ЗДЕСЬ](https://dialogs.yandex.ru/store/skills/d4f5cc21-nodered-home?action=donation)
 
+#### Следити за последними новостями и интересными статьями по сервису в нашем телеграм канале [https://t.me/nodered_home](https://t.me/nodered_home)
+
+#### Обсудить последние новости и получить оперативную поддержку можно в нашем телеграм чате [https://t.me/nodered_home_chat](https://t.me/nodered_home_chat)
+
 ## Инструкция (RUS)
 ### Использование 
 #### Как настроить навык:
