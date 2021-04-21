@@ -126,6 +126,19 @@
                         .val('unit.percent')
                         .prop('disabled', 'disabled');
                     break;
+                    case 'pressure':
+                    $('#node-input-stype').val("devices.properties.float");
+                    $('#node-input-unit')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="unit.pressure.atm">Atmosphere (atm)</option>')
+                        .append('<option value="unit.pressure.pascal">Pascal (pascal)</option>')
+                        .append('<option value="unit.pressure.bar">Bar (bar)</option>')
+                        .append('<option value="unit.pressure.mmhg">Millimeters of mercury (mmhg)</option>')
+                        .val('unit.pressure.bar')
+                        .prop('disabled', false);
+                    break;
                     default:
                     $('#node-input-unit').prop('disabled', 'disabled');
                         break;
@@ -156,6 +169,7 @@
             <option value="humidity">Humidity</option>
             <option value="temperature">Temperature</option>
             <option value="power">Power</option>
+            <option value="pressure">Pressure</option>
             <option value="voltage">Voltage</option>
             <option value="amperage">Amperage</option>
             <option value="water_level">Water level</option>
