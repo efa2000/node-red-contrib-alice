@@ -201,6 +201,7 @@ module.exports = function(RED) {
     };
 
     this.init = ()=>{
+      this.debug("Starting Device initilization ...");
       this.ref = this.service.getRef(this.id);
       this.ref.set({
         name: config.name,
@@ -214,15 +215,22 @@ module.exports = function(RED) {
         }
       })
       .then(ref=>{
+        this.debug("Device created!");
+        this.debug("Getting a list of saved capabilities");
         return this._updateCapabList() // обновляем уже заведенные в базе умения 
       })
       .then(ref=>{
+        this.debug("Сapabilities list - success!");
+        this.debug("Getting a list of saved properties");
         return this._updateSensorList() // обновляем уже заведенные в базе сенсоры 
       })
       .then(ref=>{
+        this.debug("Properties list - success!");
+        this.debug("Set geen dot and send status online to capabilities....");
         this.status({fill:"green",shape:"dot",text:"online"});
         this.emit("online");
         this.initState = true;
+        this.debug("Device initilization - success!");
       })
       .catch(err=>{
         this.error(err.message);
@@ -232,6 +240,7 @@ module.exports = function(RED) {
     if (this.service.isOnline)this.init();
 
     this.startObserver = ()=>{
+      this.debug("Starting Device observer ....");
       if (this.observer) this.observer();
       this.observer = null;
       this.observer = this.ref.collection('capabilities')
@@ -358,16 +367,20 @@ module.exports = function(RED) {
     };
 
     this.service.on("online",()=>{
+      this.debug("Received a signal online from the service");
       if (!this.initState){
         this.init()
       }else{
+        this.debug("Device has already been initialized.");
         this.ref = this.service.getRef(this.id);
+        this.debug("Send status online to capabilities");
         this.emit("online");
       }
       this.startObserver();
     });
     
     this.service.on("offline",()=>{
+      this.debug("Received a signal offline from the service");
       this.emit("offline");
       // this.ref = null;
       if (this.observer)this.observer();

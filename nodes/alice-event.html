@@ -1,9 +1,9 @@
 <script type="text/javascript">
-    RED.nodes.registerType('Sensor',{
+    RED.nodes.registerType('Event',{
         category: 'alice',
         defaults:{
             device: {value:"", type:"alice-device"},
-            name: {value:"Sensor"},
+            name: {value:"Event"},
             stype: {value:undefined},
             instance: {value:undefined, validate: (v)=>{
                 if (v){
@@ -25,6 +25,26 @@
             $('#node-input-instance').on('change',()=>{
                 var val = $('#node-input-instance').find(":selected").val();
                 switch (val) {
+                    // case 'contact':
+                    // $('#node-input-stype').val("devices.properties.bool");
+                    // $('#node-input-unit')
+                    //     .find('option')
+                    //     .remove()
+                    //     .end()
+                    //     .append('<option value="null"></option>')
+                    //     .val('null')
+                    //     .prop('disabled', 'disabled');
+                    // break;
+                    // case 'motion':
+                    // $('#node-input-stype').val("devices.properties.bool");
+                    // $('#node-input-unit')
+                    //     .find('option')
+                    //     .remove()
+                    //     .end()
+                    //     .append('<option value="null"></option>')
+                    //     .val('null')
+                    //     .prop('disabled', 'disabled');
+                    // break;
                     case 'amperage':
                     $('#node-input-stype').val("devices.properties.float");
                     $('#node-input-unit')

@@ -25,6 +25,7 @@ function AliceOnOff(config){
     this.status({fill:"red",shape:"dot",text:"offline"});
 
     this.init = ()=>{
+      this.debug("Starting capability initilization ...");
       let capab = {
         type: this.ctype,
         retrievable: this.retrievable,
@@ -40,6 +41,7 @@ function AliceOnOff(config){
       };
       this.device.setCapability(this.id,capab)
       .then(res=>{
+        this.debug("Capability initilization - success!");
         this.initState = true;
         this.value = capab.state.value;
         this.status({fill:"green",shape:"dot",text:"online"});
