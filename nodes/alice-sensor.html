@@ -4,7 +4,7 @@
         defaults:{
             device: {value:"", type:"alice-device"},
             name: {value:"Sensor"},
-            stype: {value:undefined},
+            stype: {value:'devices.properties.float'},
             instance: {value:undefined, validate: (v)=>{
                 if (v){
                     return true;
@@ -26,7 +26,7 @@
                 var val = $('#node-input-instance').find(":selected").val();
                 switch (val) {
                     case 'amperage':
-                    $('#node-input-stype').val("devices.properties.float");
+                    // $('#node-input-stype').val("devices.properties.float");
                     $('#node-input-unit')
                         .find('option')
                         .remove()
@@ -36,7 +36,7 @@
                         .prop('disabled', 'disabled');
                     break;
                     case 'battery_level':
-                    $('#node-input-stype').val("devices.properties.float");
+                    // $('#node-input-stype').val("devices.properties.float");
                     $('#node-input-unit')
                         .find('option')
                         .remove()
@@ -46,7 +46,7 @@
                         .prop('disabled', 'disabled');
                     break;
                     case 'co2_level':
-                    $('#node-input-stype').val("devices.properties.float");
+                    // $('#node-input-stype').val("devices.properties.float");
                     $('#node-input-unit')
                         .find('option')
                         .remove()
@@ -56,7 +56,7 @@
                         .prop('disabled', 'disabled');
                     break;
                     case 'humidity':
-                    $('#node-input-stype').val("devices.properties.float");
+                    // $('#node-input-stype').val("devices.properties.float");
                     $('#node-input-unit')
                         .find('option')
                         .remove()
@@ -66,7 +66,7 @@
                         .prop('disabled', 'disabled');
                     break;
                     case 'power':
-                    $('#node-input-stype').val("devices.properties.float");
+                    // $('#node-input-stype').val("devices.properties.float");
                     $('#node-input-unit')
                         .find('option')
                         .remove()
@@ -76,18 +76,23 @@
                         .prop('disabled', 'disabled');
                     break;
                     case 'temperature':
-                    $('#node-input-stype').val("devices.properties.float");
+                    // $('#node-input-stype').val("devices.properties.float");
                     $('#node-input-unit')
                         .find('option')
                         .remove()
                         .end()
                         .append('<option value="unit.temperature.celsius">Celsius</option>')
                         .append('<option value="unit.temperature.kelvin">Kelvin</option>')
-                        .val('unit.temperature.celsius')
+                        // .val('unit.temperature.celsius')
                         .prop('disabled', false);
+                    if (this.unit && this.unit.includes("unit.temperature")){
+                        $('#node-input-unit').val(this.unit);
+                    }else{
+                        $('#node-input-unit').val('unit.temperature.celsius');
+                    }
                     break;
                     case 'voltage':
-                    $('#node-input-stype').val("devices.properties.float");
+                    // $('#node-input-stype').val("devices.properties.float");
                     $('#node-input-unit')
                         .find('option')
                         .remove()
@@ -97,7 +102,7 @@
                         .prop('disabled', 'disabled');
                     break;
                     case 'water_level':
-                    $('#node-input-stype').val("devices.properties.float");
+                    // $('#node-input-stype').val("devices.properties.float");
                     $('#node-input-unit')
                         .find('option')
                         .remove()
@@ -107,7 +112,7 @@
                         .prop('disabled', 'disabled');
                     break;
                     case 'pressure':
-                    $('#node-input-stype').val("devices.properties.float");
+                    // $('#node-input-stype').val("devices.properties.float");
                     $('#node-input-unit')
                         .find('option')
                         .remove()
@@ -116,8 +121,13 @@
                         .append('<option value="unit.pressure.pascal">Pascal (pascal)</option>')
                         .append('<option value="unit.pressure.bar">Bar (bar)</option>')
                         .append('<option value="unit.pressure.mmhg">Millimeters of mercury (mmhg)</option>')
-                        .val('unit.pressure.bar')
+                        // .val('unit.pressure.bar')
                         .prop('disabled', false);
+                    if (this.unit && this.unit.includes("unit.pressure")){
+                        $('#node-input-unit').val(this.unit);
+                    }else{
+                        $('#node-input-unit').val('unit.pressure.bar');
+                    }
                     break;
                     default:
                     $('#node-input-unit').prop('disabled', 'disabled');
@@ -155,13 +165,13 @@
             <option value="water_level">Water level</option>
         </select>
     </div>
-    <div class="form-row">
+    <!-- <div class="form-row">
         <label for="node-input-stype">Data Type</label>
         <select id="node-input-stype" style="width: 70%;" disabled>
             <option value="devices.properties.float">Number (float)</option>
             <option value="devices.properties.bool">Boolean (true/false)</option>
         </select>
-    </div>
+    </div> -->
     <div class="form-row">
         <label for="node-input-unit">Unit</label>
         <select id="node-input-unit" style="width: 70%;">

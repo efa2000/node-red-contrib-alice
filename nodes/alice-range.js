@@ -9,16 +9,19 @@ module.exports = function(RED) {
     this.instance = config.instance;
     this.unit = config.unit;
     this.random_access = true;
-    this.min = parseFloat(config.min) || 0;
-    this.max = parseFloat(config.max) || 100;
-    this.precision = parseFloat(config.precision) || 1;
+    this.min = parseFloat(config.min);
+    this.max = parseFloat(config.max);
+    this.precision = parseFloat(config.precision);
     this.response = config.response;
     this.initState = false;
     this.value = null;
 
     if (config.response === undefined){
       this.response = true;
-    }
+    };
+    if (typeof this.min != 'number'){this.min = 0};
+    if (typeof this.max != 'number'){this.max = 100};
+    if (typeof this.precision != 'number'){this.precision = 1};
 
     this.status({fill:"red",shape:"dot",text:"offline"});
 

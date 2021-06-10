@@ -12,9 +12,27 @@
                 }
             }},
             unit: {value:""},
-            min:{value:1},
-            max:{value:100},
-            precision:{value: 1},
+            min:{value:1, validate: (v)=>{
+                if (v){
+                    return true;
+                }else{
+                    return false;
+                }
+            }},
+            max:{value:100, validate: (v)=>{
+                if (v){
+                    return true;
+                }else{
+                    return false;
+                }
+            }},
+            precision:{value: 1, validate: (v)=>{
+                if (v){
+                    return true;
+                }else{
+                    return false;
+                }
+            }},
             response:{value:true},
             retrievable: {value: true}
         },
@@ -50,9 +68,9 @@
                         $('#node-input-unit select').val("unit.percent");
                         $('#node-input-unit').prop( "disabled", true );
                         $('#node-input-min').val(min);
-                        $('#node-input-min').prop( "disabled", false );
+                        $('#node-input-min').prop( "disabled", true );
                         $('#node-input-max').val(max);
-                        $('#node-input-max').prop( "disabled", false );
+                        $('#node-input-max').prop( "disabled", true );
                         $('#node-input-precision').val(precision);
                         $('#node-input-precision').prop( "disabled", false );
                     break;
@@ -81,9 +99,9 @@
                         $('#node-input-unit select').val("unit.percent");
                         $('#node-input-unit').prop( "disabled", true );
                         $('#node-input-min').val(min);
-                        $('#node-input-min').prop( "disabled", false );
+                        $('#node-input-min').prop( "disabled", true );
                         $('#node-input-max').val(max);
-                        $('#node-input-max').prop( "disabled", false );
+                        $('#node-input-max').prop( "disabled", true );
                         $('#node-input-precision').val(precision);
                         $('#node-input-precision').prop( "disabled", false );
                     break;
@@ -97,9 +115,9 @@
                         $('#node-input-unit select').val("unit.percent");
                         $('#node-input-unit').prop( "disabled", true );
                         $('#node-input-min').val(min);
-                        $('#node-input-min').prop( "disabled", false );
+                        $('#node-input-min').prop( "disabled", true );
                         $('#node-input-max').val(max);
-                        $('#node-input-max').prop( "disabled", false );
+                        $('#node-input-max').prop( "disabled", true );
                         $('#node-input-precision').val(precision);
                         $('#node-input-precision').prop( "disabled", false );
                     break;
