@@ -278,7 +278,8 @@ module.exports = function(RED) {
 // Установка параметров умения 
     this.setCapability = (capId, capab)=>{
       return new Promise((resolve,reject)=>{
-        let capabIndex = capab.type+"."+capab.parameters.instance;
+        let intsance = capab.parameters.instance || '';
+        let capabIndex = capab.type+"."+intsance;
         if (this.capabilites[capabIndex] && this.capabilites[capabIndex]!=capId){
           reject(new Error("Dublicated capability on same device!"));
           return;

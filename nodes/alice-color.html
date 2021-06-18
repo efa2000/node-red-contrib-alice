@@ -4,11 +4,23 @@
         defaults:{
             device: {value:"", type:"alice-device"},
             name: {value:""},
+            color_support:{value:true},
             scheme: {value:"rgb_normal"},
-            response:{value:true}
+            response:{value:true},
+            temperature_k: {value:false},
+            temperature_min: {value:2000, validate:function(v){
+                let value = parseInt(v);
+                return value>=2000;
+            }},
+            temperature_max: {value:9000, validate:function(v){
+                let value = parseInt(v);
+                return value<=9000;
+            }},
+            color_scene: {value:[]}
         },
         inputs:1,
-        outputs:1,
+        outputs:3,
+        outputLabels: ["color","temperature_k","color_scene"],
         icon: "alice.png",
         color: "#D8BFD8",
         label: function(){
@@ -17,29 +29,150 @@
         oneditprepare: function(){
             if (this.response === undefined){
                 $( "#node-input-response").prop('checked', true);
-            }
+            };
+            if (this.color_support === undefined){
+                $( "#node-input-color_support").prop('checked', true);
+            };
+            $('#node-input-color_support').on('change',()=>{
+                if ($('#node-input-color_support').is(":checked")){
+                    $('#node-input-scheme').prop('disabled', false);
+                }else{
+                    $('#node-input-scheme').prop('disabled', true);
+                };
+            });
+            $('#node-input-temperature_k').on('change',()=>{
+                if ($('#node-input-temperature_k').is(":checked")){
+                    $('#node-input-temperature_min').prop('disabled', false);
+                    $('#node-input-temperature_max').prop('disabled', false);
+                }else{
+                    $('#node-input-temperature_min').prop('disabled', true);
+                    $('#node-input-temperature_max').prop('disabled', true);
+                };
+            });
+            updateAllScenes(this.color_scene);
         },
         oneditsave: function(){
             deivcename = $('#node-input-device option:selected').text();
             $('#node-input-name').val(deivcename);
+            this.color_scene = getCurrentScenes();
         }
     })
+    function updateAllScenes(scenes){
+        deleteAllScenes();
+        scenes.forEach((s,i)=>{
+            addScene2List(s,i);
+        });
+    };
+    function deleteAllScenes() {
+        $('#node-input-color_scene-container').empty();
+    };
+    function addScene2List(scene,index){
+        $('#node-input-color_scene-container').append('<li rel="'+scene+'" class="red-ui-editableList-item-sortable red-ui-editableList-item-removable"><div class="red-ui-editableList-item-content" style="overflow: hidden; white-space: nowrap;"><span>'+scene+'</span></div><a href="#" onclick="delScene('+index+')" class="red-ui-editableList-item-remove red-ui-button red-ui-button-small"><i class="fa fa-remove"></i></a></li>')        
+    };
+    function getCurrentScenes() {
+        let scenes = [];
+        $('#node-input-color_scene-container li').each(function(){ 
+            scenes.push($(this).attr('rel')); 
+        });
+        return scenes;
+    };
+    function addScene() {
+        let scene = $('#select-custom-scene').find(":selected").val();
+        let scenes = getCurrentScenes();
+        if (scenes.indexOf(scene)>-1){
+            return;
+        }else{
+            scenes.push(scene);
+            updateAllScenes(scenes);
+        }
+    };
+    function delScene(index) {
+        let scenes = getCurrentScenes();
+        scenes.splice(index, 1);
+        updateAllScenes(scenes);
+    };
 </script>
 
 <script type="text/x-red" data-template-name="Color">
     <input type="hidden" id="node-input-name">
-    <div class="form-row">
+    <div class="form-row" style="border-bottom: 1px solid #ddd; padding-bottom: 12px;">
         <label for="node-input-device">Device</label>
         <input id="node-input-device">
     </div>
-    <div class="form-row">
+    <div class="form-row" style="border-bottom: 1px solid #ddd; padding-bottom: 12px;">
+        <label for="node-input-color_support"><span >Color</span></label>
+        <label for="node-input-color_support" style="width:70%">
+        <input type="checkbox" id="node-input-color_support" style="display:inline-block; width:22px; vertical-align:baseline;" autocomplete="off"><span> supports color change</span>
+        </label>
         <label for="node-input-scheme">Scheme</label>
         <select id="node-input-scheme" style="width: 70%;">
             <option value="rgb_normal">RGB</option>
-            <option value="rgb">RGB (24bit)</option>
+            <!-- <option value="rgb">RGB (24bit)</option> -->
             <option value="hsv">HSV</option>
         </select>
     </div>
+    <div class="form-row" style="border-bottom: 1px solid #ddd; padding-bottom: 12px;">
+        <label for="node-input-temperature_k"><span>Wite Temp</span></label>
+        <label for="node-input-temperature_k" style="width:70%">
+            <input type="checkbox" id="node-input-temperature_k" style="display:inline-block; width:22px; vertical-align:baseline;" autocomplete="off">
+            <span> white temperature support</span>
+        </label>
+        <div>
+            <label for="node-input-temperature_x"><span>Temp Range</span></label>
+            <span style="padding-left: 4px;"> Min</span>
+            <input id="node-input-temperature_min" type="number" style="width: 70px;">
+            <span> K</span>
+            <span style="padding-left: 10px;"> Max</span>
+            <input id="node-input-temperature_max" type="number" style="width: 70px;">
+            <span> K</span>
+        </div>
+    </div>
+
+    <div class="form-row node-input-rule-container-row" style="border-bottom: 1px solid #ddd; padding-bottom: 12px;">
+        <label for="node-input-color_scene" style="width:auto">Supported color scenes</label>
+        <div class="red-ui-editableList">
+            <div class="red-ui-editableList-border red-ui-editableList-container" style="min-height: 150px; max-height: none; overflow-y: scroll; height: 308.4px;">
+                <ol id="node-input-color_scene-container" class="red-ui-editableList-list" style="min-height: 100px; min-width: 150px; ">
+                    <li class="red-ui-editableList-item-sortable red-ui-editableList-item-removable">
+                        <div class="red-ui-editableList-item-content" style="overflow: hidden; white-space: nowrap;">
+                            <span>Tets</span>
+                        </div>
+                        <i class="red-ui-editableList-item-handle fa fa-bullhorn" style="cursor:auto"></i><a href="#" class="red-ui-editableList-item-remove red-ui-button red-ui-button-small"><i class="fa fa-remove"></i></a>
+                    </li>
+                    <li class="red-ui-editableList-item-sortable red-ui-editableList-item-removable">
+                        <div class="red-ui-editableList-item-content" style="overflow: hidden; white-space: nowrap;">
+                            <span>Tets2</span>
+                        </div>
+                    <i class="red-ui-editableList-item-handle fa fa-bullhorn" style="cursor:auto"></i><a href="#" class="red-ui-editableList-item-remove red-ui-button red-ui-button-small"><i class="fa fa-remove"></i></a>
+                    </li>
+                </ol>
+            </div>
+            <div style="margin-top:4px">
+                <select id="select-custom-scene">
+                    <option value="alarm">alarm</option>
+                    <option value="alice">alice</option>
+                    <option value="candle">candle</option>
+                    <option value="dinner">dinner</option>
+                    <option value="fantasy">fantasy</option>
+                    <option value="garland">garland</option>
+                    <option value="jungle">jungle</option>
+                    <option value="movie">movie</option>
+                    <option value="neon">neon</option>
+                    <option value="night">night</option>
+                    <option value="ocean">ocean</option>
+                    <option value="party">party</option>
+                    <option value="reading">reading</option>
+                    <option value="rest">rest</option>
+                    <option value="romance">romance</option>
+                    <option value="siren">siren</option>
+                    <option value="sunrise">sunrise</option>
+                    <option value="sunset">sunset</option>
+                </select>
+                <a id="button-addScene" href="#" class="red-ui-button" onclick="addScene()" style="margin-top: 4px;"><i class="fa fa-plus"></i></a>
+            </div>
+        </div>
+    </div>
+
     <div class="form-row">
         <label for="node-input-response"><i class="fa fa-refresh"></i> <span >Response</span></label>
         <label for="node-input-response" style="width:70%">
@@ -57,10 +190,20 @@
             <span class="property-type">Select</span>
         </dt>
         <dd> The device to which this feature is connected </dd>
-        <dt>Scheme
+        <dt>Color Scheme
             <span class="property-type">Select</span>
         </dt>
-        <dd> Color scheme selection (RGB, RGB (24bit) or HSV) </dd>
+        <dd> Color scheme selection (RGB or HSV) </dd>
+        <dt>White temperature support
+            <span class="property-type">Integer</span>
+        </dt>
+        <dd>White temperature support, min and max value in Kelvin</dd>
+        <dd>Min value must be above 2000 kelvin</dd>
+        <dd>Max value must be below 9000 kelvin</dd>
+        <dt>Supported color scenes
+            <span class="property-type">array of strings</span>
+        </dt>
+        <dd>List of supported color scenes</dd>
         <dt>Response
             <span class="property-type">checkbox</span>
         </dt>
@@ -71,21 +214,33 @@
     <h3>Inputs</h3>
         <dl class="message-properties">
             <dt>payload
-                <span class="property-type">Object || Integer</span>
+                <span class="property-type">Object || Integer || String</span>
             </dt>
-            <dd> RGB, payload RGB Object </br><i>{r:Integer, g:Integer, b:Integer}</i></dd>
-            <dd> RGB (24bit), payload in 24-bit format (<a href="https://ru.wikipedia.org/wiki/TrueColor" target="_blank">TrueColor</a>). </dd>
-            <dd> HSV, payload HSV Object (hue,saturation,value) </br><i>{h:Integer,s:Integer,v:Integer}</i></dd>
+            <dd> If you want to set the color, msg.payload must be RGB or HSV Object </br><i>{r,g,b} or {h,s,v}</i></dd>
+            <dd> If you want white temperature, msg.payload must be Integer >=MIN and <=MAX</dd>
+            <dd> If you want to set the color scene, the msg.payload must be String set in the settings</dd>
         </dl>
     
-     <h3>Outputs</h3>
+    <h3>Outputs 1</h3>
         <dl class="message-properties">
             <dt>payload
-                <span class="property-type">Object || Integer</span>
+                <span class="property-type">Object</span>
             </dt>
-            <dd> RGB, payload RGB Object </br><i>{r:Integer, g:Integer, b:Integer}</i></dd>
-            <dd> RGB (24bit), payload in 24-bit format (<a href="https://ru.wikipedia.org/wiki/TrueColor" target="_blank">TrueColor</a>). </dd>
-            <dd> HSV, payload HSV Object (hue,saturation,value) </br><i>{h:Integer,s:Integer,v:Integer}</i></dd>
+            <dd> RGB or HSV Object </br><i>{r,g,b} or {h,s,v}</i></dd>
+        </dl>
+    <h3>Outputs 2</h3>
+        <dl class="message-properties">
+            <dt>payload
+                <span class="property-type">Integer</span>
+            </dt>
+            <dd> White temperature in Kelvin</dd>
+        </dl>
+    <h3>Outputs 3</h3>
+        <dl class="message-properties">
+            <dt>payload
+                <span class="property-type">String</span>
+            </dt>
+            <dd> Color scene text name</dd>
         </dl>
     <h3>References</h3>
         <ul>
