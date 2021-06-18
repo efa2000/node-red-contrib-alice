@@ -33,6 +33,12 @@
             if (this.color_support === undefined){
                 $( "#node-input-color_support").prop('checked', true);
             };
+            if (this.temperature_min === undefined){
+                $('#node-input-temperature_min').val(2000);
+            };
+            if (this.temperature_max === undefined){
+                $('#node-input-temperature_max').val(9000);
+            };
             $('#node-input-color_support').on('change',()=>{
                 if ($('#node-input-color_support').is(":checked")){
                     $('#node-input-scheme').prop('disabled', false);
