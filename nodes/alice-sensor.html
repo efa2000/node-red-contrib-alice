@@ -111,6 +111,16 @@
                         .val('unit.percent')
                         .prop('disabled', 'disabled');
                     break;
+                    case 'illumination':
+                    // $('#node-input-stype').val("devices.properties.float");
+                    $('#node-input-unit')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="unit.illumination.lux">Lux (lx)</option>')
+                        .val('unit.illumination.lux')
+                        .prop('disabled', 'disabled');
+                    break;
                     case 'pressure':
                     // $('#node-input-stype').val("devices.properties.float");
                     $('#node-input-unit')
@@ -162,6 +172,7 @@
             <option value="pressure">Pressure</option>
             <option value="voltage">Voltage</option>
             <option value="amperage">Amperage</option>
+            <option value="illumination">Illumination</option>
             <option value="water_level">Water level</option>
         </select>
     </div>
@@ -182,6 +193,7 @@
             <option value="unit.ampere">Ampere (A)</option>
             <option value="unit.volt">Volt (V)</option>
             <option value="unit.watt">Watt (W)</option>
+            <option value="unit.illumination.lux">Lux (lx)</option>
         </select>
     </div>
 </script>
