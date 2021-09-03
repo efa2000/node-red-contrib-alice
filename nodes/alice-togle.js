@@ -21,6 +21,7 @@ module.exports = function(RED) {
       let capab = {
         type: this.ctype,
         retrievable: true,
+        reportable: true,
         parameters: {
           instance: this.instance,
         },
@@ -54,21 +55,21 @@ module.exports = function(RED) {
     });
 
     this.device.on(this.id,(val)=>{
+      this.debug("Received a new value from Yandex...");
       this.send({
         payload: val
       });
-      let state = {
-        state:{
+      let state={
           value: val,
           updatedfrom: "node-red",
           updated: this.device.getTime()
-        }
-      };
+        };
       if (this.response){
+        this.debug("Automatic confirmation is true, sending confirmation to Yandex ...");
         this.device.updateCapabState(this.id,state)
         .then (res=>{
           this.value = val;
-          this.status({fill:"green",shape:"dot",text:"online"});
+          this.status({fill:"green",shape:"dot",text:val});
         })
         .catch(err=>{
           this.error("Error on update capability state: " + err.message);
