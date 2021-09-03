@@ -1,11 +1,15 @@
+// import firebase from 'firebase/compat/app';
+// import 'firebase/compat/auth';
+// import 'firebase/compat/firestore';
 module.exports = function(RED) {
   //Sevice node, Alice-Service (credential)
   function AliceService(config) {
     RED.nodes.createNode(this,config);
     this.debug("Starting Alice service...");
-    var firebase = require('firebase/app');
-    require('firebase/auth');
-    require('firebase/firestore');
+    var firebase = require('firebase/compat/app');
+    require('firebase/compat/auth');
+    require('firebase/compat/firestore');
+
     var mqtt = require('mqtt');
     var fb;
     const email = this.credentials.email;
