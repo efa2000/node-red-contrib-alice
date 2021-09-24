@@ -1,7 +1,11 @@
 
-<script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-app.js"></script>
+<!-- <script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-app.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-auth.js"></script>
-<script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-firestore.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-firestore.js"></script> -->
+
+<script  src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app-compat.js"></script>
+<script  src="https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore-compat.js"></script>
+<script  src="https://www.gstatic.com/firebasejs/9.0.2/firebase-auth-compat.js"></script>
 
 <script type="text/javascript">
     const firebaseConfig = {
@@ -14,6 +18,9 @@
             appId: "1:1049686868440:web:e5f5ef6a70ead338b6f2ad",
             measurementId: "G-MD0L6R9N79"
         };
+    var firebaseApp;
+    var firebaseDb;
+    var firebaseAuth;
     RED.nodes.registerType('alice-service',{
         category: 'config',
         defaults: {
@@ -25,6 +32,11 @@
         },
         label: function() {
             return this.name || "Alice-Credentials";
+        },
+        oneditprepare:function(){
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            firebaseDb = firebaseApp.firestore();
+            firebaseAuth = firebaseApp.auth();
         },
         oneditsave: function(){
             nodename = $('#node-config-input-email').val();
@@ -60,12 +72,13 @@
     };
     function SingUp(){
         // Initialize Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        };
+        // if (!firebase.apps.length) {
+            // firebase.initializeApp(firebaseConfig);
+        // };
+
         var email = document.getElementById("register_email").value;
         var password = document.getElementById("register_password").value;
-        firebase.auth().createUserWithEmailAndPassword(email, password)
+        firebaseAuth.createUserWithEmailAndPassword(email, password)
             .then(function(r){
                 document.getElementById("node-config-input-email").value = email;
                 document.getElementById("node-config-input-password").value = password;
@@ -77,12 +90,12 @@
             })
     };
     function Restore(){
-        // Initialize Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        };
+        // // Initialize Firebase
+        // if (!firebase.apps.length) {
+        //     firebase.initializeApp(firebaseConfig);
+        // };
         var emailAddress = document.getElementById("restore_email").value;
-        firebase.auth().sendPasswordResetEmail(emailAddress).then(function() {
+        firebaseAuth.sendPasswordResetEmail(emailAddress).then(function() {
             RED.notify("Password recovery email was sent successfully! Please check your email.", 'info');
             Activete();
         }).catch(function(error) {
@@ -90,16 +103,16 @@
         });
     }
     function DeleteAllDevices() {
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        };
-        var db = firebase.firestore();
+        // if (!firebase.apps.length) {
+        //     firebase.initializeApp(firebaseConfig);
+        // };
+        // var db = firebase.firestore();
         var email = document.getElementById("delete_email").value;
         var password = document.getElementById("delete_password").value;
-        firebase.auth().signInWithEmailAndPassword(email, password)
+        firebaseAuth.signInWithEmailAndPassword(email, password)
         .then((res)=>{
             var user = res.user;
-            db.collection('users').doc(user.uid).collection('devices').get()
+            firebaseDb.collection('users').doc(user.uid).collection('devices').get()
             .then(querySnapshot=>{
                 querySnapshot.forEach(doc=>{
                     doc.ref.collection('capabilities').get().then(capabSnapshot=>{
