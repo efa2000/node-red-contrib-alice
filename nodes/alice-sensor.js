@@ -57,15 +57,20 @@ function AliceSensor(config){
     });
 
     this.on('input', (msg, send, done)=>{
-      if (this.stype =='devices.properties.bool' && typeof msg.payload != 'boolean'){
-        this.error("Wrong type! msg.payload must be boolean.");
-        if (done) {done();}
-        return;
-      };
+      // if (this.stype =='devices.properties.bool' && typeof msg.payload != 'boolean'){
+      //   this.error("Wrong type! msg.payload must be boolean.");
+      //   if (done) {done();}
+      //   return;
+      // };
       if (this.stype =='devices.properties.float' && typeof msg.payload != 'number'){
         this.error("Wrong type! msg.payload must be number.");
         if (done) {done();}
         return;
+      };
+      if (this.unit == 'unit.percent'){
+        msg.payload = +msg.payload.toFixed(0);
+      }else {
+        msg.payload = +msg.payload.toFixed(2);
       };
       if (msg.payload === this.value){
         this.debug("Value not changed. Cancel update");
