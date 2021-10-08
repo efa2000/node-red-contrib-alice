@@ -53,6 +53,11 @@ module.exports = function(RED) {
       })
       .catch(err=>{
         this.error(err.message);
+        this.debug("Firebase Auth error: "+err.code);
+        if (err.code == 'auth/network-request-failed'){
+          this.debug("Authentication failed, retry after 10 seconds");
+          setTimeout(this.signIn, 10000);
+        }
         this.emit('offline');
       });
     }
@@ -145,6 +150,10 @@ module.exports = function(RED) {
 
     this.on('online', ()=>{
       this.isOnline = true;
+      fb.auth().currentUser.getIdToken(/* forceRefresh */ true)
+        .then(token=>{
+          this.trace("New firebase token:"+token);
+        })
     })
 
     this.on('close',(done)=>{
