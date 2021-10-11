@@ -9,9 +9,10 @@ module.exports = function(RED) {
     var firebase = require('firebase/compat/app');
     require('firebase/compat/auth');
     require('firebase/compat/firestore');
-
     var mqtt = require('mqtt');
+
     var fb;
+    var auth;
     const email = this.credentials.email;
     const password = this.credentials.password;
     const firebaseConfig = {
@@ -33,19 +34,21 @@ module.exports = function(RED) {
 
     try {
       this.debug("Initialize firebase App ...");
-      fb = firebase.initializeApp(firebaseConfig,this.id); 
+      fb = firebase.initializeApp(firebaseConfig,this.id);
+      auth = fb.auth();
     } catch (error) {
       if (error.code == 'app/duplicate-app'){
         this.debug("Dublicated firebase app");
         fb = firebase.app(this.id);
+        auth = fb.auth();
       }else{
         this.error(error);
       }
     }
-  
+    
     this.signIn = ()=>{
       this.debug("SignIn to firebase ...");
-      fb.auth().signInWithEmailAndPassword(email, password)
+      auth.signInWithEmailAndPassword(email, password)
       .then(u=>{
         this.emit('online');
         this.debug("SignIn to firebase Success. Send signal to online");
