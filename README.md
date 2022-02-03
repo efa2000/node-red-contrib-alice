@@ -2,7 +2,7 @@
 
 [![platform](https://img.shields.io/badge/platform-Node--RED-red?logo=nodered)](https://nodered.org)
 [![Min Node Version](https://img.shields.io/node/v/node-red-contrib-alice.svg)](https://nodejs.org/en/)
-![Repo size](https://img.shields.io/github/repo-size/stason325/node-red-contrib-alice)
+![Repo size](https://img.shields.io/github/repo-size/efa2000/node-red-contrib-alice)
 
 Модуль позволяет использовать Node-Red совместно с сервисом голосового помошника Yandex.Alice (голосовое управление устройствами умного дома через Алису)
 
