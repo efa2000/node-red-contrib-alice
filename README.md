@@ -4,6 +4,11 @@
 [![Min Node Version](https://img.shields.io/node/v/node-red-contrib-alice.svg)](https://nodejs.org/en/)
 ![Repo size](https://img.shields.io/github/repo-size/efa2000/node-red-contrib-alice)
 [![GitHub version](https://img.shields.io/github/package-json/v/efa2000/node-red-contrib-alice?logo=npm)](https://www.npmjs.com/package/node-red-contrib-alice)
+[![Package Quality](https://packagequality.com/shield/node-red-contrib-alice.svg)](https://packagequality.com/#?package=node-red-contrib-alice)
+![GitHub last commit](https://img.shields.io/github/last-commit/efa2000/node-red-contrib-alice/master)
+![NPM Total Downloads](https://img.shields.io/npm/dt/node-red-contrib-alice.svg)
+![NPM Downloads per month](https://img.shields.io/npm/dm/node-red-contrib-alice)
+[![issues](https://img.shields.io/github/issues/efa2000/node-red-contrib-alice?logo=github)](https://github.com/efa2000/node-red-contrib-alice/issues)
 
 Модуль позволяет использовать Node-Red совместно с сервисом голосового помошника Yandex.Alice (голосовое управление устройствами умного дома через Алису)
 
