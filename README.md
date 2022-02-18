@@ -1,4 +1,4 @@
-# Node-Red-Contrib-Alice (NodeRed Home)
+# NodeRed Home (node-red-contrib-alice)
 
 [![platform](https://img.shields.io/badge/platform-Node--RED-red?logo=nodered)](https://nodered.org)
 [![Min Node Version](https://img.shields.io/node/v/node-red-contrib-alice.svg)](https://nodejs.org/en/)
@@ -10,15 +10,12 @@
 ![NPM Downloads per month](https://img.shields.io/npm/dm/node-red-contrib-alice)
 [![issues](https://img.shields.io/github/issues/efa2000/node-red-contrib-alice?logo=github)](https://github.com/efa2000/node-red-contrib-alice/issues)
 
-Модуль позволяет использовать Node-Red совместно с сервисом голосового помошника Yandex.Alice (голосовое управление устройствами умного дома через Алису)
 
-The module allows you to use Node-Red together with the Yandex.Alice voice assistant service (voice control of smart home devices)
+**NodeRed Home** (node-red-contrib-alice) - это бесплатный сервис который позволит, в несколько простых шагов, подключить любые ваши устройства заведенные в Node-RED к умному дому от Яндекса и управлять ими с помощью голосового помощника Алиса.
 
+#### Этот некоммерческий проект, но Вы можете добровльно поддержать его развитие оформив подписку [https://boosty.to/efa2000](https://boosty.to/efa2000)
 
-
-#### Этот проект некоммерческий, но Вы можете поддержать его развитие через пожертвования [ЗДЕСЬ](https://dialogs.yandex.ru/store/skills/d4f5cc21-nodered-home?action=donation)
-
-#### Обсудить и получить оперативную поддержку [https://t.me/nodered_home_chat](https://t.me/nodered_home_chat)
+#### Обсудить и получить поддержку от сообщества и автора можно в Телеграм канале [https://t.me/nodered_home_chat](https://t.me/nodered_home_chat)
 
 ## Инструкция (RUS)
 ### Использование 
