@@ -39,7 +39,7 @@
   },
   "homepage": "https://github.com/efa2000/node-red-contrib-alice#readme",
   "dependencies": {
-    "firebase": "9.6.6",
+    "firebase": "9.6.9",
     "mqtt": "^4.3.4"
   }
 }
