@@ -38,17 +38,11 @@ module.exports = function(RED) {
         parameters: {
           instance: this.instance,
           modes: cfgModes
-        },
-        state: {
-          value: this.modes[0],
-          updatedfrom:"node-red",
-          updated: this.device.getTime()
         }
       };
       this.device.setCapability(this.id,capab)
       .then(res=>{
         this.initState = true;
-        this.value = capab.state.value;
         this.status({fill:"green",shape:"dot",text:"online"});
       })
       .catch(err=>{
@@ -73,15 +67,17 @@ module.exports = function(RED) {
       this.send({
         payload: value
       });
-      let state = {
-        value: value,
-        updatedfrom: "node-red",
-        updated: this.device.getTime()
+      let state= {
+        type:this.ctype,
+        state:{
+          instance: this.instance,
+          value: value
+        }
       };
       if (this.response){
         this.device.updateCapabState(this.id,state)
         .then (res=>{
-          this.value = val;
+          this.value = value;
           this.status({fill:"green",shape:"dot",text:"online"});
         })
         .catch(err=>{
@@ -110,10 +106,12 @@ module.exports = function(RED) {
         if (done) {done();}
         return;
       };
-      let state = {
-        value: value,
-        updatedfrom: "node-red",
-        updated: this.device.getTime()
+      let state= {
+        type:this.ctype,
+        state:{
+          instance: this.instance,
+          value: value
+        }
       };
       this.device.updateCapabState(this.id,state)
       .then(ref=>{

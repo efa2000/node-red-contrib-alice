@@ -3,6 +3,7 @@ module.exports = function(RED) {
 function AliceSensor(config){
     RED.nodes.createNode(this,config);
     this.device = RED.nodes.getNode(config.device);
+    this.device.setMaxListeners(this.device.getMaxListeners() + 1); // увеличиваем лимит для event
     this.name = config.name;
     this.stype = config.stype;
     this.reportable = true;
@@ -15,6 +16,7 @@ function AliceSensor(config){
     this.status({fill:"red",shape:"dot",text:"offline"});
 
     this.init = ()=>{
+      this.debug("Starting sensor initilization ...");
       let sensor = {
         type: this.stype,
         reportable: this.reportable,
@@ -22,20 +24,12 @@ function AliceSensor(config){
         parameters: {
           instance: this.instance,
           unit: this.unit
-        },
-        state: {
-          value: 0,
-          updatedfrom:"node-red",
-          updated: this.device.getTime()
         }
       };
-      if (this.stype == 'devices.properties.bool'){
-        delete sensor.parameters.unit;
-        sensor.state.value=false;
-      }
-      this.value = sensor.state.value;
+
       this.device.setSensor(this.id,sensor)
         .then(res=>{
+          this.debug("Sensor initilization - success!");
           this.status({fill:"green",shape:"dot",text:"online"});
           this.initState = true;
         })
@@ -57,11 +51,6 @@ function AliceSensor(config){
     });
 
     this.on('input', (msg, send, done)=>{
-      // if (this.stype =='devices.properties.bool' && typeof msg.payload != 'boolean'){
-      //   this.error("Wrong type! msg.payload must be boolean.");
-      //   if (done) {done();}
-      //   return;
-      // };
       if (this.stype =='devices.properties.float' && typeof msg.payload != 'number'){
         this.error("Wrong type! msg.payload must be number.");
         if (done) {done();}
@@ -77,11 +66,14 @@ function AliceSensor(config){
         if (done) {done();}
         return;
       };
-      this.device.updateSensorState(this.id,{
-        value: msg.payload,
-        updatedfrom: "node-red",
-        updated: this.device.getTime()
-      })
+      let state= {
+        type:this.stype,
+        state:{
+          instance: this.instance,
+          value: msg.payload
+        }
+      };
+      this.device.updateSensorState(this.id,state)
       .then(ref=>{
         this.value = msg.payload;
         this.status({fill:"green",shape:"dot",text: msg.payload});

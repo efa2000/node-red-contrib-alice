@@ -4,6 +4,7 @@ module.exports = function(RED) {
   function AliceColor(config){
     RED.nodes.createNode(this,config);
     this.device = RED.nodes.getNode(config.device);
+    this.device.setMaxListeners(this.device.getMaxListeners() + 1); // увеличиваем лимит для event
     this.name = config.name;
     this.ctype = 'devices.capabilities.color_setting';
     this.instance = 'color_model';
@@ -30,7 +31,6 @@ module.exports = function(RED) {
     };
 
     this.init = ()=>{
-      this.ref = this.device.getRef(this.id);
       var value = 0;
       if (this.scheme=="hsv"){
         value = {
@@ -46,10 +46,6 @@ module.exports = function(RED) {
         parameters: {
           // instance: this.scheme,//this.instance,
           // color_model: this.scheme
-        },
-        state: {
-          updatedfrom:"node-red",
-          updated: this.device.getTime()
         }
       };
       if (!this.color_support && !this.temperature_k && this.color_scene.length<1){
@@ -65,31 +61,31 @@ module.exports = function(RED) {
         capab.parameters.color_scene = {
           scenes:scenes
         };
-        capab.state.instance = 'scene';
-        capab.state.value = this.color_scene[0];
+        // capab.state.instance = 'scene';
+        // capab.state.value = this.color_scene[0];
       };
       if (this.color_support){
         capab.parameters.color_model = this.scheme;
-        capab.state.instance = this.scheme;
-        if (this.scheme=="hsv"){
-          capab.state.value = {h:0,s:0,v:0};
-        }else{
-          capab.state.value = 0;
-        }
+        // capab.state.instance = this.scheme;
+        // if (this.scheme=="hsv"){
+        //   capab.state.value = {h:0,s:0,v:0};
+        // }else{
+        //   capab.state.value = 0;
+        // }
       };
       if (this.temperature_k){
         capab.parameters.temperature_k = {
           min: this.temperature_min,
           max: this.temperature_max
         };
-        capab.state.instance = 'temperature_k';
-        capab.state.value = this.temperature_min;
+        // capab.state.instance = 'temperature_k';
+        // capab.state.value = this.temperature_min;
       };
 
       this.device.setCapability(this.id,capab)
         .then(res=>{
           this.initState = true;
-          this.value = JSON.stringify(capab.state.value);
+          // this.value = JSON.stringify(capab.state.value);
           this.status({fill:"green",shape:"dot",text:"online"});
         })
         .catch(err=>{
@@ -133,12 +129,13 @@ module.exports = function(RED) {
           break;
       }
       this.send(outmsgs);
-// возвращаем подтверждение в базу 
-      let state = {
-        instance: newstate.instance,
-        value: val,
-        updatedfrom: "node-red",
-        updated: this.device.getTime()
+// возвращаем подтверждение в базу
+      let state= {
+        type:this.ctype,
+        state:{
+          instance:  newstate.instance,
+          value: val
+        }
       };
       if (this.response){
         this.device.updateCapabState(this.id,state)
@@ -155,10 +152,7 @@ module.exports = function(RED) {
 
     this.on('input', (msg, send, done)=>{
       let value = msg.payload;
-      let state = {
-        updatedfrom: "node-red",
-        updated: this.device.getTime()
-      };
+      let state = {};
       switch (typeof value) {
         case 'object':
           if ((value.r>-1 && value.g>-1 && value.b>-1) || (value.h>-1 && value.s>-1 && value.v>-1)){
@@ -204,8 +198,11 @@ module.exports = function(RED) {
         if (done) {done();}
         return;
       };
-
-      this.device.updateCapabState(this.id,state)
+      let upState= {
+        type:this.ctype,
+        state:state
+      };
+      this.device.updateCapabState(this.id,upState)
       .then(ref=>{
         this.value = JSON.stringify(value);
         this.status({fill:"green",shape:"dot",text:JSON.stringify(msg.payload)});

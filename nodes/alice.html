@@ -1,26 +1,5 @@
 
-<!-- <script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-app.js"></script>
-<script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-auth.js"></script>
-<script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-firestore.js"></script> -->
-
-<script  src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app-compat.js"></script>
-<script  src="https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore-compat.js"></script>
-<script  src="https://www.gstatic.com/firebasejs/9.0.2/firebase-auth-compat.js"></script>
-
 <script type="text/javascript">
-    const firebaseConfig = {
-            apiKey: "AIzaSyDQUn6EhNOgSAV15do8DKwwx3KHDyvLGJc",
-            authDomain: "node-red-alice-4462f.firebaseapp.com",
-            databaseURL: "https://node-red-alice-4462f.firebaseio.com",
-            projectId: "node-red-alice-4462f",
-            storageBucket: "node-red-alice-4462f.appspot.com",
-            messagingSenderId: "1049686868440",
-            appId: "1:1049686868440:web:e5f5ef6a70ead338b6f2ad",
-            measurementId: "G-MD0L6R9N79"
-        };
-    var firebaseApp;
-    var firebaseDb;
-    var firebaseAuth;
     RED.nodes.registerType('alice-service',{
         category: 'config',
         defaults: {
@@ -28,192 +7,90 @@
         },
         credentials:{
             email: {type: "text", required:true},
-            password: {type: "password", required:true}
+            password: {type: "password", required:true},
+            token: {type: "password", required:true},
+            id:{type:"text",required:true}
         },
         label: function() {
             return this.name || "Alice-Credentials";
         },
         oneditprepare:function(){
-            firebaseApp = firebase.initializeApp(firebaseConfig);
-            firebaseDb = firebaseApp.firestore();
-            firebaseAuth = firebaseApp.auth();
+
         },
         oneditsave: function(){
             nodename = $('#node-config-input-email').val();
             $('#node-config-input-name').val(nodename);
         }
     });
-    function Activete(div){
-        switch(div){
-            case 'singup':
-                document.getElementById("singin").hidden = true;
-                document.getElementById("singup").hidden = false;
-                document.getElementById("restore").hidden = true;
-                document.getElementById("delete").hidden = true;
-                break
-            case 'restore':
-                document.getElementById("singin").hidden = true;
-                document.getElementById("singup").hidden = true;
-                document.getElementById("restore").hidden = false;
-                document.getElementById("delete").hidden = true;
-                break
-            case 'delete':
-                document.getElementById("singin").hidden = true;
-                document.getElementById("singup").hidden = true;
-                document.getElementById("restore").hidden = true;
-                document.getElementById("delete").hidden = false;
-                break
-            default:
-                document.getElementById("singin").hidden = false;
-                document.getElementById("singup").hidden = true;
-                document.getElementById("restore").hidden = true;
-                document.getElementById("delete").hidden = true;
-        }
-    };
-    function SingUp(){
-        // Initialize Firebase
-        // if (!firebase.apps.length) {
-            // firebase.initializeApp(firebaseConfig);
-        // };
-
-        var email = document.getElementById("register_email").value;
-        var password = document.getElementById("register_password").value;
-        firebaseAuth.createUserWithEmailAndPassword(email, password)
-            .then(function(r){
-                document.getElementById("node-config-input-email").value = email;
-                document.getElementById("node-config-input-password").value = password;
-                RED.notify("User created successfully", 'success');
-                Activete();
-            })
-            .catch(function(error) {
-                RED.notify(error.message, 'error');
-            })
-    };
-    function Restore(){
-        // // Initialize Firebase
-        // if (!firebase.apps.length) {
-        //     firebase.initializeApp(firebaseConfig);
-        // };
-        var emailAddress = document.getElementById("restore_email").value;
-        firebaseAuth.sendPasswordResetEmail(emailAddress).then(function() {
-            RED.notify("Password recovery email was sent successfully! Please check your email.", 'info');
-            Activete();
-        }).catch(function(error) {
-            RED.notify(error.message, 'error');
-        });
-    }
-    function DeleteAllDevices() {
-        // if (!firebase.apps.length) {
-        //     firebase.initializeApp(firebaseConfig);
-        // };
-        // var db = firebase.firestore();
-        var email = document.getElementById("delete_email").value;
-        var password = document.getElementById("delete_password").value;
-        firebaseAuth.signInWithEmailAndPassword(email, password)
-        .then((res)=>{
-            var user = res.user;
-            firebaseDb.collection('users').doc(user.uid).collection('devices').get()
-            .then(querySnapshot=>{
-                querySnapshot.forEach(doc=>{
-                    doc.ref.collection('capabilities').get().then(capabSnapshot=>{
-                        capabSnapshot.forEach(sdoc=>{
-                            sdoc.ref.delete()
-                        })
-                    });
-                    doc.ref.delete().catch(err=>{
-                        RED.notify(error.message, 'error');
-                    })
-                });
-                RED.notify("All devices deleted", 'info');
-                Activete();
-            })
-            .catch(err=>{
-                RED.notify(error.message, 'error');
-            })
+    
+    function GetToken(code){
+        console.log(code);
+        RED.notify("Request has been sent. Please, wait",{type:"compact"});
+        $.ajax({
+            url: "https://nodered-home.ru/api/v1/getyatoken",
+            type:"POST",
+            headers: {
+                'Content-Type':'application/json'
+            },
+            crossDomain: true,
+            contentType:"application/json",
+            data: JSON.stringify({code:code}),
+            dataType: "json",
+            format:"json"
         })
-        .catch(function(error) {
-            RED.notify(error.message, 'error');
+        .done(data=>{
+            console.log(data);
+            RED.notify("Authentication received successfully", {type:"success"});
+            $('#node-config-input-email').val(data.email);
+            $('#node-config-input-id').val(data.id);
+            $('#node-config-input-password').val(data.password);
+            $('#node-config-input-token').val(JSON.stringify(data.token));
+        }).fail(error=>{
+            console.error(error);
+            RED.notify("Error : "+error.responseJSON.message, {type:"error"});
         });
     }
 </script>
 
 <script type="text/x-red" data-template-name="alice-service">    
     <input type="hidden" id="node-config-input-name">
-    <div id="singin" >
+    <div name="New Reg">
         <div class="form-row"><b>Credentials</b></div>
-        <div class="form-row">
-            <label for="node-config-input-email">Email</label>
-            <input type="text" id="node-config-input-email" placeholder="user@example.com">
-        </div>
-        <div class="form-row">
-            <label for="node-config-input-password">Password</label>
-            <input type="password" id="node-config-input-password">
-        </div>
-
-        <div class="form-tips" style="margin-top:64px;">
-            <b>Tip:</b>
-            <p>If you don't have credentials, please <button class="ui-button" onclick="Activete('singup')">Register</button> before using </p>
-            <p>If you forgot your password <button class="ui-button" onclick="Activete('restore')">Restore password</button></p>
-            <p>If you want to delete all previously created devices <button class="ui-button" onclick="Activete('delete')">Remove all devices</button>
-        </div>
-    </div>
-    <div id="singup" hidden>
-        <form>
-            <div class="form-row"><b>Signup</b></div>
             <div class="form-row">
-                <label>Email</label>
-                <input type="text" id="register_email" placeholder="user@example.com">
+                <p>1. Follow the link and confirm access</p>
+                <label>Authentication</label>
+                <button 
+                    onclick="window.open('https://oauth.yandex.ru/authorize?response_type=code&client_id=aa882e33283046fc83de54be20a2e5d8')"
+                    class="ui-button">Yandex Authentication
+                </button>
+            </div>
+            
+            <div class="form-row">
+                <p>2. Input the verification code and click submit</p>
+                <label>Code</label>
+                <input type="text" id="verification_code" style="width:auto">
+                <button onclick="GetToken($('#verification_code').val())" class="ui-button">Submit</button>
+            </div>
+            <hr>
+            <div class="form-row">
+                <p>Authentication result:</p>
             </div>
             <div class="form-row">
-                <label> Password</label>
-                <input type="password" id="register_password">
-            </div>
-            <div class="form-row" style="text-align: end; margin-right: 32px;">
-                <button onclick="Activete()" class="ui-button">Cancel</button>
-                <button onclick="SingUp()" class="ui-button primary">Signup</button>
-            </div>
-        </form>
-        <p style="color:red;" id="register_error"></p>
-    </div>
-    <div id="restore" hidden>
-        <div class="form-row"><b>Password recovery</b></div>
-        <div class="form-row">
-            <label> Email</label>
-            <input type="text" id="restore_email" placeholder="user@example.com">
-        </div>
-        <div class="form-row" style="text-align: end; margin-right: 32px;">
-                <button onclick="Activete()" class="ui-button">Cancel</button>
-                <button onclick="Restore()" class="ui-button primary">Recover</button>
-        </div>
-    </div>
-    <div id="delete" hidden>
-        <form>
-            <div class="form-row"><b>Delete all devices</b></div>
-            <div class="form-row">
-                <label>Email</label>
-                <input type="text" id="delete_email" placeholder="user@example.com">
+                <label for="node-config-input-email">Email</label>
+                <input type="text" id="node-config-input-email" disabled>
             </div>
             <div class="form-row">
-                <label> Password</label>
-                <input type="password" id="delete_password">
+                <label for="node-config-input-id">ID</label>
+                <input type="text" id="node-config-input-id" disabled>
             </div>
-            <div class="form-row" style="text-align: end; margin-right: 32px;">
-                <button onclick="Activete()" class="ui-button">Cancel</button>
-                <button onclick="DeleteAllDevices()" class="ui-button primary">Delete</button>
+            <div class="form-row">
+                <label for="node-config-input-password">Password</label>
+                <input type="password" id="node-config-input-password" disabled>
             </div>
-        </form>
-        <div class="form-tips" style="margin-top:64px;">
-            <b>Delete all previously created devices.</b>
-            <br>
-            <b>Devices will only be deleted from the remote server, but they will have to be manually removed from the Yandex application</b>
-            <ul>
-                <li>Enter a valid username and password</li>
-                <li>Click remove devices</li>
-                <li>Re-deploy Node-Red flows</li>
-                <li>In the Yandex application manually delete devices and update the list of devices</li>
-            </ul>
-            <p></p>
-        </div>
+            <div class="form-row">
+                <label for="node-config-input-token">Token</label>
+                <input type="password" id="node-config-input-token" disabled>
+            </div>
     </div>
 </script>
 

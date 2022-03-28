@@ -3,6 +3,7 @@ module.exports = function(RED) {
   function AliceToggle(config){
     RED.nodes.createNode(this,config);
     this.device = RED.nodes.getNode(config.device);
+    this.device.setMaxListeners(this.device.getMaxListeners() + 1); // увеличиваем лимит для event
     this.name = config.name;
     this.ctype = 'devices.capabilities.toggle';
     this.instance = config.instance;
@@ -17,24 +18,20 @@ module.exports = function(RED) {
     this.status({fill:"red",shape:"dot",text:"offline"});
 
     this.init = ()=>{
-      this.ref = this.device.getRef(this.id);
+      this.debug("Starting capability initilization ...");
       let capab = {
         type: this.ctype,
         retrievable: true,
         reportable: true,
         parameters: {
           instance: this.instance,
-        },
-        state: {
-          value: false,
-          updatedfrom:"node-red",
-          updated: this.device.getTime()
         }
       };
       this.device.setCapability(this.id,capab)
         .then(res=>{
           this.initState = true;
-          this.value = capab.state.value;
+          // this.value = capab.state.value;
+          this.debug("Capability initilization - success!");
           this.status({fill:"green",shape:"dot",text:"online"});
         })
         .catch(err=>{
@@ -59,11 +56,13 @@ module.exports = function(RED) {
       this.send({
         payload: val
       });
-      let state={
-          value: val,
-          updatedfrom: "node-red",
-          updated: this.device.getTime()
-        };
+      let state= {
+        type:this.ctype,
+        state:{
+          instance: this.instance,
+          value: val
+        }
+      };
       if (this.response){
         this.debug("Automatic confirmation is true, sending confirmation to Yandex ...");
         this.device.updateCapabState(this.id,state)
@@ -89,10 +88,12 @@ module.exports = function(RED) {
         if (done) {done();}
         return;
       };
-      let state = {
-        value: msg.payload,
-        updatedfrom: "node-red",
-        updated: this.device.getTime()
+      let state= {
+        type:this.ctype,
+        state:{
+          instance: this.instance,
+          value: msg.payload
+        }
       };
       this.device.updateCapabState(this.id,state)
       .then(ref=>{

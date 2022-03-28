@@ -2,24 +2,26 @@ module.exports = function(RED) {
 // ************** ON/OFF *******************
 function AliceOnOff(config){
     RED.nodes.createNode(this,config);
-    this.device = RED.nodes.getNode(config.device);
-    this.name = config.name;
-    this.response = config.response;
-    this.ctype = 'devices.capabilities.on_off';
-    this.retrievable = config.retrievable;
-    this.split = false;
-    this.instance = 'on';
-    this.initState = false;
-    this.value;
+    const device = RED.nodes.getNode(config.device);
+    device.setMaxListeners(device.getMaxListeners() + 1); // увеличиваем лимит для event
+    const id =JSON.parse(JSON.stringify(this.id));
+    const name = config.name;
+    const ctype = 'devices.capabilities.on_off';
+    const instance = 'on';
+    let response = config.response;
+    let retrievable = config.retrievable;
+    let split = false;
+    let value;
+    let initState = false;
 
     if (config.response === undefined){
-        this.response = true;
+        response = true;
     };
     if (config.retrievable === undefined){
-      this.retrievable = true;
+      retrievable = true;
     };
-    if (!this.retrievable){
-      this.split = true;
+    if (!retrievable){
+      split = true;
     };
 
     this.status({fill:"red",shape:"dot",text:"offline"});
@@ -27,23 +29,18 @@ function AliceOnOff(config){
     this.init = ()=>{
       this.debug("Starting capability initilization ...");
       let capab = {
-        type: this.ctype,
-        retrievable: this.retrievable,
+        type: ctype,
+        retrievable: retrievable,
         parameters: {
-          instance: this.instance,
-          split: this.split
-        },
-        state: {
-          value: false,
-          updatedfrom:"node-red",
-          updated: this.device.getTime()
+          instance: instance,
+          split: split
         }
       };
-      this.device.setCapability(this.id,capab)
+
+      device.setCapability(id,capab)
       .then(res=>{
         this.debug("Capability initilization - success!");
-        this.initState = true;
-        this.value = capab.state.value;
+        initState = true;
         this.status({fill:"green",shape:"dot",text:"online"});
       })
       .catch(err=>{
@@ -53,30 +50,32 @@ function AliceOnOff(config){
     };
 
     // Проверяем сам девайс уже инициирован 
-    if (this.device.initState) this.init();
+    if (device.initState) this.init();
 
-    this.device.on("online",()=>{
+    device.on("online",()=>{
       this.init();
     });
 
-    this.device.on("offline",()=>{
+    device.on("offline",()=>{
       this.status({fill:"red",shape:"dot",text:"offline"});
     });
 
-    this.device.on(this.id,(val)=>{
+    device.on(id,(val)=>{
       this.send({
         payload: val
       });
-      let state = {
-        value: val,
-        updatedfrom: "node-red",
-        updated: this.device.getTime()
+      let state= {
+        type:ctype,
+        state:{
+          instance: instance,
+          value: val
+        }
       };
-      if (this.response){
-          this.device.updateCapabState(this.id,state)
+      if (response){
+          device.updateCapabState(id,state)
           .then (res=>{
-            this.value = val;
-            this.status({fill:"green",shape:"dot",text:"online"});
+            value = val;
+            this.status({fill:"green",shape:"dot",text:val.toString()});
           })
           .catch(err=>{
             this.error("Error on update capability state: " + err.message);
@@ -91,19 +90,21 @@ function AliceOnOff(config){
         if (done) {done();}
         return;
       };
-      if (msg.payload === this.value){
+      if (msg.payload === value){
         this.debug("Value not changed. Cancel update");
         if (done) {done();}
         return;
       };
-      let state = {
-        value: msg.payload,
-        updatedfrom: "node-red",
-        updated: this.device.getTime()
+      let state= {
+        type:ctype,
+        state:{
+          instance: instance,
+          value: msg.payload
+        }
       };
-      this.device.updateCapabState(this.id,state)
+      device.updateCapabState(id,state)
       .then(ref=>{
-        this.value = msg.payload;
+        value = msg.payload;
         this.status({fill:"green",shape:"dot",text:msg.payload.toString()});
         if (done) {done();}
       })
@@ -115,8 +116,9 @@ function AliceOnOff(config){
     });
 
     this.on('close', (removed, done)=>{
+      device.setMaxListeners(device.getMaxListeners() - 1);
       if (removed) {
-        this.device.delCapability(this.id)
+        device.delCapability(id)
         .then(res=>{
           done()
         })
@@ -124,9 +126,9 @@ function AliceOnOff(config){
           this.error("Error on delete capability: " + err.message);
           done();
         })
-      }else{
-        done();
-      }
+      };
+      done();
+      return;
     });
   }  
   RED.nodes.registerType("On_Off",AliceOnOff);

@@ -3,6 +3,7 @@ module.exports = function(RED) {
   function AliceRange(config){
     RED.nodes.createNode(this,config);
     this.device = RED.nodes.getNode(config.device);
+    this.device.setMaxListeners(this.device.getMaxListeners() + 1); // увеличиваем лимит для event
     this.name = config.name;
     this.ctype = 'devices.capabilities.range';
     this.retrievable = config.retrievable;
@@ -26,7 +27,6 @@ module.exports = function(RED) {
     this.status({fill:"red",shape:"dot",text:"offline"});
 
     this.init = ()=>{
-      this.ref = this.device.getRef(this.id);
       let capab = {
         type: this.ctype,
         retrievable: this.retrievable,
@@ -39,11 +39,6 @@ module.exports = function(RED) {
               max: this.max,
               precision: this.precision
           }
-        },
-        state: {
-          value: this.min,
-          updatedfrom:"node-red",
-          updated: this.device.getTime()
         }
       };
       // если unit не пременим к параметру, то нужно удалить 
@@ -54,7 +49,6 @@ module.exports = function(RED) {
       this.device.setCapability(this.id,capab)
       .then(res=>{
         this.initState = true;
-        this.value = capab.state.value;
         this.status({fill:"green",shape:"dot",text:"online"});
       })
       .catch(err=>{
@@ -85,13 +79,15 @@ module.exports = function(RED) {
       this.send({
         payload: value
       });
-//      this.value = value;
-      let state = {
-        value: value,
-        updatedfrom: "node-red",
-        updated: this.device.getTime()
+      let state= {
+        type:this.ctype,
+        state:{
+          instance: this.instance,
+          value: value
+        }
       };
       // если установлено требование немедленно отвечать, отвечаем
+      console.log(this.response);
       if (this.response){
         this.device.updateCapabState(this.id,state)
         .then (res=>{
@@ -117,10 +113,12 @@ module.exports = function(RED) {
         if (done) {done();}
         return;
       };
-      let state = {
-        value: value,
-        updatedfrom: "node-red",
-        updated: this.device.getTime()
+      let state= {
+        type:this.ctype,
+        state:{
+          instance: this.instance,
+          value: value
+        }
       };
       this.device.updateCapabState(this.id,state)
       .then(ref=>{
@@ -135,7 +133,8 @@ module.exports = function(RED) {
       })
     });
 
-    this.on('close', function(removed, done) {
+    this.on('close', (removed, done)=>{
+      this.device.setMaxListeners(this.device.getMaxListeners() - 1); // уменьшаем лимит для event
       if (removed) {
         this.device.delCapability(this.id)
         .then(res=>{
