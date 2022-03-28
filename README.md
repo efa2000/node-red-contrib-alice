@@ -10,6 +10,7 @@
 ![NPM Downloads per month](https://img.shields.io/npm/dm/node-red-contrib-alice)
 [![issues](https://img.shields.io/github/issues/efa2000/node-red-contrib-alice?logo=github)](https://github.com/efa2000/node-red-contrib-alice/issues)
 
+## ВАЖНО !!!! с 28-го марта 2022 г. в связи с необходимостью перехода на новую версию, временно приостанавливается работа сервиса 
 
 **NodeRed Home** (node-red-contrib-alice) - это бесплатный сервис который позволит, в несколько простых шагов, подключить любые ваши устройства заведенные в Node-RED к умному дому от Яндекса и управлять ими с помощью голосового помощника Алиса.
 
