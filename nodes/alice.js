@@ -13,7 +13,10 @@ module.exports = function(RED) {
 
     this.isOnline = false;
     this.mqttClient;
-
+    if (!token){
+      this.error("Authentication is required!!!");
+      return;
+    };
     this.mqttClient = mqtt.connect("mqtts://mqtt.cloud.yandex.net",{
       port: 8883,
       clientId: login,

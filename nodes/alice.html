@@ -41,10 +41,10 @@
         .done(data=>{
             console.log(data);
             RED.notify("Authentication received successfully", {type:"success"});
-            $('#node-config-input-email').val(data.email);
-            $('#node-config-input-id').val(data.id);
-            $('#node-config-input-password').val(data.password);
-            $('#node-config-input-token').val(JSON.stringify(data.token));
+            $('#node-config-input-email').val(data.email).trigger("change");
+            $('#node-config-input-id').val(data.id).trigger("input").trigger("change");
+            $('#node-config-input-password').val(data.password).trigger("change");
+            $('#node-config-input-token').val(JSON.stringify(data.token)).trigger("change");
         }).fail(error=>{
             console.error(error);
             RED.notify("Error : "+error.responseJSON.message, {type:"error"});
