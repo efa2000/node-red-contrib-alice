@@ -26,6 +26,8 @@
     function GetToken(code){
         console.log(code);
         RED.notify("Request has been sent. Please, wait",{type:"compact"});
+        $('#verification_code').prop('disabled', true);
+        $('#submit_button').prop('disabled', true);
         $.ajax({
             url: "https://nodered-home.ru/api/v1/getyatoken",
             type:"POST",
@@ -39,15 +41,15 @@
             format:"json"
         })
         .done(data=>{
-            console.log(data);
-            RED.notify("Authentication received successfully", {type:"success"});
+            RED.notify("Authentication data, received successfully", {type:"success"});
             $('#node-config-input-email').val(data.email).trigger("change");
             $('#node-config-input-id').val(data.id).trigger("input").trigger("change");
             $('#node-config-input-password').val(data.password).trigger("change");
             $('#node-config-input-token').val(JSON.stringify(data.token)).trigger("change");
         }).fail(error=>{
-            console.error(error);
             RED.notify("Error : "+error.responseJSON.message, {type:"error"});
+            $('#verification_code').prop('disabled', false);
+            $('#submit_button').prop('disabled', false);
         });
     }
 </script>
@@ -69,7 +71,10 @@
                 <p>2. Input the verification code and click submit</p>
                 <label>Code</label>
                 <input type="text" id="verification_code" style="width:auto">
-                <button onclick="GetToken($('#verification_code').val())" class="ui-button">Submit</button>
+                <button id="submit_button" onclick="GetToken($('#verification_code').val())" class="ui-button">Submit</button>
+            </div>
+            <div class="form-tips" id="node-tip">
+                <span>Tip: Data request may take up to 15 seconds, please wait for success or error message.</span>
             </div>
             <hr>
             <div class="form-row">
