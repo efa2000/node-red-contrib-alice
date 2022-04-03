@@ -9,7 +9,7 @@ module.exports = function(RED) {
     this.instance = config.instance;
     this.response = config.response;
     this.initState = false;
-    this.value;
+    this.value = false;
 
     if (config.response === undefined){
         this.response = true;

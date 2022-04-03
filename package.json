@@ -23,7 +23,8 @@
   "node-red": {
     "version": ">=2.0.0",
     "nodes": {
-      "alice": "./nodes/alice.js",
+      "alice-service": "./nodes/alice.js",
+      "alice-device": "./nodes/alice-device.js",
       "alice-onoff": "./nodes/alice-onoff.js",
       "alice-togle": "./nodes/alice-togle.js",
       "alice-range": "./nodes/alice-range.js",

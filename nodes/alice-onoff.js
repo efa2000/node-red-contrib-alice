@@ -11,8 +11,14 @@ function AliceOnOff(config){
     let response = config.response;
     let retrievable = config.retrievable;
     let split = false;
-    let value;
     let initState = false;
+    let curentState = {
+      type:ctype,
+      state:{
+        instance: instance,
+        value: false
+      }
+    };
 
     if (config.response === undefined){
         response = true;
@@ -47,6 +53,14 @@ function AliceOnOff(config){
         this.error("Error on create capability: " + err.message);
         this.status({fill:"red",shape:"dot",text:"error"});
       });
+      device.updateCapabState(id,curentState)
+      .then (res=>{
+        this.status({fill:"green",shape:"dot",text:"online"});
+      })
+      .catch(err=>{
+        this.error("Error on update capability state: " + err.message);
+        this.status({fill:"red",shape:"dot",text:"Error"});
+      });
     };
 
     // Проверяем сам девайс уже инициирован 
@@ -64,17 +78,10 @@ function AliceOnOff(config){
       this.send({
         payload: val
       });
-      let state= {
-        type:ctype,
-        state:{
-          instance: instance,
-          value: val
-        }
-      };
       if (response){
-          device.updateCapabState(id,state)
+          curentState.state.value = val;
+          device.updateCapabState(id,curentState)
           .then (res=>{
-            value = val;
             this.status({fill:"green",shape:"dot",text:val.toString()});
           })
           .catch(err=>{
@@ -90,21 +97,14 @@ function AliceOnOff(config){
         if (done) {done();}
         return;
       };
-      if (msg.payload === value){
+      if (msg.payload === curentState.state.value){
         this.debug("Value not changed. Cancel update");
         if (done) {done();}
         return;
       };
-      let state= {
-        type:ctype,
-        state:{
-          instance: instance,
-          value: msg.payload
-        }
-      };
-      device.updateCapabState(id,state)
+      curentState.state.value = msg.payload;
+      device.updateCapabState(id,curentState)
       .then(ref=>{
-        value = msg.payload;
         this.status({fill:"green",shape:"dot",text:msg.payload.toString()});
         if (done) {done();}
       })
