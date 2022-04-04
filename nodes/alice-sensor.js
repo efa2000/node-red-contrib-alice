@@ -12,6 +12,13 @@ function AliceSensor(config){
     this.instance = config.instance;
     this.initState = false;
     this.value;
+    let curentState= {
+      type:this.stype,
+      state:{
+        instance: this.instance,
+        value: 0
+      }
+    };
 
     this.status({fill:"red",shape:"dot",text:"offline"});
 
