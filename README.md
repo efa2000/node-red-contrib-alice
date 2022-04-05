@@ -1,5 +1,8 @@
 # NodeRed Home (node-red-contrib-alice)
 
+**NodeRed Home** (node-red-contrib-alice) - это бесплатный сервис который позволит, в несколько простых шагов, подключить любые ваши устройства заведенные в Node-RED к умному дому от Яндекса и управлять ими с помощью голосового помощника Алиса.
+
+
 [![platform](https://img.shields.io/badge/platform-Node--RED-red?logo=nodered)](https://nodered.org)
 [![Min Node Version](https://img.shields.io/node/v/node-red-contrib-alice.svg)](https://nodejs.org/en/)
 ![Repo size](https://img.shields.io/github/repo-size/efa2000/node-red-contrib-alice)
@@ -9,8 +12,6 @@
 ![NPM Total Downloads](https://img.shields.io/npm/dt/node-red-contrib-alice.svg)
 ![NPM Downloads per month](https://img.shields.io/npm/dm/node-red-contrib-alice)
 [![issues](https://img.shields.io/github/issues/efa2000/node-red-contrib-alice?logo=github)](https://github.com/efa2000/node-red-contrib-alice/issues)
-
-**NodeRed Home** (node-red-contrib-alice) - это бесплатный сервис который позволит, в несколько простых шагов, подключить любые ваши устройства заведенные в Node-RED к умному дому от Яндекса и управлять ими с помощью голосового помощника Алиса.
 
 #### ВАЖНО !!!! В связи с необходимостью перезда и обновления сервиса, с 28-го марта его работа была преостановлена, до 11-го апреля (возможно раньше) будет запущенна общедоступная новая версия Для тех кто оформил добровольную подписку доступен ранний доступ к новой версии. Инструкция по переходу здесь. [https://boosty.to/efa2000/posts/8c64ea4d-949a-4d18-b9c2-ecea3c1229e8](https://boosty.to/efa2000/posts/8c64ea4d-949a-4d18-b9c2-ecea3c1229e8?share=post_link)
 
