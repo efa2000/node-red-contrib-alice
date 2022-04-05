@@ -51,7 +51,7 @@ module.exports = function(RED) {
       this.debug("Yandex IOT client reconnecting ...");
     });
     mqttClient.on("error",(err)=>{
-      this.debug("Yandex IOT client Error: "+ err.message);
+      this.error("Yandex IOT client Error: "+ err.message);
       this.emit('offline');
     });
 
