@@ -23,8 +23,7 @@ module.exports = function(RED) {
         device_info:{
           manufacturer: "NodeRed Home",
           model: "virtual device",
-          sw_version: pjson.version,
-          hw_version: this.id
+          sw_version: pjson.version
         },
         capabilities:[],
         properties:[]
@@ -42,7 +41,7 @@ module.exports = function(RED) {
 // функция обновления информации об устройстве    
     this._updateDeviceInfo= (now)=>{
       let data;
-      if (deviceconfig === null){
+      if (deviceconfig === null || (deviceconfig.capabilities.length==0 && deviceconfig.properties.length==0)){
         data = '';
       }else{
         data = JSON.stringify(deviceconfig);
@@ -66,7 +65,7 @@ module.exports = function(RED) {
 // функция обновления состояния умений и сенсоров 
     this._updateDeviceState= ()=>{
       let data;
-      if (states === null){
+      if (states === null || (states.capabilities.length==0 && states.properties.length==0)){
         data = '';
       }else{
         data = JSON.stringify(states);

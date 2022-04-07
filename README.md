@@ -11,7 +11,7 @@
 ![NPM Total Downloads](https://img.shields.io/npm/dt/node-red-contrib-alice.svg)
 ![NPM Downloads per month](https://img.shields.io/npm/dm/node-red-contrib-alice)
 
-#### ВАЖНО !!!! В связи с необходимостью перезда и обновления сервиса, с 28-го марта его работа была преостановлена, до 11-го апреля (возможно раньше) будет запущенна общедоступная новая версия Для тех кто оформил добровольную подписку доступен ранний доступ к новой версии. Инструкция по переходу здесь. [https://boosty.to/efa2000/posts/8c64ea4d-949a-4d18-b9c2-ecea3c1229e8](https://boosty.to/efa2000/posts/8c64ea4d-949a-4d18-b9c2-ecea3c1229e8?share=post_link)
+#### ВАЖНО !!!! Запущена новая версия сервиса. Если Вы ранее пользовались версией < 1.0.0 то после обновления потребуются дополнительные дествия. Инструкция по переходу здесь. [https://boosty.to/efa2000/posts/8c64ea4d-949a-4d18-b9c2-ecea3c1229e8](https://boosty.to/efa2000/posts/8c64ea4d-949a-4d18-b9c2-ecea3c1229e8?share=post_link)
 
 #### Этот некоммерческий проект, но Вы можете добровльно поддержать его развитие оформив подписку [https://boosty.to/efa2000](https://boosty.to/efa2000)
 
