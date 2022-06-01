@@ -73,6 +73,13 @@ function AliceEvent(config){
       }else{
         curentState.state.value = msg.payload;
       };
+      // для кнопок обнуляем значение через 1 сек
+      if (instance=='button'){
+        setTimeout(() => {
+          curentState.state.value = null;
+          this.status({fill:"green",shape:"dot",text:""});
+        }, 1000);
+      };
       device.updateSensorState(id,curentState)
       .then(ref=>{
         this.status({fill:"green",shape:"dot",text: curentState.state.value});
