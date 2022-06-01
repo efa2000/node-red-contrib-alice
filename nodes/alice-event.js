@@ -1,37 +1,39 @@
 module.exports = function(RED) {
 // ************** ON/OFF *******************
-function AliceSensor(config){
+function AliceEvent(config){
     RED.nodes.createNode(this,config);
     const device = RED.nodes.getNode(config.device);
     device.setMaxListeners(device.getMaxListeners() + 1); // увеличиваем лимит для event
     const id =JSON.parse(JSON.stringify(this.id));
     const name = config.name;
-    const stype = config.stype;
+    const stype = 'devices.properties.event';
+    const instance = config.instance;
     const reportable = true;
     const retrievable = true;
-    const unit = config.unit;
-    const instance = config.instance;
+    const events = config.events;
     let initState = false;
-    // this.value;
-    let curentState= {
+    let curentState = {
       type:stype,
       state:{
         instance: instance,
-        value: 0
+        value: ''
       }
     };
-
     this.status({fill:"red",shape:"dot",text:"offline"});
 
     this.init = ()=>{
       this.debug("Starting sensor initilization ...");
+      let objEvents=[]
+      events.forEach(v => {
+        objEvents.push({value:v})
+      });
       let sensor = {
         type: stype,
         reportable: reportable,
         retrievable: retrievable,
         parameters: {
           instance: instance,
-          unit: unit
+          events: objEvents
         }
       };
 
@@ -59,25 +61,21 @@ function AliceSensor(config){
     });
 
     this.on('input', (msg, send, done)=>{
-      if (typeof msg.payload != 'number'){
-        this.error("Wrong type! msg.payload must be number.");
+      if (!events.includes(msg.payload)){
+        this.error("Wrong type! msg.payload must be from the list of allowed events.");
         if (done) {done();}
         return;
       };
-      if (unit == 'unit.temperature.celsius'){
-        msg.payload = +msg.payload.toFixed(1);
-      }else {
-        msg.payload = +msg.payload.toFixed(0);
-      };
-      if (curentState.state.value == msg.payload){
+      if (curentState.state.value==msg.payload){
         this.debug("Value not changed. Cancel update");
         if (done) {done();}
         return;
+      }else{
+        curentState.state.value = msg.payload;
       };
-      curentState.state.value = msg.payload;
       device.updateSensorState(id,curentState)
       .then(ref=>{
-        this.status({fill:"green",shape:"dot",text: msg.payload});
+        this.status({fill:"green",shape:"dot",text: curentState.state.value});
         if (done) {done();}
       })
       .catch(err=>{
@@ -98,10 +96,9 @@ function AliceSensor(config){
           done();
         })
       }else{
-        device.setMaxListeners(device.getMaxListeners() - 1);
         done();
       }
     });
   }  
-  RED.nodes.registerType("Sensor",AliceSensor);
+  RED.nodes.registerType("Event",AliceEvent);
 };

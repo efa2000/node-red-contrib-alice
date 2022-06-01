@@ -52,6 +52,9 @@
             $('#submit_button').prop('disabled', false);
         });
     }
+    function ClearDataOnGateway(jToken) {
+
+    }
 </script>
 
 <script type="text/x-red" data-template-name="alice-service">    
@@ -78,7 +81,7 @@
             </div>
             <hr>
             <div class="form-row">
-                <p>Authentication result:</p>
+                <p><b>Authentication result:</b></p>
             </div>
             <div class="form-row">
                 <label for="node-config-input-email">Email</label>
@@ -96,6 +99,23 @@
                 <label for="node-config-input-token">Token</label>
                 <input type="password" id="node-config-input-token" disabled>
             </div>
+    </div>
+    <hr>
+    <div name="Clearing" style="display: none;">
+        <div class="form-row"><b>Сlear all data on the gateway</b></div>
+        <div class="form-row">
+            <p>1. Click the clear button</p>
+            <p>2. Wait for the success message</p>
+            <p>3. Сlose the window and do a full deploy</p>
+            <button 
+                onclick="ClearDataOnGateway($('#node-config-input-token').val())"
+                class="ui-button">
+                Сlear data on the gateway
+            </button>
+        </div>
+        <div class="form-tips" id="node-tip">
+            <span>Tip: Сlear all data on the gateway may take up to 15 seconds, please wait for success or error message.</span>
+        </div>  
     </div>
 </script>
 
