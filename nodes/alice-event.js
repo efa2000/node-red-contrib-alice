@@ -9,7 +9,7 @@ function AliceEvent(config){
     const stype = 'devices.properties.event';
     const instance = config.instance;
     const reportable = true;
-    const retrievable = true;
+    const retrievable = false;
     const events = config.events;
     let initState = false;
     let curentState = {
@@ -21,7 +21,7 @@ function AliceEvent(config){
     };
     this.status({fill:"red",shape:"dot",text:"offline"});
 
-    this.init = ()=>{
+    const init = ()=>{
       this.debug("Starting sensor initilization ...");
       let objEvents=[]
       events.forEach(v => {
@@ -50,10 +50,14 @@ function AliceEvent(config){
     };
 
 // Проверяем сам девайс уже инициирован 
-    if (device.initState) this.init();
+    if (device.initState) init();
 
     device.on("online",()=>{
-      this.init();
+      if (!initState){
+        init();
+      }else{
+        this.status({fill:"green",shape:"dot",text: curentState.state.value});
+      };
     });
 
     device.on("offline",()=>{
@@ -81,15 +85,15 @@ function AliceEvent(config){
         }, 1000);
       };
       device.updateSensorState(id,curentState)
-      .then(ref=>{
-        this.status({fill:"green",shape:"dot",text: curentState.state.value});
-        if (done) {done();}
-      })
-      .catch(err=>{
-        this.error("Error on update sensor state: " +err.message);
-        this.status({fill:"red",shape:"dot",text:"Error"});
-        if (done) {done();}
-      })
+        .then(ref=>{
+          this.status({fill:"green",shape:"dot",text: curentState.state.value});
+          if (done) {done();}
+        })
+        .catch(err=>{
+          this.error("Error on update sensor state: " +err.message);
+          this.status({fill:"red",shape:"dot",text:"Error"});
+          if (done) {done();}
+        })
     });
 
     this.on('close', function(removed, done) {
