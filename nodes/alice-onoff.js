@@ -67,7 +67,11 @@ function AliceOnOff(config){
     if (device.initState) this.init();
 
     device.on("online",()=>{
-      this.init();
+      if (initState){
+        this.status({fill:"green",shape:"dot",text:curentState.state.value});
+      }else{
+        this.init();
+      };
     });
 
     device.on("offline",()=>{

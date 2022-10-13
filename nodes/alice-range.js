@@ -14,8 +14,8 @@ module.exports = function(RED) {
     this.max = parseFloat(config.max);
     this.precision = parseFloat(config.precision);
     this.response = config.response;
-    this.initState = false;
-    this.value = null;
+    let initState = false;
+    let currentState = null;
 
     if (config.response === undefined){
       this.response = true;
@@ -48,7 +48,7 @@ module.exports = function(RED) {
 
       this.device.setCapability(this.id,capab)
       .then(res=>{
-        this.initState = true;
+        initState = true;
         this.status({fill:"green",shape:"dot",text:"online"});
       })
       .catch(err=>{
@@ -61,7 +61,11 @@ module.exports = function(RED) {
     if (this.device.initState) this.init();
 
     this.device.on("online",()=>{
-      this.init();
+      if (initState){
+        this.status({fill:"green",shape:"dot",text:currentState})
+      }else{
+        this.init();
+      }
     });
 
     this.device.on("offline",()=>{
@@ -72,7 +76,7 @@ module.exports = function(RED) {
       let value = val;
       //проверка является ли значение относительным и нужно ли отдавать полное значение
       if (fullstate.relative && this.retrievable){
-        value = this.value + val;
+        value = currentState + val;
         if (val<0 && value<this.min) value=this.min;
         if (val>0 && value>this.max) value=this.max;
       };
@@ -91,7 +95,7 @@ module.exports = function(RED) {
       if (this.response){
         this.device.updateCapabState(this.id,state)
         .then (res=>{
-          this.value = value;
+          currentState = value;
           this.status({fill:"green",shape:"dot",text:"online"});
         })
         .catch(err=>{
@@ -108,7 +112,7 @@ module.exports = function(RED) {
         if (done) {done();}
         return;
       }
-      if (value === this.value){
+      if (value === currentState){
         this.debug("Value not changed. Cancel update");
         if (done) {done();}
         return;
@@ -122,7 +126,7 @@ module.exports = function(RED) {
       };
       this.device.updateCapabState(this.id,state)
       .then(ref=>{
-        this.value = value;
+        currentState = value;
         this.status({fill:"green",shape:"dot",text:value});
         if (done) {done();}
       })

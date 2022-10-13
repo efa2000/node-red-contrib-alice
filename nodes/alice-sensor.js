@@ -23,7 +23,7 @@ function AliceSensor(config){
 
     this.status({fill:"red",shape:"dot",text:"offline"});
 
-    this.init = ()=>{
+    init = ()=>{
       this.debug("Starting sensor initilization ...");
       let sensor = {
         type: stype,
@@ -48,10 +48,14 @@ function AliceSensor(config){
     };
 
 // Проверяем сам девайс уже инициирован 
-    if (device.initState) this.init();
+    if (device.initState) init();
 
     device.on("online",()=>{
-      this.init();
+      if (initState){
+        this.status({fill:"green",shape:"dot",text: curentState.state.value});
+      }else{
+        init();
+      };
     });
 
     device.on("offline",()=>{
