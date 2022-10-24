@@ -8,8 +8,8 @@ module.exports = function(RED) {
     this.ctype = 'devices.capabilities.toggle';
     this.instance = config.instance;
     this.response = config.response;
-    let initState = false;
-    let currentState = false;
+    this.initState = false;
+    this.value = false;
 
     if (config.response === undefined){
         this.response = true;
@@ -29,8 +29,8 @@ module.exports = function(RED) {
       };
       this.device.setCapability(this.id,capab)
         .then(res=>{
-          initState = true;
-          // currentState = capab.state.value;
+          this.initState = true;
+          // this.value = capab.state.value;
           this.debug("Capability initilization - success!");
           this.status({fill:"green",shape:"dot",text:"online"});
         })
@@ -44,11 +44,7 @@ module.exports = function(RED) {
     if (this.device.initState) this.init();
 
     this.device.on("online",()=>{
-      if (initState){
-        this.status({fill:"green",shape:"dot",text:currentState});
-      }else{
-        this.init();
-      }
+      this.init();
     });
 
     this.device.on("offline",()=>{
@@ -71,7 +67,7 @@ module.exports = function(RED) {
         this.debug("Automatic confirmation is true, sending confirmation to Yandex ...");
         this.device.updateCapabState(this.id,state)
         .then (res=>{
-          currentState = val;
+          this.value = val;
           this.status({fill:"green",shape:"dot",text:val});
         })
         .catch(err=>{
@@ -87,7 +83,7 @@ module.exports = function(RED) {
         if (done) {done();}
         return;
       };
-      if (msg.payload === currentState){
+      if (msg.payload === this.value){
         this.debug("Value not changed. Cancel update");
         if (done) {done();}
         return;
@@ -101,7 +97,7 @@ module.exports = function(RED) {
       };
       this.device.updateCapabState(this.id,state)
       .then(ref=>{
-        currentState = msg.payload;
+        this.value = msg.payload;
         this.status({fill:"green",shape:"dot",text:msg.payload.toString()});
         if (done) {done();}
       })

@@ -10,14 +10,14 @@ module.exports = function(RED) {
     this.response = config.response;
     this.instance = config.instance;
     this.modes = config.modes;
-    let initState = false;
-    let currentValue;
+    this.initState = false;
+    this.value;
 
     if (config.response === undefined){
       this.response = true;
     }
 
-    init = _=>{
+    this.init = _=>{
       if (this.modes.length<1){
         this.status({fill:"red",shape:"dot",text:"error"});
         this.error("In the list of supported commands, there must be at least one command");
@@ -42,7 +42,7 @@ module.exports = function(RED) {
       };
       this.device.setCapability(this.id,capab)
       .then(res=>{
-        initState = true;
+        this.initState = true;
         this.status({fill:"green",shape:"dot",text:"online"});
       })
       .catch(err=>{
@@ -52,14 +52,10 @@ module.exports = function(RED) {
     };
 
     // Проверяем сам девайс уже инициирован 
-    if (this.device.initState) init();
+    if (this.device.initState) this.init();
 
     this.device.on("online",()=>{
-      if (initState){
-        this.status({fill:"green",shape:"dot",text:currentValue});
-      }else{
-        init();
-      }
+      this.init();
     });
 
     this.device.on("offline",()=>{
@@ -81,7 +77,7 @@ module.exports = function(RED) {
       if (this.response){
         this.device.updateCapabState(this.id,state)
         .then (res=>{
-          currentValue = value;
+          this.value = value;
           this.status({fill:"green",shape:"dot",text:"online"});
         })
         .catch(err=>{
@@ -105,7 +101,7 @@ module.exports = function(RED) {
         if (done) {done();}
         return;
       };
-      if (value === currentValue){
+      if (value === this.value){
         this.debug("Value not changed. Cancel update");
         if (done) {done();}
         return;
@@ -119,8 +115,8 @@ module.exports = function(RED) {
       };
       this.device.updateCapabState(this.id,state)
       .then(ref=>{
-        currentValue = value;
-        this.status({fill:"green",shape:"dot",text:currentValue});
+        this.value = value;
+        this.status({fill:"green",shape:"dot",text:value});
         if (done) {done();}
       })
       .catch(err=>{

@@ -67,11 +67,7 @@ function AliceVideo(config){
     if (device.initState) this.init();
 
     device.on("online",()=>{
-      if (initState){
-
-      }else{
-        this.init();
-      }
+      this.init();
     });
 
     device.on("offline",()=>{

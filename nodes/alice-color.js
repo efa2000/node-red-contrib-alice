@@ -3,36 +3,36 @@ module.exports = function(RED) {
   // ************** Color  *******************
   function AliceColor(config){
     RED.nodes.createNode(this,config);
-    const device = RED.nodes.getNode(config.device);
-    device.setMaxListeners(device.getMaxListeners() + 1); // увеличиваем лимит для event
-    const name = config.name;
-    const ctype = 'devices.capabilities.color_setting';
-    const instance = 'color_model';
-    let color_support = config.color_support;
-    let scheme = config.scheme;
-    const temperature_k = config.temperature_k;
-    const temperature_min = parseInt(config.temperature_min);
-    const temperature_max = parseInt(config.temperature_max);
-    const color_scene = config.color_scene || [];
-    let needConvert = false;
-    let response = config.response;
-    let initState = false;
-    let curentValue;
+    this.device = RED.nodes.getNode(config.device);
+    this.device.setMaxListeners(this.device.getMaxListeners() + 1); // увеличиваем лимит для event
+    this.name = config.name;
+    this.ctype = 'devices.capabilities.color_setting';
+    this.instance = 'color_model';
+    this.color_support = config.color_support;
+    this.scheme = config.scheme;
+    this.temperature_k = config.temperature_k;
+    this.temperature_min = parseInt(config.temperature_min);
+    this.temperature_max = parseInt(config.temperature_max);
+    this.color_scene = config.color_scene || [];
+    this.needConvert = false;
+    this.response = config.response;
+    this.initState = false;
+    this.value;
 
-    if (scheme == "rgb_normal"){
-      scheme = "rgb";
-      needConvert = true;
+    if (this.scheme == "rgb_normal"){
+      this.scheme = "rgb";
+      this.needConvert = true;
     };
     if (config.response === undefined){
-        response = true;
+        this.response = true;
     };
     if (config.color_support === undefined){
-      color_support = true
+      this.color_support = true
     };
 
-    init = ()=>{
+    this.init = ()=>{
       var value = 0;
-      if (scheme=="hsv"){
+      if (this.scheme=="hsv"){
         value = {
           h:0,
           s:0,
@@ -40,52 +40,52 @@ module.exports = function(RED) {
         };
       };
       let capab = {
-        type: ctype,
+        type: this.ctype,
         retrievable: true,
         reportable: true,
         parameters: {
-          // instance: scheme,//instance,
-          // color_model: scheme
+          // instance: this.scheme,//this.instance,
+          // color_model: this.scheme
         }
       };
-      if (!color_support && !temperature_k && color_scene.length<1){
+      if (!this.color_support && !this.temperature_k && this.color_scene.length<1){
           this.error("Error on create capability: " + "At least one parameter must be enabled");
           this.status({fill:"red",shape:"dot",text:"error"});
           return;
       };
-      if (color_scene.length>0){
+      if (this.color_scene.length>0){
         let scenes = [];
-        color_scene.forEach(s=>{
+        this.color_scene.forEach(s=>{
           scenes.push({id:s});
         });
         capab.parameters.color_scene = {
           scenes:scenes
         };
         // capab.state.instance = 'scene';
-        // capab.state.value = color_scene[0];
+        // capab.state.value = this.color_scene[0];
       };
-      if (color_support){
-        capab.parameters.color_model = scheme;
-        // capab.state.instance = scheme;
-        // if (scheme=="hsv"){
+      if (this.color_support){
+        capab.parameters.color_model = this.scheme;
+        // capab.state.instance = this.scheme;
+        // if (this.scheme=="hsv"){
         //   capab.state.value = {h:0,s:0,v:0};
         // }else{
         //   capab.state.value = 0;
         // }
       };
-      if (temperature_k){
+      if (this.temperature_k){
         capab.parameters.temperature_k = {
-          min: temperature_min,
-          max: temperature_max
+          min: this.temperature_min,
+          max: this.temperature_max
         };
         // capab.state.instance = 'temperature_k';
-        // capab.state.value = temperature_min;
+        // capab.state.value = this.temperature_min;
       };
 
-      device.setCapability(this.id,capab)
+      this.device.setCapability(this.id,capab)
         .then(res=>{
-          initState = true;
-          // curentValue = JSON.stringify(capab.state.value);
+          this.initState = true;
+          // this.value = JSON.stringify(capab.state.value);
           this.status({fill:"green",shape:"dot",text:"online"});
         })
         .catch(err=>{
@@ -95,21 +95,17 @@ module.exports = function(RED) {
     };
 
     // Проверяем сам девайс уже инициирован 
-    if (device.initState) init();
+    if (this.device.initState) this.init();
 
-    device.on("online",()=>{
-      if (initState){
-        this.status({fill:"green",shape:"dot",text:JSON.stringify(curentValue)});
-      }else{
-        init();
-      }
+    this.device.on("online",()=>{
+      this.init();
     });
 
-    device.on("offline",()=>{
+    this.device.on("offline",()=>{
       this.status({fill:"red",shape:"dot",text:"offline"});
     });
 
-    device.on(this.id,(val,newstate)=>{
+    this.device.on(this.id,(val,newstate)=>{
 // отправляем данные на выход
       let outmsgs=[null,null,null];
       switch (newstate.instance) {
@@ -135,16 +131,16 @@ module.exports = function(RED) {
       this.send(outmsgs);
 // возвращаем подтверждение в базу
       let state= {
-        type:ctype,
+        type:this.ctype,
         state:{
           instance:  newstate.instance,
           value: val
         }
       };
-      if (response){
-        device.updateCapabState(this.id,state)
+      if (this.response){
+        this.device.updateCapabState(this.id,state)
         .then (res=>{
-          curentValue = JSON.stringify(val);
+          this.value = JSON.stringify(val);
           this.status({fill:"green",shape:"dot",text:"online"});
         })
         .catch(err=>{
@@ -160,11 +156,11 @@ module.exports = function(RED) {
       switch (typeof value) {
         case 'object':
           if ((value.r>-1 && value.g>-1 && value.b>-1) || (value.h>-1 && value.s>-1 && value.v>-1)){
-            if (scheme == 'rgb'){
+            if (this.scheme == 'rgb'){
               value = value.r << 16 | value.g << 8 | value.b;
             };
             state.value = value;
-            state.instance = scheme
+            state.instance = this.scheme
           }else{
             this.error("Wrong type! For Color, msg.payload must be RGB or HSV Object.");
             if (done) {done();}
@@ -172,7 +168,7 @@ module.exports = function(RED) {
           }
           break;
         case 'number':
-          if (value>=temperature_min && value<=temperature_max){
+          if (value>=this.temperature_min && value<=this.temperature_max){
             state.value = value;
             state.instance = 'temperature_k';
           }else{
@@ -182,7 +178,7 @@ module.exports = function(RED) {
           }
           break;
         case 'string':
-          if (color_scene.includes(value)){
+          if (this.color_scene.includes(value)){
             state.value = value;
             state.instance = 'scene';
           }else{
@@ -197,19 +193,19 @@ module.exports = function(RED) {
           return;
       }
       
-      if (JSON.stringify(value) === curentValue){
+      if (JSON.stringify(value) === this.value){
         this.debug("Value not changed. Cancel update");
         if (done) {done();}
         return;
       };
       let upState= {
-        type:ctype,
+        type:this.ctype,
         state:state
       };
-      device.updateCapabState(this.id,upState)
+      this.device.updateCapabState(this.id,upState)
       .then(ref=>{
-        curentValue = JSON.stringify(value);
-        this.status({fill:"green",shape:"dot",text:JSON.stringify(curentValue)});
+        this.value = JSON.stringify(value);
+        this.status({fill:"green",shape:"dot",text:JSON.stringify(msg.payload)});
         if (done) {done();}
       })
       .catch(err=>{
@@ -221,7 +217,7 @@ module.exports = function(RED) {
 
     this.on('close', function(removed, done) {
       if (removed) {
-        device.delCapability(this.id)
+        this.device.delCapability(this.id)
         .then(res=>{
           done()
         })
