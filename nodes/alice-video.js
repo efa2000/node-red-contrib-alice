@@ -1,5 +1,5 @@
 module.exports = function(RED) {
-// ************** ON/OFF *******************
+// ************** VIDEO *******************
 function AliceVideo(config){
     RED.nodes.createNode(this,config);
     const device = RED.nodes.getNode(config.device);
@@ -7,27 +7,22 @@ function AliceVideo(config){
     const id =this.id;
     const name = config.name;
     const ctype = 'devices.capabilities.video_stream';
-    const instance = 'on';
-    let response = config.response;
-    let retrievable = config.retrievable;
-    let split = false;
+    const instance = 'get_stream';
+    const stream_url = config.stream_url;
+    const protocol = config.protocol;
+    const response = true;
+    const retrievable = false;
+    const reportable = false;
     let initState = false;
     let curentState = {
       type:ctype,
       state:{
         instance: instance,
-        value: false
+        value: {
+          stream_url: stream_url,
+          protocol: protocol
+        }
       }
-    };
-
-    if (config.response === undefined){
-        response = true;
-    };
-    if (config.retrievable === undefined){
-      retrievable = true;
-    };
-    if (!retrievable){
-      split = true;
     };
 
     this.status({fill:"red",shape:"dot",text:"offline"});
@@ -37,9 +32,10 @@ function AliceVideo(config){
       let capab = {
         type: ctype,
         retrievable: retrievable,
+        reportable: reportable,
         parameters: {
           instance: instance,
-          split: split
+          protocols: [protocol]
         }
       };
 
@@ -51,7 +47,7 @@ function AliceVideo(config){
       })
       .catch(err=>{
         this.error("Error on create capability: " + err.message);
-        this.status({fill:"red",shape:"dot",text:"error"});
+        this.status({fill:"red",shape:"dot",text:"Error"});
       });
       device.updateCapabState(id,curentState)
       .then (res=>{
@@ -75,14 +71,15 @@ function AliceVideo(config){
     });
 
     device.on(id,(val)=>{
-      this.send({
-        payload: val
-      });
+      // this.send({
+      //   payload: val
+      // });
       if (response){
-          curentState.state.value = val;
+          // curentState.state.value = val;
           device.updateCapabState(id,curentState)
           .then (res=>{
-            this.status({fill:"green",shape:"dot",text:val.toString()});
+            str_url = stream_url.slice(0,25) + "...";
+            this.status({fill:"green",shape:"dot",text:str_url});
           })
           .catch(err=>{
             this.error("Error on update capability state: " + err.message);
@@ -91,29 +88,29 @@ function AliceVideo(config){
       };
     })
 
-    this.on('input', (msg, send, done)=>{
-      if (typeof msg.payload != 'boolean'){
-        this.error("Wrong type! msg.payload must be boolean.");
-        if (done) {done();}
-        return;
-      };
-      if (msg.payload === curentState.state.value){
-        this.debug("Value not changed. Cancel update");
-        if (done) {done();}
-        return;
-      };
-      curentState.state.value = msg.payload;
-      device.updateCapabState(id,curentState)
-      .then(ref=>{
-        this.status({fill:"green",shape:"dot",text:msg.payload.toString()});
-        if (done) {done();}
-      })
-      .catch(err=>{
-        this.error("Error on update capability state: " + err.message);
-        this.status({fill:"red",shape:"dot",text:"Error"});
-        if (done) {done();}
-      })
-    });
+    // this.on('input', (msg, send, done)=>{
+    //   if (typeof msg.payload != 'boolean'){
+    //     this.error("Wrong type! msg.payload must be boolean.");
+    //     if (done) {done();}
+    //     return;
+    //   };
+    //   if (msg.payload === curentState.state.value){
+    //     this.debug("Value not changed. Cancel update");
+    //     if (done) {done();}
+    //     return;
+    //   };
+    //   curentState.state.value = msg.payload;
+    //   device.updateCapabState(id,curentState)
+    //   .then(ref=>{
+    //     this.status({fill:"green",shape:"dot",text:msg.payload.toString()});
+    //     if (done) {done();}
+    //   })
+    //   .catch(err=>{
+    //     this.error("Error on update capability state: " + err.message);
+    //     this.status({fill:"red",shape:"dot",text:"Error"});
+    //     if (done) {done();}
+    //   })
+    // });
 
     this.on('close', (removed, done)=>{
       device.setMaxListeners(device.getMaxListeners() - 1);

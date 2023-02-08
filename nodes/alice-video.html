@@ -5,28 +5,28 @@
             device: {value:"", type:"alice-device"},
             name: {value:""},
             protocol: { value:"hls" },
-            url:{ value:"", required: true }
+            stream_url:{ value:"", required: true }
         },
-        inputs:1,
-        outputs:1,
+        inputs:0,
+        outputs:0,
         icon: "alice.png",
         color: "#D8BFD8",
         label: function(){
             return this.name + ":video";
         },
-        oneditprepare: function(){
-            $("#node-input-protocol").typedInput({
-                types: [
-                    {
-                        value: "protocol",
-                        options: [
-                            { value: "hls", label: "HLS"},
-                            { value: "progressive_mp4", label: "Progressive mp4"},
-                        ]
-                    }
-                ]
-            });
-        },
+        // oneditprepare: function(){
+        //     $("#node-input-protocol").typedInput({
+        //         types: [
+        //             {
+        //                 value: "protocol",
+        //                 options: [
+        //                     { value: "hls", label: "HLS"},
+        //                     { value: "progressive_mp4", label: "Progressive mp4"},
+        //                 ]
+        //             }
+        //         ]
+        //     });
+        // },
         oneditsave: function(){
             deivcename = $('#node-input-device option:selected').text();
             $('#node-input-name').val(deivcename);
@@ -42,17 +42,23 @@
     </div>
     <div class="form-row">
         <label for="node-input-protocol">Protocol</label>
-        <input type="text" id="node-input-protocol">
+        <input type="text" id="node-input-protocol" disabled>
     </div>
     <div class="form-row">
-        <label for="node-input-url">URL</label>
-        <input type="text" id="node-input-url">
-        </label>
+        <label for="node-input-stream_url">URL</label>
+        <input type="text" id="node-input-stream_url">
+    </div>
+    <div class="form-tips" id="node-tip">
+        <span>Currently only supports the HLS stream protocol.<br>
+            Supported video codecs: H264.<br>
+            Maximum video resolution: 1920 x 1080.<br>
+            Supported audio codecs: AAC.
+        </span>
     </div>
 </script>
 
 <script type="text/x-red" data-help-name="Video">
-    <p>Allows the device to turn on and off</p>
+    <p>Getting a video stream from a camera.</p>
     
     <h3>Property</h3>
     <dl class="message-properties">
@@ -60,20 +66,25 @@
             <span class="property-type">Select</span>
         </dt>
         <dd> The device to which this feature is connected </dd>
-        <dt>Main button
-            <span class="property-type">checkbox</span>
+        <dt>Protocol
+            <span class="property-type">disabled</span>
         </dt>
-        <dd>The main button blocks access to other controls if the device is turned off.
-            When unchecking this, the controls will be available, but you will not be able to find out whether the device is on or off</dd>
-        <dt>Response
-            <span class="property-type">checkbox</span>
+        <dd>Currently only supports the HLS stream protocol.<br>
+            Supported video codecs: H264.<br>
+            Maximum video resolution: 1920 x 1080.<br>
+            Supported audio codecs: AAC.</dd>
+        <dt>URL
+            <span class="property-type">string</span>
         </dt>
-        <dd> In order for the device to respond to Alice that the command was successful, the corresponding value should arrive at the input within 2.5 seconds.
-            If your device takes longer or doesn’t return a confirmation at all, just check this box. </dd>
+        <dd>Stream URL with parameters.<br>
+            The URL must be accessible from the Internet<br>
+            In response to a request for a stream using this link, you need to pass headers:<br>
+            Content-type: application/vnd.apple.mpegurl<br>
+            Access-Control-Allow-Origin: https://yastatic.net</dd>
     </dl>
 
     <h3>References</h3>
         <ul>
-            <li><a href="https://yandex.ru/dev/dialogs/alice/doc/smart-home/concepts/capability-types-docpage/"> - Yandex documentation</a></li>
+            <li><a href="https://yandex.ru/dev/dialogs/smart-home/doc/concepts/video_stream.html"> - Yandex documentation</a></li>
         </ul>
     </script>

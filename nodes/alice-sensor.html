@@ -52,6 +52,15 @@
                         .val('unit.ppm')
                         .prop('disabled', 'disabled');
                     break;
+                    case 'food_level':
+                    $('#node-input-unit')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="unit.percent">Percent (%)</option>')
+                        .val('unit.percent')
+                        .prop('disabled', 'disabled');
+                    break;
                     case 'humidity':
                     $('#node-input-unit')
                         .find('option')
@@ -188,11 +197,10 @@
     <div class="form-row">
         <label for="node-input-instance">Sensor Type</label>
         <select id="node-input-instance" style="width: 70%;">
-            <!-- <option value="contact">Contact</option> -->
-            <!-- <option value="motion">Motion</option> -->
             <option value="amperage">Amperage</option>
             <option value="battery_level">Battery level</option>
             <option value="co2_level">CO2 level</option>
+            <option value="food_level">Food level</option>
             <option value="humidity">Humidity</option>
             <option value="illumination">Illumination</option>
             <option value="pm1_density">PM 1 density</option>

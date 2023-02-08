@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-alice",
-  "version": "1.1.5",
+  "version": "1.2.1",
   "description": "",
   "main": "alice.js",
   "scripts": {
@@ -31,7 +31,8 @@
       "alice-color": "./nodes/alice-color.js",
       "alice-mode": "./nodes/alice-mode.js",
       "alice-sensor": "./nodes/alice-sensor.js",
-      "alice-event": "./nodes/alice-event.js"
+      "alice-event": "./nodes/alice-event.js",
+      "alice-video": "./nodes/alice-video.js"
     }
   },
   "author": "Efa2000",
