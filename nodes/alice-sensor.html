@@ -174,6 +174,24 @@
                         .val('unit.density.mcg_m3')
                         .prop('disabled', 'disabled');
                     break;
+                    case 'sound_level':
+                    $('#node-input-unit')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="unit.db">Decibel (dB)</option>')
+                        .val('unit.db')
+                        .prop('disabled', 'disabled');
+                    break;
+                    case 'motion_level':
+                    $('#node-input-unit')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="unit.motion">Motion</option>')
+                        .val('unit.motion')
+                        .prop('disabled', 'disabled');
+                    break;                        
                     default:
                     $('#node-input-unit').prop('disabled', 'disabled');
                         break;
@@ -212,6 +230,8 @@
             <option value="tvoc">TVOC</option>
             <option value="voltage">Voltage</option>
             <option value="water_level">Water level</option>
+            <option value="sound_level">Sound level</option>
+            <option value="motion_level">Motion level</option>
         </select>
     </div>
     <!-- <div class="form-row">
@@ -233,6 +253,8 @@
             <option value="unit.watt">Watt (W)</option>
             <option value="unit.illumination.lux">Lux (lx)</option>
             <option value="unit.density.mcg_m3">μg/m3</option>
+            <option value="unit.sound">dB</option>
+            <option value="unit.motion"></option>
         </select>
     </div>
 </script>
