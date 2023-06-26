@@ -1,4 +1,5 @@
 
+<script src="https://widget.cloudpayments.ru/bundles/cloudpayments.js"></script>
 <script type="text/javascript">
     RED.nodes.registerType('alice-service',{
         category: 'config',
@@ -15,14 +16,64 @@
             return this.name || "Alice-Credentials";
         },
         oneditprepare:function(){
-
+            let em = $('#node-config-input-email').val();
+            let idt =  $('#node-config-input-id').val();
+            $.ajax({
+                url: "https://nodered-home.ru/api/v1/devices/count",
+                type:"POST",
+                headers: {
+                    'Content-Type':'application/json'
+                },
+                crossDomain: true,
+                contentType:"application/json",
+                data: JSON.stringify({
+                    id: idt,
+                    email: em
+                }),
+                dataType: "json",
+                format:"json"
+            })
+            .done(result=>{
+                $('#dev-on-gate').text(result.text)
+            })
+            .fail(error=>{
+                console.log(error)
+                console.error(error.responseJSON);
+                RED.notify("Error : "+error.responseJSON.message, {type:"error"});
+            });
+            getSubscribeStatus(idt,em,"subscribe-status");
         },
         oneditsave: function(){
             nodename = $('#node-config-input-email').val();
             $('#node-config-input-name').val(nodename);
         }
     });
-    
+    function getSubscribeStatus(id, email, contId){
+        $.ajax({
+                url: "https://nodered-home.ru/payment/getsubscribestatus",
+                type:"POST",
+                headers: {
+                    'Content-Type':'application/json'
+                },
+                crossDomain: true,
+                contentType:"application/json",
+                data: JSON.stringify({
+                    id: id,
+                    email: email
+                }),
+                dataType: "json",
+                format:"json"
+            })
+            .done(result=>{
+                // console.log(result);
+                $('#'+contId).text(result.text);
+            })
+            .fail(error=>{
+                console.log(error)
+                console.error(error.responseJSON);
+                RED.notify("Error : "+error.responseJSON.message, {type:"error"});
+            });
+    };
     function GetToken(code){
         RED.notify("Request has been sent. Please, wait",{type:"compact"});
         $('#verification_code').prop('disabled', true);
@@ -54,7 +105,56 @@
     }
     function ClearDataOnGateway(jToken) {
 
-    }
+    };
+    function pay(id, email) {
+        if (!id || !email){
+            RED.notify("Please authorize before purchasing a subscription", {type:"error"});
+            return;
+        };
+        $('#subscribe-button').prop('disabled', true);
+        RED.notify("Request has been sent. Please, wait",{type:"compact"});
+        let paymentWidget = new cp.CloudPayments();
+        $.ajax({
+            url: "https://nodered-home.ru/payment/create",
+            type:"POST",
+            headers: {
+                'Content-Type':'application/json'
+            },
+            crossDomain: true,
+            contentType:"application/json",
+            data: JSON.stringify({
+                id: id,
+                email: email
+            }),
+            dataType: "json",
+            format:"json"
+        })
+        .done(paydata=>{
+            // console.log(paydata);
+            paymentWidget.pay('auth', // или 'charge'
+                paydata,
+                {
+                    onSuccess: function (result) { // success
+                        //действие при успешной оплате
+                        // console.log('result', result);
+                    },
+                    onFail: function (reason, options) { // fail
+                        //действие при неуспешной оплате
+                    },
+                    onComplete: function (paymentResult, options) { //Вызывается как только виджет получает от api.cloudpayments ответ с результатом транзакции.
+                        //например вызов вашей аналитики Facebook Pixel
+                    }
+                }
+            );
+            $('#subscribe-button').prop('disabled', false);
+        })
+        .fail(error=>{
+            console.log(error)
+            console.error(error.responseJSON);
+            RED.notify("Error : "+error.responseJSON.message, {type:"error"});
+            $('#subscribe-button').prop('disabled', false);
+        })
+    };
 </script>
 
 <script type="text/x-red" data-template-name="alice-service">    
@@ -95,10 +195,31 @@
                 <label for="node-config-input-password">Password</label> -->
                 <input type="hidden" id="node-config-input-password" disabled>
             <!-- </div> -->
-            <div class="form-row">
+            <div class="form-row" style="display: none;">
                 <label for="node-config-input-token">Token</label>
                 <input type="password" id="node-config-input-token" disabled>
             </div>
+    </div>
+    <hr>
+    <div name="subcribtion">
+        <div class="form-row">
+            <p><b>Subscription:</b></p>
+        </div>
+        <div class="form-row">
+            <label for="node-config-input-token" style="width: 150px">Registered Devices:</label> <span id="dev-on-gate"></span> <br>
+            <label for="node-config-input-token" style="width: 150px">Subscription status:</label> <span id="subscribe-status"></span>
+            <div class="form-tips" id="node-tip-subscribe-warn">
+                <span>Important:</span><br>
+                <span> - By purchasing a subscription, you agree to the terms of the <a href="https://nodered-home.ru/public_offer.pdf" target="_blank">public offer</a></span><br>
+                <span> - View and manage your subscriptions <a href="https://my.cloudpayments.ru/ru/unsubscribe" target="_blank">here</a></span>
+                <div style="text-align: end">
+                    <button id="subscribe-button"
+                        onclick="pay($('#node-config-input-id').val(), $('#node-config-input-email').val())"
+                        class="ui-button">Buy a subscription
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
     <hr>
     <div name="Clearing" style="display: none;">
@@ -108,6 +229,7 @@
             <p>2. Wait for the success message</p>
             <p>3. Сlose the window and do a full deploy</p>
             <button 
+                style="margin-left: 150px; margin-top: 10px;"
                 onclick="ClearDataOnGateway($('#node-config-input-token').val())"
                 class="ui-button">
                 Сlear data on the gateway

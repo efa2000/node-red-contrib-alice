@@ -27,8 +27,13 @@ module.exports = function(RED) {
     mqttClient.on("message",(topic, payload)=>{
       const arrTopic = topic.split('/');
       const data = JSON.parse(payload);
+      this.trace("Incoming:" + topic);
       if (payload.length && typeof data === 'object'){
-        this.emit(arrTopic[3],data);
+        if (arrTopic[2]=='message'){
+          this.warn(data.text);
+        }else{
+          this.emit(arrTopic[3],data);
+        };
       }
     });
     mqttClient.on("connect",()=>{
@@ -37,7 +42,11 @@ module.exports = function(RED) {
       // Подписываемся на получение комманд 
       mqttClient.subscribe("$me/device/commands/+",_=>{
         this.debug("Yandex IOT client subscribed to the command");
-      }); 
+      });
+      // Подписываемся на получение сообщений 
+      mqttClient.subscribe("$me/device/message",_=>{
+        this.debug("Yandex IOT client subscribed to the message");
+      });
     });
     mqttClient.on("offline",()=>{
       this.debug("Yandex IOT client offline. ");
@@ -73,6 +82,7 @@ module.exports = function(RED) {
     this.send2gate= (path,data,retain)=>{
       // this.debug(path);
       // this.debug(data);
+      this.trace("Outgoing: "+path);
       mqttClient.publish(path, data ,{ qos: 0, retain: retain });
     }
 

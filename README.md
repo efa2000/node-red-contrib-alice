@@ -11,10 +11,6 @@
 ![NPM Total Downloads](https://img.shields.io/npm/dt/node-red-contrib-alice.svg)
 ![NPM Downloads per month](https://img.shields.io/npm/dm/node-red-contrib-alice)
 
-#### ВАЖНО !!!! Запущена новая версия сервиса. Если Вы ранее пользовались версией < 1.0.0 то после обновления потребуются дополнительные дествия. Инструкция по переходу здесь. [https://boosty.to/efa2000/posts/8c64ea4d-949a-4d18-b9c2-ecea3c1229e8](https://boosty.to/efa2000/posts/8c64ea4d-949a-4d18-b9c2-ecea3c1229e8?share=post_link)
-
-#### Этот некоммерческий проект, но Вы можете добровльно поддержать его развитие оформив подписку [https://boosty.to/efa2000](https://boosty.to/efa2000)
-
 #### Обсудить и получить поддержку от сообщества и автора можно в Телеграм канале [https://t.me/nodered_home_chat](https://t.me/nodered_home_chat)
 
 ## Инструкция (RUS)
@@ -40,6 +36,9 @@ npm install node-red-contrib-alice
 Для того, что бы устройство ответило Алисе, что комманда выполнена успешно, на вход должно прийти соответсвующее значение.
 Если ваше устройство отвечает дольше или совсем не возвращает подтверждение просто добавьте оставьте галочку Response включенной
 
+### Тарифы
+до 5-ти зарегистрированных на шлюзе устройств - бесплатно
+5-ть и более зарегистрированных на шлюзе устройств - 199 руб./мес. 
 
 ## Instruction (ENG - Google Translate)
 The module allows you to use Node-Red together with the Yandex.Alice voice assistant service (voice control of smart home devices)
