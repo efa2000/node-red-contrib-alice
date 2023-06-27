@@ -18,7 +18,16 @@
         oneditprepare:function(){
             let em = $('#node-config-input-email').val();
             let idt =  $('#node-config-input-id').val();
-            $.ajax({
+            getDeviceCount(idt,em,"dev-on-gate");
+            getSubscribeStatus(idt,em,"subscribe-status");
+        },
+        oneditsave: function(){
+            nodename = $('#node-config-input-email').val();
+            $('#node-config-input-name').val(nodename);
+        }
+    });
+    function getDeviceCount(id, email, contId){
+        $.ajax({
                 url: "https://nodered-home.ru/api/v1/devices/count",
                 type:"POST",
                 headers: {
@@ -27,27 +36,21 @@
                 crossDomain: true,
                 contentType:"application/json",
                 data: JSON.stringify({
-                    id: idt,
-                    email: em
+                    id: id,
+                    email: email
                 }),
                 dataType: "json",
                 format:"json"
             })
             .done(result=>{
-                $('#dev-on-gate').text(result.text)
+                $('#'+contId).text(result.text);
             })
             .fail(error=>{
                 console.log(error)
                 console.error(error.responseJSON);
                 RED.notify("Error : "+error.responseJSON.message, {type:"error"});
             });
-            getSubscribeStatus(idt,em,"subscribe-status");
-        },
-        oneditsave: function(){
-            nodename = $('#node-config-input-email').val();
-            $('#node-config-input-name').val(nodename);
-        }
-    });
+    };
     function getSubscribeStatus(id, email, contId){
         $.ajax({
                 url: "https://nodered-home.ru/payment/getsubscribestatus",
@@ -130,19 +133,19 @@
             format:"json"
         })
         .done(paydata=>{
-            // console.log(paydata);
+            console.log(paydata);
             paymentWidget.pay('auth', // или 'charge'
                 paydata,
                 {
                     onSuccess: function (result) { // success
                         //действие при успешной оплате
-                        // console.log('result', result);
                     },
                     onFail: function (reason, options) { // fail
                         //действие при неуспешной оплате
                     },
                     onComplete: function (paymentResult, options) { //Вызывается как только виджет получает от api.cloudpayments ответ с результатом транзакции.
                         //например вызов вашей аналитики Facebook Pixel
+
                     }
                 }
             );
