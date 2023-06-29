@@ -216,7 +216,6 @@ module.exports = function(RED) {
           capabIndex = cap.type+".";
         };
         const capId = capabilites[capabIndex];
-        // console.log("Emit",capId);
         this.emit(capId,cap.state.value, cap.state);
       });
     })

@@ -87,7 +87,6 @@ module.exports = function(RED) {
         }
       };
       // если установлено требование немедленно отвечать, отвечаем
-      console.log(this.response);
       if (this.response){
         this.device.updateCapabState(this.id,state)
         .then (res=>{

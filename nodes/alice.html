@@ -16,6 +16,8 @@
             return this.name || "Alice-Credentials";
         },
         oneditprepare:function(){
+            $('#dev-on-gate').text("checking ...");
+            $('#subscribe-status').text("checking ...");
             let em = $('#node-config-input-email').val();
             let idt =  $('#node-config-input-id').val();
             getDeviceCount(idt,em,"dev-on-gate");
@@ -43,7 +45,7 @@
                 format:"json"
             })
             .done(result=>{
-                $('#'+contId).text(result.text);
+                $('#'+contId).text(result.data.text);
             })
             .fail(error=>{
                 console.log(error)
@@ -69,7 +71,7 @@
             })
             .done(result=>{
                 // console.log(result);
-                $('#'+contId).text(result.text);
+                $('#'+contId).text(result.data.text);
             })
             .fail(error=>{
                 console.log(error)
@@ -110,6 +112,7 @@
 
     };
     function pay(id, email) {
+        console.log("Start pay");
         if (!id || !email){
             RED.notify("Please authorize before purchasing a subscription", {type:"error"});
             return;
@@ -117,6 +120,7 @@
         $('#subscribe-button').prop('disabled', true);
         RED.notify("Request has been sent. Please, wait",{type:"compact"});
         let paymentWidget = new cp.CloudPayments();
+        console.log("Start get pay confi");
         $.ajax({
             url: "https://nodered-home.ru/payment/create",
             type:"POST",
@@ -133,12 +137,20 @@
             format:"json"
         })
         .done(paydata=>{
-            console.log(paydata);
+            console.log("pay config done");
+            console.log("Start widget");
             paymentWidget.pay('auth', // или 'charge'
                 paydata,
                 {
                     onSuccess: function (result) { // success
                         //действие при успешной оплате
+                        let em = $('#node-config-input-email').val();
+                        let idt =  $('#node-config-input-id').val();
+                        $('#subscribe-status').text("checking ...");
+                        setTimeout(() => {
+                            getSubscribeStatus(idt,em,"subscribe-status");
+                        }, 2000);
+                        
                     },
                     onFail: function (reason, options) { // fail
                         //действие при неуспешной оплате
