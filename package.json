@@ -42,6 +42,6 @@
   },
   "homepage": "https://github.com/efa2000/node-red-contrib-alice#readme",
   "dependencies": {
-    "mqtt": "^4.3.4"
+    "mqtt": "^5.0.0"
   }
 }
