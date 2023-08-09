@@ -29,7 +29,7 @@ module.exports = function(RED) {
       const data = JSON.parse(payload);
       this.trace("Incoming:" + topic);
       if (payload.length && typeof data === 'object'){
-        if (arrTopic[2]=='message'){
+        if (arrTopic[3]=='message'){
           this.warn(data.text);
         }else{
           this.emit(arrTopic[3],data);
@@ -42,10 +42,6 @@ module.exports = function(RED) {
       // Подписываемся на получение комманд 
       mqttClient.subscribe("$me/device/commands/+",_=>{
         this.debug("Yandex IOT client subscribed to the command");
-      });
-      // Подписываемся на получение сообщений 
-      mqttClient.subscribe("$me/device/message",_=>{
-        this.debug("Yandex IOT client subscribed to the message");
       });
     });
     mqttClient.on("offline",()=>{
