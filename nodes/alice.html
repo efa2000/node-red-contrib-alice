@@ -16,11 +16,9 @@
             return this.name || "Alice-Credentials";
         },
         oneditprepare:function(){
-            // $('#dev-on-gate').text("checking ...");
             $('#subscribe-status').text("checking ...");
             let em = $('#node-config-input-email').val();
             let idt =  $('#node-config-input-id').val();
-            getDeviceCount(idt,em,"dev-on-gate");
             getSubscribeStatus(idt,em,"subscribe-status");
         },
         oneditsave: function(){
@@ -28,31 +26,6 @@
             $('#node-config-input-name').val(nodename);
         }
     });
-    // function getDeviceCount(id, email, contId){
-    //     $.ajax({
-    //             url: "https://nodered-home.ru/api/v1/devices/count",
-    //             type:"POST",
-    //             headers: {
-    //                 'Content-Type':'application/json'
-    //             },
-    //             crossDomain: true,
-    //             contentType:"application/json",
-    //             data: JSON.stringify({
-    //                 id: id,
-    //                 email: email
-    //             }),
-    //             dataType: "json",
-    //             format:"json"
-    //         })
-    //         .done(result=>{
-    //             $('#'+contId).text(result.data.text);
-    //         })
-    //         .fail(error=>{
-    //             console.log(error)
-    //             console.error(error.responseJSON);
-    //             RED.notify("Error : "+error.responseJSON.message, {type:"error"});
-    //         });
-    // };
     function getSubscribeStatus(id, email, contId){
         if (email.length < 3 || id.length < 3){
             return;
