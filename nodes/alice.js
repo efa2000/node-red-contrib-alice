@@ -27,7 +27,7 @@ module.exports = function(RED) {
     mqttClient.on("message",(topic, payload)=>{
       const arrTopic = topic.split('/');
       const data = JSON.parse(payload);
-      this.trace("Incoming:" + topic);
+      this.trace("Incoming:" + topic +" timestamp:"+new Date().getTime());
       if (payload.length && typeof data === 'object'){
         if (arrTopic[3]=='message'){
           this.warn(data.text);

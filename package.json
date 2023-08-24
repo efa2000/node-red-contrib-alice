@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-alice",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "",
   "main": "alice.js",
   "scripts": {
@@ -42,6 +42,7 @@
   },
   "homepage": "https://github.com/efa2000/node-red-contrib-alice#readme",
   "dependencies": {
-    "mqtt": "^4.3.4"
+    "axios": "^1.4.0",
+    "mqtt": "^5.0.3"
   }
 }
