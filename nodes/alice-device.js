@@ -73,10 +73,6 @@ module.exports = function(RED) {
       //   data = JSON.stringify(states);
       // };
       // service.send2gate('$me/device/state/'+this.id+'/states', data ,true);
-      let data = states;
-      if (states === null || (states.capabilities.length==0 && states.properties.length==0)){
-        data = null;
-      };
       const option = {
         timeout: 2000,
         method: 'POST',
@@ -90,7 +86,7 @@ module.exports = function(RED) {
           state: states
         }
       };
-      if (states === null || (states.capabilities.length==0 && states.properties.length==0)){
+      if (states === null){
         return;
       };
       axios.request(option)
