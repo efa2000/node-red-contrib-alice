@@ -1,7 +1,10 @@
+const axios = require('axios');
+
+
 module.exports = function(RED) {
     // ***************************** Alice DEVICE ****************************
   function AliceDevice(config){
-    var pjson = require('../package.json');
+    const pjson = require('../package.json');
     RED.nodes.createNode(this,config);
     const service = RED.nodes.getNode(config.service);
     service.setMaxListeners(service.getMaxListeners() + 1); // увеличиваем лимит для event
@@ -62,15 +65,41 @@ module.exports = function(RED) {
         }, 300);
       }
     };
-// функция обновления состояния умений и сенсоров 
-    this._updateDeviceState= ()=>{
-      let data;
+// функция обновления состояния устройства (умений и сенсоров) 
+    this._updateDeviceState= (event=null)=>{
+      // if (states === null || (states.capabilities.length==0 && states.properties.length==0)){
+      //   data = '';
+      // }else{
+      //   data = JSON.stringify(states);
+      // };
+      // service.send2gate('$me/device/state/'+this.id+'/states', data ,true);
+      let data = states;
       if (states === null || (states.capabilities.length==0 && states.properties.length==0)){
-        data = '';
-      }else{
-        data = JSON.stringify(states);
+        data = null;
       };
-      service.send2gate('$me/device/state/'+this.id+'/states', data ,true);
+      const option = {
+        timeout: 2000,
+        method: 'POST',
+        url: 'https://api.nodered-home.ru/gtw/device/state',
+        headers: {
+          'content-type': 'application/json',
+          'Authorization': "Bearer "+service.getToken()
+        },
+        data: {
+          event: event,
+          state: states
+        }
+      };
+      if (states === null || (states.capabilities.length==0 && states.properties.length==0)){
+        return;
+      };
+      axios.request(option)
+      .then(res=>{
+        this.trace("Device state updated successfully");
+      })
+      .catch(error=>{
+        this.error("Error when update device state: "+error.message);
+      })
     };
 // отправка эвентов
     this._sendEvent = (event)=>{
@@ -112,7 +141,7 @@ module.exports = function(RED) {
         sensors[sensorIndex] = sensId; // добавляем новый сенсор в локальный список 
         sensor.id = sensId;
         deviceconfig.properties.push(sensor);
-        this._updateDeviceInfo()
+        this._updateDeviceInfo();
         resolve(true);
       })
     };
@@ -129,7 +158,11 @@ module.exports = function(RED) {
           states.capabilities.splice(index, 1);
         };
         states.capabilities.push(state);
-        this._updateDeviceState();
+        const currentevent = {
+          id: this.id,
+          capabilities:[state]
+        };
+        this._updateDeviceState(currentevent);
         resolve(true);
         //   reject(new Error("Device not ready"));
       })
@@ -143,7 +176,11 @@ module.exports = function(RED) {
           states.properties.splice(index, 1);
         };
         states.properties.push(state);
-        this._updateDeviceState();
+        const currentevent = {
+          id: this.id,
+          properties:[state]
+        };
+        this._updateDeviceState(currentevent);
         resolve(true);
         //   reject(new Error("Device not ready"));
       })

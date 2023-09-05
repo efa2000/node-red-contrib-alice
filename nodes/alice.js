@@ -82,6 +82,10 @@ module.exports = function(RED) {
       mqttClient.publish(path, data ,{ qos: 0, retain: retain });
     }
 
+    this.getToken = ()=>{
+      return JSON.parse(token).access_token; 
+    }
+
   };
   RED.nodes.registerType("alice-service",AliceService,{
     credentials: {
