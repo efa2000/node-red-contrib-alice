@@ -73,8 +73,11 @@ module.exports = function(RED) {
       //   data = JSON.stringify(states);
       // };
       // service.send2gate('$me/device/state/'+this.id+'/states', data ,true);
+      if (states === null){
+        return;
+      };
       const option = {
-        timeout: 2000,
+        timeout: 4000,
         method: 'POST',
         url: 'https://api.nodered-home.ru/gtw/device/state',
         headers: {
@@ -85,9 +88,6 @@ module.exports = function(RED) {
           event: event,
           state: states
         }
-      };
-      if (states === null){
-        return;
       };
       axios.request(option)
       .then(res=>{
