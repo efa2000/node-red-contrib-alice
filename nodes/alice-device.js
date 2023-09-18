@@ -73,11 +73,8 @@ module.exports = function(RED) {
       //   data = JSON.stringify(states);
       // };
       // service.send2gate('$me/device/state/'+this.id+'/states', data ,true);
-      if (states === null){
-        return;
-      };
       const option = {
-        timeout: 4000,
+        timeout: 5000,
         method: 'POST',
         url: 'https://api.nodered-home.ru/gtw/device/state',
         headers: {
@@ -94,7 +91,7 @@ module.exports = function(RED) {
         this.trace("Device state updated successfully");
       })
       .catch(error=>{
-        this.error("Error when update device state: "+error.message);
+        this.debug("Error when update device state: "+error.message);
       })
     };
 // отправка эвентов
@@ -221,6 +218,7 @@ module.exports = function(RED) {
         if (stateindex>-1){
             states.properties.splice(stateindex, 1);
         };
+        this._updateDeviceState();
         resolve(true);
       })
     };
@@ -257,7 +255,8 @@ module.exports = function(RED) {
       this.emit('offline');
       if (removed){
         deviceconfig = null;
-        states = null;
+        states.capabilities = [];
+        states.properties = [];
         this._updateDeviceState();
         this._updateDeviceInfo(true);
       };
