@@ -168,6 +168,7 @@ module.exports = function(RED) {
           }
           break;
         case 'number':
+          value = Math.round(value);
           if (value>=this.temperature_min && value<=this.temperature_max){
             state.value = value;
             state.instance = 'temperature_k';
