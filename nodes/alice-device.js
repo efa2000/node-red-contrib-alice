@@ -42,37 +42,65 @@ module.exports = function(RED) {
       this.initState = true;
     };
 // функция обновления информации об устройстве    
-    this._updateDeviceInfo= (now)=>{
-      let data;
-      if (deviceconfig === null || (deviceconfig.capabilities.length==0 && deviceconfig.properties.length==0)){
-        data = '';
-      }else{
-        data = JSON.stringify(deviceconfig);
-      };
-      if (now){
-        this.debug("Updating Device info ...");
-        service.send2gate('$me/device/state/'+this.id, data ,true);
+    this._updateDeviceInfo= _=>{
+      let now = false;
+
+      if (deviceconfig.capabilities.length==0 && deviceconfig.properties.length==0){
+        this.debug("DELETE Device config from gateway ...");
+        /// отправка по http 
+        const option = {
+          timeout: 5000,
+          method: 'POST',
+          url: 'https://api.nodered-home.ru/gtw/device/config',
+          headers: {
+            'content-type': 'application/json',
+            'Authorization': "Bearer "+service.getToken()
+          },
+          data: {
+            id: this.id,
+            config: deviceconfig
+          }
+        };
+        axios.request(option)
+        .then(res=>{
+          this.trace("Device config deleted on gateway successfully");
+        })
+        .catch(error=>{
+          this.debug("Error when delete device config on gateway: "+error.message);
+        });
         return;
       };
+
       if (!updating){
         updating = true;
         setTimeout(() => {
-          this.debug("Updating Device info ...");
+          this.debug("Updating Device config ...");
           updating = false;
-          let nData = JSON.stringify(deviceconfig);
-          if (deviceconfig === null){ nData = ''};
-          service.send2gate('$me/device/state/'+this.id, nData ,true);
-        }, 300);
+          const option = {
+            timeout: 5000,
+            method: 'POST',
+            url: 'https://api.nodered-home.ru/gtw/device/config',
+            headers: {
+              'content-type': 'application/json',
+              'Authorization': "Bearer "+service.getToken()
+            },
+            data: {
+              id: this.id,
+              config: deviceconfig
+            }
+          };
+          axios.request(option)
+          .then(res=>{
+            this.trace("Device config updated successfully");
+          })
+          .catch(error=>{
+            this.debug("Error when update device config: "+error.message);
+          });
+        }, 1000);
       }
     };
 // функция обновления состояния устройства (умений и сенсоров) 
     this._updateDeviceState= (event=null)=>{
-      // if (states === null || (states.capabilities.length==0 && states.properties.length==0)){
-      //   data = '';
-      // }else{
-      //   data = JSON.stringify(states);
-      // };
-      // service.send2gate('$me/device/state/'+this.id+'/states', data ,true);
       const option = {
         timeout: 5000,
         method: 'POST',
@@ -82,6 +110,7 @@ module.exports = function(RED) {
           'Authorization': "Bearer "+service.getToken()
         },
         data: {
+          id: this.id,
           event: event,
           state: states
         }
@@ -254,16 +283,17 @@ module.exports = function(RED) {
     this.on('close', (removed, done)=>{
       this.emit('offline');
       if (removed){
-        deviceconfig = null;
+        deviceconfig.capabilities = [];
+        deviceconfig.properties = [];
         states.capabilities = [];
         states.properties = [];
         this._updateDeviceState();
-        this._updateDeviceInfo(true);
+        this._updateDeviceInfo();
       };
       setTimeout(()=>{
         // this.emit('offline');
         done();
-      },300)
+      },500)
     });
   };
   RED.nodes.registerType("alice-device",AliceDevice);
