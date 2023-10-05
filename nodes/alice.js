@@ -1,4 +1,5 @@
 const mqtt = require('mqtt');
+const axios = require('axios');
 
 module.exports = function(RED) {
   //Sevice node, Alice-Service (credential)
@@ -10,6 +11,29 @@ module.exports = function(RED) {
     const login = this.credentials.id;
     const password = this.credentials.password;
     const token = this.credentials.token;
+
+    const suburl = Buffer.from(email).toString('base64');
+    RED.httpAdmin.get("/noderedhome/"+suburl+"/clearalldevice",(req,res)=>{
+      const option = {
+        method: 'POST',
+        url: 'https://api.nodered-home.ru/gtw/device/clearallconfigs',
+        headers: {
+          'content-type': 'application/json',
+          'Authorization': "Bearer "+this.getToken()
+        },
+        data: {}
+      };
+      axios.request(option)
+      .then(result=>{
+        this.trace("All devices configs deleted on gateway successfully");
+        // console.log(result)
+        res.sendStatus(200);
+      })
+      .catch(error=>{
+        this.debug("Error when delete All devices configs deleted on gateway: "+error.message);
+        res.sendStatus(500);
+      });
+    });
 
     this.isOnline = false;
     if (!token){
@@ -96,4 +120,6 @@ module.exports = function(RED) {
     }
   });
 };
+
+
 

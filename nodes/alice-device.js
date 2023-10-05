@@ -1,6 +1,5 @@
 const axios = require('axios');
 
-
 module.exports = function(RED) {
     // ***************************** Alice DEVICE ****************************
   function AliceDevice(config){

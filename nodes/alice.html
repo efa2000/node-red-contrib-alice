@@ -56,6 +56,7 @@
             });
     };
     function GetToken(code){
+        console.log(this.id);
         RED.notify("Request has been sent. Please, wait",{type:"compact"});
         $('#verification_code').prop('disabled', true);
         $('#submit_button').prop('disabled', true);
@@ -84,8 +85,19 @@
             $('#submit_button').prop('disabled', false);
         });
     }
-    function ClearDataOnGateway(jToken) {
-
+    function ClearDevicesConfigOnGateway(email) {
+        RED.notify("Request has been sent. Please, wait",{type:"compact"});
+        const suburl = btoa(email);
+        $.ajax({
+            url: "/noderedhome/"+suburl+"/clearalldevice",
+            type:"GET"
+        })
+        .done(result=>{
+            RED.notify("All configs have been successfully cleared", {type:"success"});
+        })
+        .fail(error=>{
+            RED.notify("Error when deleting configs on the gateway", {type:"error"});
+        })
     };
     function pay(id, email) {
         console.log("Start pay");
@@ -203,11 +215,6 @@
                 <span> - By purchasing a subscription, you agree to the terms of the <a href="https://nodered-home.ru/public_offer.pdf" target="_blank">public offer</a></span><br>
                 <span> - View and manage your subscriptions <a href="https://my.cloudpayments.ru/ru/unsubscribe" target="_blank">here</a></span>
                 <div style="text-align: end">
-                    <!-- <label for="node-input-subList" style="text-align: start">Period:</label>
-                    <select id="node-input-subList" style="width:70%; margin-top:10px; margin-bottom:10px;">
-                        <option value=1>1 month - 199 rubles</option>
-                        <option value=12>12 month - 2 300 rubles</option>
-                    </select> -->
                     <button id="subscribe-button"
                         onclick="pay($('#node-config-input-id').val(), $('#node-config-input-email').val())"
                         class="ui-button">Buy a subscription
@@ -217,21 +224,18 @@
         </div>
     </div>
     <hr>
-    <div name="Clearing" style="display: none;">
-        <div class="form-row"><b>Сlear all data on the gateway</b></div>
-        <div class="form-row">
-            <p>1. Click the clear button</p>
-            <p>2. Wait for the success message</p>
-            <p>3. Сlose the window and do a full deploy</p>
-            <button 
-                style="margin-left: 150px; margin-top: 10px;"
-                onclick="ClearDataOnGateway($('#node-config-input-token').val())"
-                class="ui-button">
-                Сlear data on the gateway
-            </button>
-        </div>
+    <div name="Clearing">
+        <div class="form-row"><b>Сlear all data and configs on the gateway</b></div>
         <div class="form-tips" id="node-tip">
-            <span>Tip: Сlear all data on the gateway may take up to 15 seconds, please wait for success or error message.</span>
+            <span>Tip: Сlear all data on the gateway may take up to 15 seconds, please wait for success or error message. When finished, make a full deployment to update the settings on the gateway.</span>
+            <div style="text-align: end">
+                <button 
+                    style="margin-left: 150px; margin-top: 10px;"
+                    onclick="ClearDevicesConfigOnGateway($('#node-config-input-email').val())"
+                    class="ui-button">
+                    Сlear data on the gateway
+                </button>
+            </div>
         </div>  
     </div>
 </script>
