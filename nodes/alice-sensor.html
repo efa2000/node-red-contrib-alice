@@ -86,7 +86,6 @@
                         .end()
                         .append('<option value="unit.temperature.celsius">Celsius</option>')
                         .append('<option value="unit.temperature.kelvin">Kelvin</option>')
-                        // .val('unit.temperature.celsius')
                         .prop('disabled', false);
                     if (this.unit && this.unit.includes("unit.temperature")){
                         $('#node-input-unit').val(this.unit);
@@ -174,6 +173,51 @@
                         .val('unit.density.mcg_m3')
                         .prop('disabled', 'disabled');
                     break;
+                    case 'electricity_meter':
+                    $('#node-input-unit')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="unit.kilowatt_hour">kW⋅h</option>')
+                        .val('unit.kilowatt_hour')
+                        .prop('disabled', 'disabled');
+                    break;
+                    case 'gas_meter':
+                    $('#node-input-unit')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="unit.cubic_meter">m3</option>')
+                        .val('unit.cubic_meter')
+                        .prop('disabled', 'disabled');
+                    break;
+                    case 'heat_meter':
+                    $('#node-input-unit')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="unit.gigacalorie">Gcal</option>')
+                        .val('unit.gigacalorie')
+                        .prop('disabled', 'disabled');
+                    break;
+                    case 'water_meter':
+                    $('#node-input-unit')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="unit.cubic_meter">m3</option>')
+                        .val('unit.cubic_meter')
+                        .prop('disabled', 'disabled');
+                    break;
+                    case 'meter':
+                    $('#node-input-unit')
+                        .find('option')
+                        .remove()
+                        .end()
+                        // .append('<option value="unit.gigacalorie">Gcal</option>')
+                        // .val('unit.gigacalorie')
+                        .prop('disabled', 'disabled');
+                    break;
                     default:
                     $('#node-input-unit').prop('disabled', 'disabled');
                         break;
@@ -212,15 +256,13 @@
             <option value="tvoc">TVOC</option>
             <option value="voltage">Voltage</option>
             <option value="water_level">Water level</option>
+            <option value="electricity_meter">Electricity counter</option>
+            <option value="gas_meter">Gas counter</option>
+            <option value="water_meter">Water counter</option>
+            <option value="meter">Universal counter</option>
         </select>
     </div>
-    <!-- <div class="form-row">
-        <label for="node-input-stype">Data Type</label>
-        <select id="node-input-stype" style="width: 70%;" disabled>
-            <option value="devices.properties.float">Number (float)</option>
-            <option value="devices.properties.bool">Boolean (true/false)</option>
-        </select>
-    </div> -->
+
     <div class="form-row">
         <label for="node-input-unit">Unit</label>
         <select id="node-input-unit" style="width: 70%;">
