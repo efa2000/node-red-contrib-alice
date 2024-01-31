@@ -37,6 +37,7 @@ function AliceOnOff(config){
       let capab = {
         type: ctype,
         retrievable: retrievable,
+        reportable: true,
         parameters: {
           instance: instance,
           split: split

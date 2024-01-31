@@ -35,6 +35,7 @@ module.exports = function(RED) {
       let capab = {
         type: this.ctype,
         retrievable: this.retrievable,
+        reportable: true,
         parameters: {
           instance: this.instance,
           modes: cfgModes
