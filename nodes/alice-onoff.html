@@ -5,7 +5,8 @@
             device: {value:"", type:"alice-device"},
             name: {value:""},
             retrievable: {value:true},
-            response:{value:true}
+            response:{value:true},
+            split: {value:false}
         },
         inputs:1,
         outputs:1,
@@ -18,8 +19,8 @@
             if (this.response === undefined){
                 $( "#node-input-response").prop('checked', true);
             };
-            if (this.retrievable === undefined){
-                $( "#node-input-retrievable").prop('checked', true);
+            if (this.retrievable === false){
+                $( "#node-input-split").prop('checked', true);
             }
         },
         oneditsave: function(){
@@ -36,9 +37,9 @@
         <input id="node-input-device">
     </div>
     <div class="form-row">
-        <label for="node-input-retrievable"><i class="fa fa-power-off"></i> <span >Main button</span></label>
-        <label for="node-input-retrievable" style="width:70%">
-        <input type="checkbox" id="node-input-retrievable" style="display:inline-block; width:22px; vertical-align:baseline;" autocomplete="off"><span>Disable other controls if the device is turned off</span>
+        <label for="node-input-split"><i class="fa fa-power-off"></i> <span >Split button</span></label>
+        <label for="node-input-split" style="width:70%">
+        <input type="checkbox" id="node-input-split" style="display:inline-block; width:22px; vertical-align:baseline;" autocomplete="off"><span>Split On/Off button</span>
         </label>
     </div>
     <div class="form-row">

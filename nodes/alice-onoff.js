@@ -9,8 +9,7 @@ function AliceOnOff(config){
     const ctype = 'devices.capabilities.on_off';
     const instance = 'on';
     let response = config.response;
-    let retrievable = config.retrievable;
-    let split = false;
+    let split = config.split;
     let initState = false;
     let curentState = {
       type:ctype,
@@ -23,10 +22,7 @@ function AliceOnOff(config){
     if (config.response === undefined){
         response = true;
     };
-    if (config.retrievable === undefined){
-      retrievable = true;
-    };
-    if (!retrievable){
+    if (!config.retrievable){
       split = true;
     };
 
@@ -36,7 +32,7 @@ function AliceOnOff(config){
       this.debug("Starting capability initilization ...");
       let capab = {
         type: ctype,
-        retrievable: retrievable,
+        retrievable: true,
         reportable: true,
         parameters: {
           instance: instance,
