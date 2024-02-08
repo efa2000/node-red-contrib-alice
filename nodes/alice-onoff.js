@@ -5,7 +5,6 @@ function AliceOnOff(config){
     const device = RED.nodes.getNode(config.device);
     device.setMaxListeners(device.getMaxListeners() + 1); // увеличиваем лимит для event
     const id =JSON.parse(JSON.stringify(this.id));
-    const name = config.name;
     const ctype = 'devices.capabilities.on_off';
     const instance = 'on';
     let response = config.response;
@@ -22,8 +21,8 @@ function AliceOnOff(config){
     if (config.response === undefined){
         response = true;
     };
-    if (!config.retrievable){
-      split = true;
+    if (config.split === undefined){
+      split = false;
     };
 
     this.status({fill:"red",shape:"dot",text:"offline"});

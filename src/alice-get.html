@@ -1,0 +1,30 @@
+<script type="text/javascript">
+    RED.nodes.registerType('Alice-Get',{
+        category: 'alice',
+        inputs:1,
+        outputs:1,
+        icon: "alice.png",
+        color: "#D8BFD8",
+        defaults:{
+            service: {value:"", type:"alice-service"},
+            name: {value:null, required: false},
+        },
+        label: function(){
+            return this.name || "Alice-Get";
+        },
+        oneditprepare: ()=>{
+            
+        }
+    })
+</script>
+
+<script type="text/x-red" data-template-name="Alice-Get">
+    <div class="form-row">
+        <label for="node-input-service">Credentials</label>
+        <input id="node-input-service">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-name">Name</label>
+        <input type="text" id="node-config-input-name" placeholder="Name">
+    </div>
+</script>
