@@ -1,13 +1,11 @@
 {
   "name": "node-red-contrib-alice",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "description": "",
-  "main": "alice.js",
   "scripts": {
     "start": "npm run build && node-red",
     "build": "tsc && npm run copy-html",
-    "copy-html": "cp ./src/*.html ./nodes/",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "copy-html": "cp ./src/*.html ./nodes/"
   },
   "repository": {
     "type": "git",
@@ -50,11 +48,32 @@
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
+    "@types/mqtt": "^2.5.0",
     "@types/node": "^20.11.16",
     "@types/node-red": "^1.3.4",
     "@typescript-eslint/eslint-plugin": "^6.20.0",
     "@typescript-eslint/parser": "^6.20.0",
     "eslint": "^8.56.0",
+    "nodemon": "^3.0.3",
     "typescript": "^5.3.3"
+  },
+  "nodemonConfig": {
+    "ignoreRoot" : [".git", "test"],
+    "restartable": "rs",
+    "ignore": [
+      "node_modules/**/node_modules",
+      "node_modules/**/test",
+      "*.log"
+    ],
+    "verbose": true,
+    "delay": "1000",
+    "events": {
+      "restart": "echo ------ restarted due to: $FILENAME ------"
+    },
+    "watch": [
+      "src/",
+      "node_modules/node-red-*"
+    ],
+    "ext": "js json htm html css"
   }
 }

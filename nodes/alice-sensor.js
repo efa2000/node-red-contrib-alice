@@ -64,7 +64,7 @@ function AliceSensor(config){
         if (done) {done();}
         return;
       };
-      if (unit == 'unit.temperature.celsius'){
+      if (unit == 'unit.temperature.celsius' || unit == 'unit.ampere'){
         msg.payload = +msg.payload.toFixed(1);
       }else {
         msg.payload = +msg.payload.toFixed(0);
