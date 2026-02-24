@@ -1,0 +1,90 @@
+<script type="text/javascript">
+    RED.nodes.registerType('Video',{
+        category: 'alice',
+        defaults:{
+            device: {value:"", type:"alice-device"},
+            name: {value:""},
+            protocol: { value:"hls" },
+            stream_url:{ value:"", required: true }
+        },
+        inputs:0,
+        outputs:0,
+        icon: "alice.png",
+        color: "#D8BFD8",
+        label: function(){
+            return this.name + ":video";
+        },
+        // oneditprepare: function(){
+        //     $("#node-input-protocol").typedInput({
+        //         types: [
+        //             {
+        //                 value: "protocol",
+        //                 options: [
+        //                     { value: "hls", label: "HLS"},
+        //                     { value: "progressive_mp4", label: "Progressive mp4"},
+        //                 ]
+        //             }
+        //         ]
+        //     });
+        // },
+        oneditsave: function(){
+            deivcename = $('#node-input-device option:selected').text();
+            $('#node-input-name').val(deivcename);
+        }
+    })
+</script>
+
+<script type="text/x-red" data-template-name="Video">
+    <input type="hidden" id="node-input-name">
+    <div class="form-row">
+        <label for="node-input-device">Device</label>
+        <input id="node-input-device">
+    </div>
+    <div class="form-row">
+        <label for="node-input-protocol">Protocol</label>
+        <input type="text" id="node-input-protocol" disabled>
+    </div>
+    <div class="form-row">
+        <label for="node-input-stream_url">URL</label>
+        <input type="text" id="node-input-stream_url">
+    </div>
+    <div class="form-tips" id="node-tip">
+        <span>Currently only supports the HLS stream protocol.<br>
+            Supported video codecs: H264.<br>
+            Maximum video resolution: 1920 x 1080.<br>
+            Supported audio codecs: AAC.
+        </span>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="Video">
+    <p>Getting a video stream from a camera.</p>
+    
+    <h3>Property</h3>
+    <dl class="message-properties">
+        <dt>Device
+            <span class="property-type">Select</span>
+        </dt>
+        <dd> The device to which this feature is connected </dd>
+        <dt>Protocol
+            <span class="property-type">disabled</span>
+        </dt>
+        <dd>Currently only supports the HLS stream protocol.<br>
+            Supported video codecs: H264.<br>
+            Maximum video resolution: 1920 x 1080.<br>
+            Supported audio codecs: AAC.</dd>
+        <dt>URL
+            <span class="property-type">string</span>
+        </dt>
+        <dd>Stream URL with parameters.<br>
+            The URL must be accessible from the Internet<br>
+            In response to a request for a stream using this link, you need to pass headers:<br>
+            Content-type: application/vnd.apple.mpegurl<br>
+            Access-Control-Allow-Origin: https://yastatic.net</dd>
+    </dl>
+
+    <h3>References</h3>
+        <ul>
+            <li><a href="https://yandex.ru/dev/dialogs/smart-home/doc/concepts/video_stream.html"> - Yandex documentation</a></li>
+        </ul>
+    </script>

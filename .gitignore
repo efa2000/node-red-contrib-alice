@@ -65,3 +65,6 @@ typings/
 
 # vscode
 .vscode
+
+# Source maps
+*.js.map

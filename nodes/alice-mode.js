@@ -1,146 +1,137 @@
-module.exports = function(RED) {
-      // ************** Modes  *******************
-  function AliceMode(config){
-    RED.nodes.createNode(this,config);
-    this.device = RED.nodes.getNode(config.device);
-    this.name = config.name;
-    this.ctype = 'devices.capabilities.mode';
-    this.retrievable = true;
-    this.random_access = true;
-    this.response = config.response;
-    this.instance = config.instance;
-    this.modes = config.modes;
-    this.initState = false;
-    this.value;
-
-    if (config.response === undefined){
-      this.response = true;
+"use strict";
+module.exports = (RED) => {
+    function AliceMode(config) {
+        RED.nodes.createNode(this, config);
+        const device = RED.nodes.getNode(config.device);
+        const ctype = 'devices.capabilities.mode';
+        const instance = config.instance || '';
+        const modes = config.modes;
+        let response = config.response;
+        let value;
+        if (config.response === undefined) {
+            response = true;
+        }
+        const init = () => {
+            if (modes.length < 1) {
+                this.status({ fill: "red", shape: "dot", text: "error" });
+                this.error("In the list of supported commands, there must be at least one command");
+                return;
+            }
+            if (!instance) {
+                this.status({ fill: "red", shape: "dot", text: "error" });
+                this.error("Mode type not selected");
+                return;
+            }
+            const cfgModes = modes.map(v => ({ value: v }));
+            const capab = {
+                type: ctype,
+                retrievable: true,
+                reportable: true,
+                parameters: {
+                    instance: instance,
+                    modes: cfgModes
+                }
+            };
+            device.setCapability(this.id, capab)
+                .then(() => {
+                this.status({ fill: "green", shape: "dot", text: "online" });
+            })
+                .catch(err => {
+                this.error("Error on create capability: " + err.message);
+                this.status({ fill: "red", shape: "dot", text: "error" });
+            });
+        };
+        if (device.initState)
+            init();
+        device.on("online", () => {
+            init();
+        });
+        device.on("offline", () => {
+            this.status({ fill: "red", shape: "dot", text: "offline" });
+        });
+        device.on(this.id, (val) => {
+            this.send({ payload: val });
+            const state = {
+                type: ctype,
+                state: {
+                    instance: instance,
+                    value: val
+                }
+            };
+            if (response) {
+                device.updateCapabState(this.id, state)
+                    .then(() => {
+                    value = val;
+                    this.status({ fill: "green", shape: "dot", text: "online" });
+                })
+                    .catch(err => {
+                    this.error("Error on update capability state: " + err.message);
+                    this.status({ fill: "red", shape: "dot", text: "Error" });
+                });
+            }
+        });
+        this.on('input', (msg, _send, done) => {
+            const newValue = msg.payload;
+            if (typeof newValue != 'string') {
+                this.error("Wrong type! msg.payload must be String.");
+                this.status({ fill: "red", shape: "dot", text: "Error" });
+                if (done) {
+                    done();
+                }
+                return;
+            }
+            if (modes.indexOf(newValue) < 0) {
+                this.error("Error! Unsupported command.");
+                this.status({ fill: "red", shape: "dot", text: "Error" });
+                if (done) {
+                    done();
+                }
+                return;
+            }
+            if (newValue === value) {
+                this.debug("Value not changed. Cancel update");
+                if (done) {
+                    done();
+                }
+                return;
+            }
+            const state = {
+                type: ctype,
+                state: {
+                    instance: instance,
+                    value: newValue
+                }
+            };
+            device.updateCapabState(this.id, state)
+                .then(() => {
+                value = newValue;
+                this.status({ fill: "green", shape: "dot", text: newValue });
+                if (done) {
+                    done();
+                }
+            })
+                .catch(err => {
+                this.error("Error on update capability state: " + err.message);
+                this.status({ fill: "red", shape: "dot", text: "Error" });
+                if (done) {
+                    done();
+                }
+            });
+        });
+        this.on('close', (removed, done) => {
+            if (removed) {
+                device.delCapability(this.id)
+                    .then(() => { done(); })
+                    .catch(err => {
+                    this.error("Error on delete capability: " + err.message);
+                    done();
+                });
+            }
+            else {
+                done();
+            }
+        });
     }
-
-    this.init = _=>{
-      if (this.modes.length<1){
-        this.status({fill:"red",shape:"dot",text:"error"});
-        this.error("In the list of supported commands, there must be at least one command");
-        return;
-      };
-      if (!this.instance){
-        this.status({fill:"red",shape:"dot",text:"error"});
-        this.error("Mode type not selected");
-        return;
-      };
-      var cfgModes = [];
-      this.modes.forEach(v=>{
-        cfgModes.push({value:v});
-      });
-      let capab = {
-        type: this.ctype,
-        retrievable: this.retrievable,
-        reportable: true,
-        parameters: {
-          instance: this.instance,
-          modes: cfgModes
-        }
-      };
-      this.device.setCapability(this.id,capab)
-      .then(res=>{
-        this.initState = true;
-        this.status({fill:"green",shape:"dot",text:"online"});
-      })
-      .catch(err=>{
-        this.error("Error on create capability: " + err.message);
-        this.status({fill:"red",shape:"dot",text:"error"});
-      });
-    };
-
-    // Проверяем сам девайс уже инициирован 
-    if (this.device.initState) this.init();
-
-    this.device.on("online",()=>{
-      this.init();
-    });
-
-    this.device.on("offline",()=>{
-      this.status({fill:"red",shape:"dot",text:"offline"});
-    });
-
-    this.device.on(this.id,(val,fullstate)=>{
-      let value = val;
-      this.send({
-        payload: value
-      });
-      let state= {
-        type:this.ctype,
-        state:{
-          instance: this.instance,
-          value: value
-        }
-      };
-      if (this.response){
-        this.device.updateCapabState(this.id,state)
-        .then (res=>{
-          this.value = value;
-          this.status({fill:"green",shape:"dot",text:"online"});
-        })
-        .catch(err=>{
-          this.error("Error on update capability state: " + err.message);
-          this.status({fill:"red",shape:"dot",text:"Error"});
-        })
-      };
-    })
-
-    this.on('input', (msg, send, done)=>{
-      const value = msg.payload;
-      if (typeof value != 'string'){
-        this.error("Wrong type! msg.payload must be String.");
-        this.status({fill:"red",shape:"dot",text:"Error"});
-        if (done) {done();}
-        return;
-      };
-      if (this.modes.indexOf(value)<0){
-        this.error("Error! Unsupported command.");
-        this.status({fill:"red",shape:"dot",text:"Error"});
-        if (done) {done();}
-        return;
-      };
-      if (value === this.value){
-        this.debug("Value not changed. Cancel update");
-        if (done) {done();}
-        return;
-      };
-      let state= {
-        type:this.ctype,
-        state:{
-          instance: this.instance,
-          value: value
-        }
-      };
-      this.device.updateCapabState(this.id,state)
-      .then(ref=>{
-        this.value = value;
-        this.status({fill:"green",shape:"dot",text:value});
-        if (done) {done();}
-      })
-      .catch(err=>{
-        this.error("Error on update capability state: " + err.message);
-        this.status({fill:"red",shape:"dot",text:"Error"});
-        if (done) {done();}
-      });
-    });
-
-    this.on('close', function(removed, done) {
-      if (removed) {
-        this.device.delCapability(this.id)
-        .then(res=>{
-          done()
-        })
-        .catch(err=>{
-          this.error("Error on delete capability: " + err.message);
-          done();
-        })
-      }else{
-        done();
-      }
-    });
-  }  
-  RED.nodes.registerType("Mode",AliceMode);
+    RED.nodes.registerType("Mode", AliceMode);
 };
+//# sourceMappingURL=alice-mode.js.map

@@ -1,0 +1,148 @@
+<script type="text/javascript">
+    RED.nodes.registerType('Event',{
+        category: 'alice',
+        defaults:{
+            device: {value:"", type:"alice-device"},
+            name: {value:"Event"},
+            stype: {value:'devices.properties.event'},
+            instance: {value:undefined, validate: (v)=>{
+                if (v){
+                    return true;
+                }else{
+                    return false;
+                }
+            }},
+            events:{value:[]}
+        },
+        inputs:1,
+        outputs:0,
+        icon: "alice.png",
+        color: "#D8BFD8",
+        label: function(){
+            return this.name;
+        },
+        oneditprepare: function(){
+            $("#node-input-instance").typedInput({
+                types: [
+                    {
+                        options: [
+                            { value: "vibration", label: "Vibration"},
+                            { value: "open", label: "Open"},
+                            { value: "button", label: "Button"},
+                            { value: "motion", label: "Motion"},
+                            { value: "smoke", label: "Smoke"},
+                            { value: "gas", label: "Gas"},
+                            { value: "battery_level", label: "Battery level"},
+                            { value: "water_level", label: "Water level"},
+                            { value: "water_leak", label: "Water leak"}
+                        ]
+                    }
+                ]
+            });
+            $('#node-input-instance').on('change',()=>{
+                let val= $("#node-input-instance").val();
+                $("#node-input-eventslist").editableList('empty');
+
+                switch (val) {
+                    case "vibration":
+                        $("#node-input-eventslist").editableList('addItems',["tilt","fall","vibration"]);
+                        break;
+                    case "open":
+                        $("#node-input-eventslist").editableList('addItems',["opened","closed"]);
+                        break;
+                    case "button":
+                        $("#node-input-eventslist").editableList('addItems',["click","double_click","long_press"]);
+                        break;
+                    case "motion":
+                        $("#node-input-eventslist").editableList('addItems',["detected","not_detected"]);
+                        break;
+                    case "smoke":
+                        $("#node-input-eventslist").editableList('addItems',["detected","not_detected","high"]);
+                        break;
+                    case "gas":
+                        $("#node-input-eventslist").editableList('addItems',["detected","not_detected","high"]);
+                        break;
+                    case "battery_level":
+                        $("#node-input-eventslist").editableList('addItems',["low","normal"]);
+                        break;
+                    case "water_level":
+                        $("#node-input-eventslist").editableList('addItems',["low","normal"]);
+                        break;
+                    case "water_leak":
+                        $("#node-input-eventslist").editableList('addItems',["dry","leak"]);
+                        break;
+                    default:
+                        break;
+                }
+            });
+            $("#node-input-eventslist").editableList({
+                addButton: false,
+                height: 150,
+                addItem: function(container,i,opt){
+                    var row = $('<div style="padding-left: 3px; class="event_name">'+opt+'</div>').appendTo(container);
+                }
+            });
+        },
+        oneditsave: function(){
+            deivcename = $('#node-input-device option:selected').text();
+            instance = $("#node-input-instance").val();
+            $('#node-input-name').val(deivcename+":"+instance);
+            let events = $("#node-input-eventslist").editableList('items');
+            let node = this;
+            node.events= [];
+            events.each(function(i) {
+                let name = $(this).text(); 
+                node.events.push(name);
+            })
+        }
+    })
+</script>
+
+<script type="text/x-red" data-template-name="Event">
+    <input type="hidden" id="node-input-name">
+    <div class="form-row">
+        <label for="node-input-device">Device</label>
+        <input id="node-input-device">
+    </div>
+    <div class="form-row">
+        <label for="node-input-instance">Event Type</label>
+        <input type="text" id="node-input-instance">
+    </div>
+    <div class="form-row node-input-rule-container-row">
+        <label for="node-input-modes" style="width:auto">Supported events</label>
+        <ol id="node-input-eventslist"></ol>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="Event">
+    <p>Transmits event from sensors built into the device.</p>
+    
+    <h3>Property</h3>
+    <dl class="message-properties">
+        <dt>Device
+            <span class="property-type">Select</span>
+        </dt>
+        <dd> The device to which this sensor is connected </dd>
+        <dt>Event Type
+            <span class="property-type">Select</span>
+        </dt>
+        <dd>a type of event that helps to better understand the area of its use and the data it collects</dd>
+        <dt>Supported events
+            <span class="property-type">Read only</span>
+        </dt>
+        <dd>list of events that the sensor can send</dd>
+    </dl>
+
+    <h3>Inputs</h3>
+        <dl class="message-properties">
+            <dt>payload
+                <span class="property-type">string</span>
+            </dt>
+            <dd>events can only be from the allowed list</dd>
+        </dl>
+    
+    <h3>References</h3>
+        <ul>
+            <li><a href="https://yandex.ru/dev/dialogs/smart-home/doc/concepts/event.html"> - Yandex documentation</a></li>
+        </ul>
+    </script>

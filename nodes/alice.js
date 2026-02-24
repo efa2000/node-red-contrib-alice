@@ -4,9 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 const axios_1 = __importDefault(require("axios"));
 const mqtt_1 = __importDefault(require("mqtt"));
-;
-;
-;
 module.exports = (RED) => {
     function AliceService(config) {
         RED.nodes.createNode(this, config);
@@ -16,8 +13,8 @@ module.exports = (RED) => {
         const password = this.credentials.password;
         const token = this.credentials.token;
         const suburl = Buffer.from(email).toString('base64');
-        RED.httpAdmin.get("/noderedhome/" + suburl + "/clearalldevice", (req, res) => {
-            const option = {
+        RED.httpAdmin.get("/noderedhome/" + suburl + "/clearalldevice", (_req, res) => {
+            axios_1.default.request({
                 method: 'POST',
                 url: 'https://api.nodered-home.ru/gtw/device/clearallconfigs',
                 headers: {
@@ -25,9 +22,8 @@ module.exports = (RED) => {
                     'Authorization': "Bearer " + this.getToken()
                 },
                 data: {}
-            };
-            axios_1.default.request(option)
-                .then(result => {
+            })
+                .then(() => {
                 this.trace("All devices configs deleted on gateway successfully");
                 res.sendStatus(200);
             })
@@ -36,16 +32,15 @@ module.exports = (RED) => {
                 res.sendStatus(500);
             });
         });
-        RED.httpAdmin.get("/noderedhome/" + this.id + "/getfullconfig", (req, res) => {
-            const option = {
+        RED.httpAdmin.get("/noderedhome/" + this.id + "/getfullconfig", (_req, res) => {
+            axios_1.default.request({
                 method: 'GET',
                 url: 'https://api.iot.yandex.net/v1.0/user/info',
                 headers: {
                     'content-type': 'application/json',
                     'Authorization': "Bearer " + this.getToken()
                 }
-            };
-            axios_1.default.request(option)
+            })
                 .then(result => {
                 this.trace("Full Alice SmartHome config successfully retrieved");
                 res.json(result.data);
@@ -60,7 +55,6 @@ module.exports = (RED) => {
             this.error("Authentication is required!!!");
             return;
         }
-        ;
         const mqttClient = mqtt_1.default.connect("mqtts://mqtt.cloud.yandex.net", {
             port: 8883,
             clientId: login,
@@ -71,7 +65,7 @@ module.exports = (RED) => {
         });
         mqttClient.on("message", (topic, payload) => {
             const arrTopic = topic.split('/');
-            const data = JSON.parse(payload);
+            const data = JSON.parse(payload.toString());
             this.trace("Incoming:" + topic + " timestamp:" + new Date().getTime());
             if (payload.length && typeof data === 'object') {
                 if (arrTopic[3] == 'message') {
@@ -80,13 +74,12 @@ module.exports = (RED) => {
                 else {
                     this.emit(arrTopic[3], data);
                 }
-                ;
             }
         });
         mqttClient.on("connect", () => {
             this.debug("Yandex IOT client connected. ");
             this.emit('online');
-            mqttClient.subscribe("$me/device/commands/+", _ => {
+            mqttClient.subscribe("$me/device/commands/+", () => {
                 this.debug("Yandex IOT client subscribed to the command");
             });
         });
@@ -114,7 +107,7 @@ module.exports = (RED) => {
         this.on('close', (done) => {
             this.emit('offline');
             setTimeout(() => {
-                mqttClient.end(false, done);
+                mqttClient.end(false, {}, done);
             }, 500);
         });
         this.send2gate = (path, data, retain) => {
@@ -125,7 +118,6 @@ module.exports = (RED) => {
             return JSON.parse(token).access_token;
         };
     }
-    ;
     RED.nodes.registerType("alice-service", AliceService, {
         credentials: {
             email: { type: "text" },
@@ -135,3 +127,4 @@ module.exports = (RED) => {
         }
     });
 };
+//# sourceMappingURL=alice.js.map
