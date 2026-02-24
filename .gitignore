@@ -68,3 +68,6 @@ typings/
 
 # Source maps
 *.js.map
+
+# npm auth
+.npmrc
