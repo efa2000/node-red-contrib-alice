@@ -71,6 +71,3 @@ typings/
 
 # npm auth
 .npmrc
-
-#claude
-.CLAUDE.md
