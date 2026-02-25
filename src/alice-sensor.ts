@@ -20,6 +20,9 @@ export = (RED: NodeAPI): void => {
       }
     };
 
+    let lastUpdateTime = 0;
+    const UPDATE_INTERVAL = 10 * 60 * 1000; // 10 минут
+
     this.status({ fill: "red", shape: "dot", text: "offline" });
 
     const init = (): void => {
@@ -61,17 +64,19 @@ export = (RED: NodeAPI): void => {
         if (done) { done(); }
         return;
       }
-      if (unit == 'unit.temperature.celsius' || unit == 'unit.ampere') {
+      if (unit == 'unit.temperature.celsius' || unit == 'unit.ampere' || unit == 'unit.pressure.bar') {
         msg.payload = +msg.payload.toFixed(1);
       } else {
         msg.payload = +msg.payload.toFixed(0);
       }
-      if (curentState.state.value == msg.payload) {
+      const timeSinceLastUpdate = Date.now() - lastUpdateTime;
+      if (curentState.state.value == msg.payload && timeSinceLastUpdate < UPDATE_INTERVAL) {
         this.debug("Value not changed. Cancel update");
         if (done) { done(); }
         return;
       }
       curentState.state.value = msg.payload;
+      lastUpdateTime = Date.now();
       device.updateSensorState(id, curentState)
         .then(() => {
           this.status({ fill: "green", shape: "dot", text: String(msg.payload) });
