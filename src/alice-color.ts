@@ -25,14 +25,12 @@ export = (RED: NodeAPI): void => {
     const temperature_min = parseInt(config.temperature_min);
     const temperature_max = parseInt(config.temperature_max);
     const color_scene = config.color_scene || [];
-    let needConvert = false;
     let response = config.response;
     let color_support = config.color_support;
     let lastValue: string | undefined;
 
     if (scheme == "rgb_normal") {
       scheme = "rgb";
-      needConvert = true;
     }
     if (config.response === undefined) {
       response = true;
@@ -210,6 +208,7 @@ export = (RED: NodeAPI): void => {
     });
 
     this.on('close', (removed: boolean, done: () => void) => {
+      device.setMaxListeners(device.getMaxListeners() - 1);
       if (removed) {
         device.delCapability(this.id)
           .then(() => { done(); })

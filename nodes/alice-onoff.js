@@ -9,7 +9,6 @@ module.exports = (RED) => {
         const instance = 'on';
         let response = config.response;
         let split = config.split;
-        let initState = false;
         const curentState = {
             type: ctype,
             state: {
@@ -38,7 +37,6 @@ module.exports = (RED) => {
             device.setCapability(id, capab)
                 .then(() => {
                 this.debug("Capability initilization - success!");
-                initState = true;
                 this.status({ fill: "green", shape: "dot", text: "online" });
             })
                 .catch(err => {

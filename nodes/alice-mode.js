@@ -3,6 +3,7 @@ module.exports = (RED) => {
     function AliceMode(config) {
         RED.nodes.createNode(this, config);
         const device = RED.nodes.getNode(config.device);
+        device.setMaxListeners(device.getMaxListeners() + 1);
         const ctype = 'devices.capabilities.mode';
         const instance = config.instance || '';
         const modes = config.modes;
@@ -119,6 +120,7 @@ module.exports = (RED) => {
             });
         });
         this.on('close', (removed, done) => {
+            device.setMaxListeners(device.getMaxListeners() - 1);
             if (removed) {
                 device.delCapability(this.id)
                     .then(() => { done(); })
