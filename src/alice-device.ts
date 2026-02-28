@@ -110,7 +110,7 @@ export = (RED: NodeAPI): void => {
       axios.request({
         timeout: 5000,
         method: 'POST',
-        url: 'https://api.nodered-home.ru/gtw/device/state',
+        url: 'https://state.nodered-home.ru/gtw/device/state',
         headers: {
           'content-type': 'application/json',
           'Authorization': "Bearer " + service.getToken()
