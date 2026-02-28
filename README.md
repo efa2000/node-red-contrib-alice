@@ -1,62 +1,97 @@
 # NodeRed Home (node-red-contrib-alice)
 
-**NodeRed Home** (node-red-contrib-alice) - это сервис позволит, в несколько простых шагов, подключить любые ваши устройства заведенные в Node-RED к умному дому от Яндекса и управлять ими с помощью голосового помощника Алиса.
-
 [![platform](https://img.shields.io/badge/platform-Node--RED-red?logo=nodered)](https://nodered.org)
 [![Min Node Version](https://img.shields.io/node/v/node-red-contrib-alice.svg)](https://nodejs.org/en/)
-![Repo size](https://img.shields.io/github/repo-size/efa2000/node-red-contrib-alice)
 [![GitHub version](https://img.shields.io/github/package-json/v/efa2000/node-red-contrib-alice?logo=npm)](https://www.npmjs.com/package/node-red-contrib-alice)
-[![Package Quality](https://packagequality.com/shield/node-red-contrib-alice.svg)](https://packagequality.com/#?package=node-red-contrib-alice)
-![GitHub last commit](https://img.shields.io/github/last-commit/efa2000/node-red-contrib-alice/master)
 ![NPM Total Downloads](https://img.shields.io/npm/dt/node-red-contrib-alice.svg)
 ![NPM Downloads per month](https://img.shields.io/npm/dm/node-red-contrib-alice)
 
-#### Обсудить и получить поддержку от сообщества и автора можно в Телеграм канале [https://t.me/nodered_home_chat](https://t.me/nodered_home_chat)
+Интеграция Node-RED с умным домом Яндекса. Подключите любые устройства из Node-RED к Алисе и управляйте ими голосом.
 
-## Инструкция (RUS)
-### Использование 
-#### Как настроить навык:
-1. Установите и настройте Node-Red
-2. Из интерфейса Node-Red добавьте модуль node-red-contrib-alice или с использованием npm
-```
-npm install node-red-contrib-alice
-```
-3. Добавьте в свою схему устройства и умения Алисы и зарегистрируйтесь на вкладке настройки 
-4. Настройте их связь с вашими устройствами
-5. В приложении Яндекс добавьте навык NodeRed Home
-6. Заведенные устройства появятся автоматически
+Integration of Node-RED with Yandex Smart Home. Connect any device from Node-RED to Alice voice assistant.
 
-### Концепция
-Кождое устройство может иметь неограниченное число умений (функционала)
-К примеру, лампочка может иметь умение включения/выклюяения, но так же дополнительное умение установки цвета и яркости 
-Умения устройства можно объеденять в любом порядке 
-Более подробно о умениях и устройствах можно почитать в документации Yandex [Документация Яндекса](https://yandex.ru/dev/dialogs/alice/doc/smart-home/concepts/capability-types-docpage/)
+**Telegram:** [https://t.me/nodered_home_chat](https://t.me/nodered_home_chat) — поддержка и обсуждение / support & discussion
 
-### Особенности
-Для того, что бы устройство ответило Алисе, что комманда выполнена успешно, на вход должно прийти соответсвующее значение.
-Если ваше устройство отвечает дольше или совсем не возвращает подтверждение просто добавьте оставьте галочку Response включенной
+**Сайт / Website:** [https://nodered-home.ru](https://nodered-home.ru)
 
-### Тарифы
-до 5-ти зарегистрированных на шлюзе устройств - бесплатно  
-5-ть и более зарегистрированных на шлюзе устройств - 199 руб./мес. 
+---
 
-## Instruction (ENG - Google Translate)
-The module allows you to use Node-Red together with the Yandex.Alice voice assistant service (voice control of smart home devices)
+## Быстрый старт
 
-### Use
-#### How to set up a skill:
-1. Install and configure Node-Red
-2. From the Node-Red interface add the node-red-contrib-alice module or using npm
-```
-npm install node-red-contrib-alice
-```
-3. Add Alice’s devices and capability to your circuit and register on the settings tab
-4. Configure their connection with your devices
-5. In the Yandex application, add the NodeRed Home skill
-6. Started devices will appear automatically
+1. Установите Node-RED ([инструкция](https://nodered.org/docs/getting-started/))
+2. Установите модуль из палитры Node-RED или через npm:
+   ```
+   npm install node-red-contrib-alice
+   ```
+3. Перетащите на рабочую область ноду **alice-device** и нужные умения (on/off, range, color, mode и т.д.)
+4. Откройте настройки ноды alice-device, нажмите «Зарегистрироваться» — авторизуйтесь через Яндекс
+5. Соедините умения с вашими устройствами в Node-RED
+6. В приложении «Дом с Алисой» добавьте навык **NodeRed Home** — устройства появятся автоматически
 
-### Concept
-Each device can have an unlimited number of capability (functionality)
-For example, a light bulb may have the capability to turn on / off, but also the additional capability to set the color and brightness
-Device capabilites can be combined in any order
-You can read more about capability and devices in the Yandex documentation [Yandex Documentation] (https://yandex.ru/dev/dialogs/alice/doc/smart-home/concepts/capability-types-docpage/)
+## Концепция
+
+Каждое устройство в Node-RED состоит из:
+- **alice-device** — само устройство (лампочка, розетка, кондиционер и т.д.)
+- **Умения** — функции устройства, которые подключаются к alice-device:
+  - **on_off** — включение/выключение
+  - **range** — числовые параметры (яркость, громкость, температура)
+  - **color** — управление цветом
+  - **mode** — режимы работы (скорость вентилятора, режим кондиционера)
+  - **toggle** — переключатели (пауза, беззвучный режим)
+  - **sensor** — датчики (температура, влажность, CO2)
+  - **event** — события (открытие двери, движение)
+  - **video** — видеопоток
+
+Умения можно комбинировать в любом порядке. Например, лампочка = on_off + range (яркость) + color.
+
+Подробнее об устройствах и умениях: [документация Яндекса](https://yandex.ru/dev/dialogs/alice/doc/smart-home/concepts/capability-types-docpage/)
+
+## Подтверждение команд
+
+Когда Алиса отправляет команду, устройство должно вернуть подтверждение (отправить значение на вход ноды умения). Если ваше устройство не отвечает или отвечает медленно — включите опцию **Response** в настройках умения, и подтверждение будет отправлено автоматически.
+
+## Тарифы
+
+- До 4 устройств — **бесплатно**
+- 5 и более устройств — **299 руб./мес.**
+
+---
+
+## Quick Start
+
+1. Install Node-RED ([guide](https://nodered.org/docs/getting-started/))
+2. Install the module from the Node-RED palette or via npm:
+   ```
+   npm install node-red-contrib-alice
+   ```
+3. Drag an **alice-device** node and the desired capability nodes (on/off, range, color, mode, etc.) onto your flow
+4. Open the alice-device settings, click "Register" and sign in with your Yandex account
+5. Wire the capability nodes to your devices in Node-RED
+6. In the Yandex "Home with Alice" app, add the **NodeRed Home** skill — your devices will appear automatically
+
+## Concept
+
+Each device in Node-RED consists of:
+- **alice-device** — the device itself (light, switch, AC, etc.)
+- **Capabilities** — device functions connected to alice-device:
+  - **on_off** — turn on/off
+  - **range** — numeric parameters (brightness, volume, temperature)
+  - **color** — color control
+  - **mode** — operating modes (fan speed, AC mode)
+  - **toggle** — toggles (mute, pause)
+  - **sensor** — sensors (temperature, humidity, CO2)
+  - **event** — events (door open, motion detected)
+  - **video** — video stream
+
+Capabilities can be combined in any order. For example, a light = on_off + range (brightness) + color.
+
+More about devices and capabilities: [Yandex documentation](https://yandex.ru/dev/dialogs/alice/doc/smart-home/concepts/capability-types-docpage/)
+
+## Command Confirmation
+
+When Alice sends a command, the device must return a confirmation (send a value to the capability node input). If your device does not respond or responds slowly, enable the **Response** option in the capability settings — the confirmation will be sent automatically.
+
+## Pricing
+
+- Up to 4 devices — **free**
+- 5 or more devices — **299 RUB/month**
