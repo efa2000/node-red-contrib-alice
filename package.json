@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-alice",
-  "version": "2.3.6",
+  "version": "2.3.7",
   "description": "",
   "scripts": {
     "start": "npm run build && node-red",
