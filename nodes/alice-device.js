@@ -92,7 +92,7 @@ module.exports = (RED) => {
             axios_1.default.request({
                 timeout: 5000,
                 method: 'POST',
-                url: 'https://state.nodered-home.ru/gtw/device/state',
+                url: 'https://api.nodered-home.ru/gtw/device/state',
                 headers: {
                     'content-type': 'application/json',
                     'Authorization': "Bearer " + service.getToken()
