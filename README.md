@@ -25,14 +25,16 @@ Integration of Node-RED with Yandex Smart Home. Connect any device from Node-RED
 
 Начиная с **версии 3.0.0** плагин не зависит от IoT Core: команды доставляются по WebSocket (`wss://ws.nodered-home.ru`, исходящее подключение на стандартный порт 443 вместо 8883 — проще за файрволами и прокси).
 
-**Как обновиться:**
+**Как обновиться** — прямо из интерфейса Node-RED: меню → **Управление палитрой** (Manage palette) → вкладка **Ноды** → найдите `node-red-contrib-alice` → кнопка **Обновить**, затем перезапустите Node-RED.
+
+Альтернатива через npm:
 
 ```
 cd ~/.node-red
 npm install node-red-contrib-alice@latest
 ```
 
-и перезапустите Node-RED (или обновите через палитру). Флоу, настройки и авторизация сохраняются — переавторизация и перенастройка устройств **не требуются**.
+Флоу, настройки и авторизация сохраняются — переавторизация и перенастройка устройств **не требуются**.
 
 Бонус: теперь можно подключать несколько инстансов Node-RED под одним аккаунтом (до 5 одновременных подключений) — в MQTT-версии они конфликтовали.
 
@@ -88,14 +90,16 @@ Yandex is shutting down **Yandex IoT Core**, the MQTT service that versions 2.x 
 
 Starting with **version 3.0.0** the plugin no longer depends on IoT Core: commands are delivered over WebSocket (`wss://ws.nodered-home.ru`, outgoing connection on standard port 443 instead of 8883 — friendlier to firewalls and proxies).
 
-**How to update:**
+**How to update** — right from the Node-RED editor: menu → **Manage palette** → **Nodes** tab → find `node-red-contrib-alice` → click **Update**, then restart Node-RED.
+
+Alternatively via npm:
 
 ```
 cd ~/.node-red
 npm install node-red-contrib-alice@latest
 ```
 
-then restart Node-RED (or update via the palette). Flows, settings and authorization are preserved — **no re-authentication or device reconfiguration required**.
+Flows, settings and authorization are preserved — **no re-authentication or device reconfiguration required**.
 
 Bonus: you can now connect several Node-RED instances under one account (up to 5 simultaneous connections) — MQTT versions conflicted with each other.
 
