@@ -20,8 +20,8 @@ Integration of Node-RED with Yandex Smart Home. Connect any device from Node-RED
 
 Яндекс закрывает сервис **Yandex IoT Core**, через который версии 2.x получали команды Алисы (MQTT):
 
-- **1 ноября 2026** — брокер переходит в режим read-only: голосовые команды («Алиса, включи свет») и управление из приложения **перестанут работать** на версиях 2.x. Отправка состояний и датчиков продолжит работать (она идёт по HTTPS).
-- **1 декабря 2026** — сервис отключается полностью.
+- **1 ноября 2026** — голосовые команды («Алиса, включи свет») и управление из приложения **перестанут работать** на версиях 2.x. Отправка состояний и датчиков продолжит работать.
+- **1 декабря 2026** — Yandex IoT Core отключается: с этого момента полноценно работают **только версии 3.0.0 и новее**.
 
 Начиная с **версии 3.0.0** плагин не зависит от IoT Core: команды доставляются по WebSocket (`wss://ws.nodered-home.ru`, исходящее подключение на стандартный порт 443 вместо 8883 — проще за файрволами и прокси).
 
@@ -85,8 +85,8 @@ npm install node-red-contrib-alice@latest
 
 Yandex is shutting down **Yandex IoT Core**, the MQTT service that versions 2.x rely on for receiving Alice commands:
 
-- **November 1, 2026** — the broker becomes read-only: voice commands and app control **will stop working** on 2.x. Sending states and sensor data will keep working (it goes over HTTPS).
-- **December 1, 2026** — the service shuts down completely.
+- **November 1, 2026** — voice commands and app control **will stop working** on 2.x. Sending states and sensor data will keep working.
+- **December 1, 2026** — Yandex IoT Core shuts down: from that point on, **only versions 3.0.0 and newer** work fully.
 
 Starting with **version 3.0.0** the plugin no longer depends on IoT Core: commands are delivered over WebSocket (`wss://ws.nodered-home.ru`, outgoing connection on standard port 443 instead of 8883 — friendlier to firewalls and proxies).
 
