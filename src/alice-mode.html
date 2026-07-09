@@ -42,7 +42,10 @@
                 };
                 switch (val) {
                     case 'cleanup_mode':
-                        this.modes = ['auto','eco','express','normal','quiet']
+                        this.modes = ['auto','dry_cleaning','eco','express','mixed_cleaning','normal','quiet','wet_cleaning']
+                        break;
+                    case 'dishwashing':
+                        this.modes = ['auto','eco','express','glass','intensive','pre_rinse','quiet']
                         break;
                     case 'coffee_mode':
                         this.modes = ['americano','cappuccino','double_espresso','espresso','latte']
@@ -67,6 +70,9 @@
                         break;
                     case 'thermostat':
                         this.modes = ['auto','cool','dry','fan_only','heat','preheat']
+                        break;
+                    case 'ventilation_mode':
+                        this.modes = ['auto','supply_air','extraction_air']
                         break;
                     case 'work_speed':
                         this.modes = ['auto','fast','max','medium','min','slow','turbo']
@@ -135,6 +141,7 @@
         <select id="node-input-instance" style="width: 70%;">
             <option value="cleanup_mode">Cleanup mode</option>
             <option value="coffee_mode">Coffee mode</option>
+            <option value="dishwashing">Dishwashing</option>
             <option value="multicooker_mode">Multicooker Mode</option>
             <option value="tea_mode">Tea Mode</option>
             <option value="fan_speed">Fan speed</option>
@@ -143,6 +150,7 @@
             <option value="program">Program</option>
             <option value="swing">Swing Mode</option>
             <option value="thermostat">Thermostat</option>
+            <option value="ventilation_mode">Ventilation mode</option>
             <option value="work_speed">Work speed</option>
         </select>
     </div>
@@ -185,6 +193,14 @@
                     <option value="express">express</option>
                     <option value="normal">normal</option>
                     <option value="quiet">quiet</option>
+                    <option value="wet_cleaning">wet_cleaning</option>
+                    <option value="dry_cleaning">dry_cleaning</option>
+                    <option value="mixed_cleaning">mixed_cleaning</option>
+                    <option value="intensive">intensive</option>
+                    <option value="glass">glass</option>
+                    <option value="pre_rinse">pre_rinse</option>
+                    <option value="supply_air">supply_air</option>
+                    <option value="extraction_air">extraction_air</option>
                     <option value="horizontal">horizontal</option>
                     <option value="stationary">stationary</option>
                     <option value="vertical">vertical</option>

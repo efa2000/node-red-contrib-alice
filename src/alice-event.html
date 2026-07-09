@@ -33,6 +33,7 @@
                             { value: "smoke", label: "Smoke"},
                             { value: "gas", label: "Gas"},
                             { value: "battery_level", label: "Battery level"},
+                            { value: "food_level", label: "Food level"},
                             { value: "water_level", label: "Water level"},
                             { value: "water_leak", label: "Water leak"}
                         ]
@@ -65,8 +66,11 @@
                     case "battery_level":
                         $("#node-input-eventslist").editableList('addItems',["low","normal"]);
                         break;
+                    case "food_level":
+                        $("#node-input-eventslist").editableList('addItems',["empty","low","normal"]);
+                        break;
                     case "water_level":
-                        $("#node-input-eventslist").editableList('addItems',["low","normal"]);
+                        $("#node-input-eventslist").editableList('addItems',["empty","low","normal"]);
                         break;
                     case "water_leak":
                         $("#node-input-eventslist").editableList('addItems',["dry","leak"]);

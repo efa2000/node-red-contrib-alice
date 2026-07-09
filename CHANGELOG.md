@@ -1,5 +1,20 @@
 # Changelog
 
+## v3.0.3 — новые режимы и события из актуального протокола УДЯ
+
+Списки нод приведены в соответствие с текущей документацией умного дома Яндекса. Изменения только аддитивные — существующие флоу работают без перенастройки.
+
+### Нода Mode
+
+- Новые типы режимов: **Dishwashing** (`dishwashing`) — режимы мытья посуды и **Ventilation mode** (`ventilation_mode`) — режимы вентиляции.
+- Пресет `cleanup_mode` дополнен режимами `wet_cleaning`, `dry_cleaning`, `mixed_cleaning` (влажная/сухая/смешанная уборка).
+- В пул ручного добавления режимов добавлены `wet_cleaning`, `dry_cleaning`, `mixed_cleaning`, `intensive`, `glass`, `pre_rinse`, `supply_air`, `extraction_air`.
+
+### Нода Event
+
+- Новый тип события: **Food level** (`food_level`, события `empty`/`low`/`normal`) — уровень корма для кормушек `pet_feeder`.
+- У `water_level` добавлено событие `empty`.
+
 ## v3.0.0 — WebSocket вместо MQTT (миграция с Yandex IoT Core)
 
 ### ⚠️ Зачем обновляться
