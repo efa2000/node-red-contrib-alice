@@ -16,6 +16,28 @@ Integration of Node-RED with Yandex Smart Home. Connect any device from Node-RED
 
 ---
 
+## ⚠️ Обновитесь до версии 3.x до 1 ноября 2026
+
+Яндекс закрывает сервис **Yandex IoT Core**, через который версии 2.x получали команды Алисы (MQTT):
+
+- **1 ноября 2026** — брокер переходит в режим read-only: голосовые команды («Алиса, включи свет») и управление из приложения **перестанут работать** на версиях 2.x. Отправка состояний и датчиков продолжит работать (она идёт по HTTPS).
+- **1 декабря 2026** — сервис отключается полностью.
+
+Начиная с **версии 3.0.0** плагин не зависит от IoT Core: команды доставляются по WebSocket (`wss://ws.nodered-home.ru`, исходящее подключение на стандартный порт 443 вместо 8883 — проще за файрволами и прокси).
+
+**Как обновиться:**
+
+```
+cd ~/.node-red
+npm install node-red-contrib-alice@latest
+```
+
+и перезапустите Node-RED (или обновите через палитру). Флоу, настройки и авторизация сохраняются — переавторизация и перенастройка устройств **не требуются**.
+
+Бонус: теперь можно подключать несколько инстансов Node-RED под одним аккаунтом (до 5 одновременных подключений) — в MQTT-версии они конфликтовали.
+
+---
+
 ## Быстрый старт
 
 1. Установите Node-RED ([инструкция](https://nodered.org/docs/getting-started/))
@@ -54,6 +76,28 @@ Integration of Node-RED with Yandex Smart Home. Connect any device from Node-RED
 
 - До 4 устройств — **бесплатно**
 - 5 и более устройств — **299 руб./мес.**
+
+---
+
+## ⚠️ Update to version 3.x before November 1, 2026
+
+Yandex is shutting down **Yandex IoT Core**, the MQTT service that versions 2.x rely on for receiving Alice commands:
+
+- **November 1, 2026** — the broker becomes read-only: voice commands and app control **will stop working** on 2.x. Sending states and sensor data will keep working (it goes over HTTPS).
+- **December 1, 2026** — the service shuts down completely.
+
+Starting with **version 3.0.0** the plugin no longer depends on IoT Core: commands are delivered over WebSocket (`wss://ws.nodered-home.ru`, outgoing connection on standard port 443 instead of 8883 — friendlier to firewalls and proxies).
+
+**How to update:**
+
+```
+cd ~/.node-red
+npm install node-red-contrib-alice@latest
+```
+
+then restart Node-RED (or update via the palette). Flows, settings and authorization are preserved — **no re-authentication or device reconfiguration required**.
+
+Bonus: you can now connect several Node-RED instances under one account (up to 5 simultaneous connections) — MQTT versions conflicted with each other.
 
 ---
 
