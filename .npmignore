@@ -73,3 +73,7 @@ typings/
 .npmrc
 # Тесты не публикуем в npm
 test/
+
+# Рабочие файлы Claude Code — не публикуем
+CLAUDE.md
+.claude/
