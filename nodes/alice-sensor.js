@@ -1,5 +1,16 @@
 "use strict";
-module.exports = (RED) => {
+function checkRange(instance, unit, value) {
+    if (unit == 'unit.percent') {
+        return value >= 0 && value <= 100 ? null : "expected 0..100 (percent)";
+    }
+    if (instance == 'temperature') {
+        if (unit == 'unit.temperature.kelvin')
+            return value >= 0 ? null : "expected >= 0 K";
+        return value >= -273.15 ? null : "expected >= -273.15 °C";
+    }
+    return value >= 0 ? null : "expected >= 0";
+}
+const register = (RED) => {
     function AliceSensor(config) {
         RED.nodes.createNode(this, config);
         const device = RED.nodes.getNode(config.device);
@@ -48,18 +59,30 @@ module.exports = (RED) => {
             this.status({ fill: "red", shape: "dot", text: "offline" });
         });
         this.on('input', (msg, _send, done) => {
-            if (typeof msg.payload != 'number') {
-                this.error("Wrong type! msg.payload must be number.");
+            if (typeof msg.payload != 'number' || !Number.isFinite(msg.payload)) {
+                this.error("Wrong type! msg.payload must be a finite number.");
+                this.status({ fill: "red", shape: "dot", text: "not a number" });
                 if (done) {
                     done();
                 }
                 return;
             }
+            let value = msg.payload;
             if (unit == 'unit.temperature.celsius' || unit == 'unit.ampere' || unit == 'unit.pressure.bar') {
-                msg.payload = +msg.payload.toFixed(1);
+                value = +value.toFixed(1);
             }
             else {
-                msg.payload = +msg.payload.toFixed(0);
+                value = +value.toFixed(0);
+            }
+            msg.payload = value;
+            const rangeError = checkRange(instance, unit, value);
+            if (rangeError) {
+                this.error("Invalid value " + value + " for " + instance + ": " + rangeError + ". Value not sent.");
+                this.status({ fill: "red", shape: "dot", text: "invalid: " + String(value) });
+                if (done) {
+                    done();
+                }
+                return;
             }
             const timeSinceLastUpdate = Date.now() - lastUpdateTime;
             if (curentState.state.value == msg.payload && timeSinceLastUpdate < UPDATE_INTERVAL) {
@@ -103,4 +126,6 @@ module.exports = (RED) => {
     }
     RED.nodes.registerType("Sensor", AliceSensor);
 };
+register.checkRange = checkRange;
+module.exports = register;
 //# sourceMappingURL=alice-sensor.js.map

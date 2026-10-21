@@ -1,7 +1,21 @@
 import { NodeAPI, Node } from "node-red";
 import { AliceSensorConfig, AliceDeviceNode, SensorState } from "./types.js";
 
-export = (RED: NodeAPI): void => {
+// Допустимые диапазоны значений датчиков по требованиям УДЯ: проценты 0…100, температура
+// не ниже абсолютного нуля, остальное (концентрации, освещённость, давление, мощность,
+// напряжение, ток, счётчики) — не отрицательное. Возвращает текст ошибки или null.
+function checkRange(instance: string, unit: string | undefined, value: number): string | null {
+  if (unit == 'unit.percent') {
+    return value >= 0 && value <= 100 ? null : "expected 0..100 (percent)";
+  }
+  if (instance == 'temperature') {
+    if (unit == 'unit.temperature.kelvin') return value >= 0 ? null : "expected >= 0 K";
+    return value >= -273.15 ? null : "expected >= -273.15 °C";
+  }
+  return value >= 0 ? null : "expected >= 0";
+}
+
+const register = (RED: NodeAPI): void => {
   function AliceSensor(this: Node, config: AliceSensorConfig): void {
     RED.nodes.createNode(this, config);
     const device = RED.nodes.getNode(config.device) as AliceDeviceNode;
@@ -59,15 +73,27 @@ export = (RED: NodeAPI): void => {
     });
 
     this.on('input', (msg, _send, done) => {
-      if (typeof msg.payload != 'number') {
-        this.error("Wrong type! msg.payload must be number.");
+      if (typeof msg.payload != 'number' || !Number.isFinite(msg.payload)) {
+        this.error("Wrong type! msg.payload must be a finite number.");
+        this.status({ fill: "red", shape: "dot", text: "not a number" });
         if (done) { done(); }
         return;
       }
+      let value: number = msg.payload;
       if (unit == 'unit.temperature.celsius' || unit == 'unit.ampere' || unit == 'unit.pressure.bar') {
-        msg.payload = +msg.payload.toFixed(1);
+        value = +value.toFixed(1);
       } else {
-        msg.payload = +msg.payload.toFixed(0);
+        value = +value.toFixed(0);
+      }
+      msg.payload = value;
+      const rangeError = checkRange(instance, unit, value);
+      if (rangeError) {
+        // Облако приняло бы значение, но УДЯ ответил бы 400 BAD_REQUEST, и состояние
+        // в Алисе не обновилось бы — молча. Лучше сказать об этом здесь.
+        this.error("Invalid value " + value + " for " + instance + ": " + rangeError + ". Value not sent.");
+        this.status({ fill: "red", shape: "dot", text: "invalid: " + String(value) });
+        if (done) { done(); }
+        return;
       }
       const timeSinceLastUpdate = Date.now() - lastUpdateTime;
       if (curentState.state.value == msg.payload && timeSinceLastUpdate < UPDATE_INTERVAL) {
@@ -106,3 +132,6 @@ export = (RED: NodeAPI): void => {
 
   RED.nodes.registerType("Sensor", AliceSensor);
 };
+
+register.checkRange = checkRange; // для тестов
+export = register;
