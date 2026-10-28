@@ -16,14 +16,13 @@ Integration of Node-RED with Yandex Smart Home. Connect any device from Node-RED
 
 ---
 
-## ⚠️ Обновитесь до версии 3.x до 1 ноября 2026
+## ⚠️ Работают только версии 3.0.0 и новее
 
-Яндекс закрывает сервис **Yandex IoT Core**, через который версии 2.x получали команды Алисы (MQTT):
+В октябре 2026 сервис переехал из Yandex Cloud на собственные серверы. Старый канал команд через **Yandex IoT Core** (MQTT), которым пользовались версии 2.x, отключён — теперь работают **только версии плагина 3.0.0 и новее**. Они получают команды Алисы по WebSocket (`wss://ws.nodered-home.ru`, исходящее подключение на стандартный порт 443).
 
-- **1 ноября 2026** — голосовые команды («Алиса, включи свет») и управление из приложения **перестанут работать** на версиях 2.x. Отправка состояний и датчиков продолжит работать.
-- **1 декабря 2026** — Yandex IoT Core отключается: с этого момента полноценно работают **только версии 3.0.0 и новее**.
+**Если Алиса не управляет устройствами** (отвечает «устройство недоступно», устройства не включаются из приложения «Дом с Алисой») — скорее всего, у вас версия 2.x. Обновите плагин.
 
-Начиная с **версии 3.0.0** плагин не зависит от IoT Core: команды доставляются по WebSocket (`wss://ws.nodered-home.ru`, исходящее подключение на стандартный порт 443 вместо 8883 — проще за файрволами и прокси).
+**Как узнать версию:** меню Node-RED → **Управление палитрой** (Manage palette) → вкладка **Ноды** → `node-red-contrib-alice` — версия указана рядом.
 
 **Как обновиться** — прямо из интерфейса Node-RED: меню → **Управление палитрой** (Manage palette) → вкладка **Ноды** → найдите `node-red-contrib-alice` → кнопка **Обновить**, затем перезапустите Node-RED.
 
@@ -34,7 +33,9 @@ cd ~/.node-red
 npm install node-red-contrib-alice@latest
 ```
 
-Флоу, настройки и авторизация сохраняются — переавторизация и перенастройка устройств **не требуются**.
+Затем перезапустите Node-RED. В Docker или Home Assistant выполните команду в каталоге данных Node-RED внутри контейнера (обычно `/data`) либо обновите через палитру, а затем перезапустите контейнер или аддон.
+
+Флоу, настройки и авторизация сохраняются — переавторизация и перенастройка устройств **не требуются**. Если после обновления ноды не показывают статус **online** — заново авторизуйтесь (Credentials → **Yandex Authentication** → новый код → **Submit** → **Update** → **Deploy**). Подробная инструкция — [nodered-home.ru/docs.html#update](https://nodered-home.ru/docs.html#update).
 
 Бонус: теперь можно подключать несколько инстансов Node-RED под одним аккаунтом (до 5 одновременных подключений) — в MQTT-версии они конфликтовали.
 
@@ -81,14 +82,13 @@ npm install node-red-contrib-alice@latest
 
 ---
 
-## ⚠️ Update to version 3.x before November 1, 2026
+## ⚠️ Only versions 3.0.0 and newer work
 
-Yandex is shutting down **Yandex IoT Core**, the MQTT service that versions 2.x rely on for receiving Alice commands:
+In October 2026 the service moved from Yandex Cloud to its own servers. The old command channel via **Yandex IoT Core** (MQTT), used by versions 2.x, is shut down — **only plugin versions 3.0.0 and newer** work now. They receive Alice commands over WebSocket (`wss://ws.nodered-home.ru`, outgoing connection on standard port 443).
 
-- **November 1, 2026** — voice commands and app control **will stop working** on 2.x. Sending states and sensor data will keep working.
-- **December 1, 2026** — Yandex IoT Core shuts down: from that point on, **only versions 3.0.0 and newer** work fully.
+**If Alice does not control your devices** ("device unavailable", devices don't respond in the Yandex Smart Home app) — you most likely run version 2.x. Update the plugin.
 
-Starting with **version 3.0.0** the plugin no longer depends on IoT Core: commands are delivered over WebSocket (`wss://ws.nodered-home.ru`, outgoing connection on standard port 443 instead of 8883 — friendlier to firewalls and proxies).
+**How to check the version:** Node-RED menu → **Manage palette** → **Nodes** tab → `node-red-contrib-alice` — the version is shown next to it.
 
 **How to update** — right from the Node-RED editor: menu → **Manage palette** → **Nodes** tab → find `node-red-contrib-alice` → click **Update**, then restart Node-RED.
 
@@ -99,7 +99,9 @@ cd ~/.node-red
 npm install node-red-contrib-alice@latest
 ```
 
-Flows, settings and authorization are preserved — **no re-authentication or device reconfiguration required**.
+Then restart Node-RED. In Docker or Home Assistant run the command in the Node-RED data directory inside the container (usually `/data`) or update via the palette, then restart the container or add-on.
+
+Flows, settings and authorization are preserved — **no re-authentication or device reconfiguration required**. If the nodes don't show **online** after the update, re-authenticate (Credentials → **Yandex Authentication** → new code → **Submit** → **Update** → **Deploy**). Detailed guide (in Russian): [nodered-home.ru/docs.html#update](https://nodered-home.ru/docs.html#update).
 
 Bonus: you can now connect several Node-RED instances under one account (up to 5 simultaneous connections) — MQTT versions conflicted with each other.
 
