@@ -102,7 +102,7 @@ export = (RED: NodeAPI): void => {
       return;
     }
 
-    // ---------- WebSocket-транспорт (замена MQTT / Yandex IoT Core) ----------
+    // ---------- WebSocket-транспорт команд ----------
 
     let ws: WebSocket | null = null;          // текущее соединение
     let closing = false;                      // нода закрывается — реконнект запрещён
@@ -186,7 +186,7 @@ export = (RED: NodeAPI): void => {
             this.emit('online');
             break;
           case "command":
-            // payload — массив capability-объектов, как раньше в MQTT-топике команд
+            // payload — массив capability-объектов
             this.trace("Incoming command devId:" + frame.devId + " timestamp:" + new Date().getTime());
             if (!Array.isArray(frame.payload)) {
               this.warn("WS: command frame without payload array ignored. devId:" + frame.devId);
@@ -297,14 +297,14 @@ export = (RED: NodeAPI): void => {
       }, CLOSE_FAILSAFE_MS).unref();
     });
 
-    // Сигнатура сохранена для совместимости с alice-device:
-    // path — старый MQTT-топик ($me/device/events/{devId}), retain не используется
+    // Контракт с alice-device: path — строка вида $me/device/events/{devId} (из неё берётся devId),
+    // retain не используется
     this.send2gate = (path: string, data: string, _retain: boolean) => {
       this.trace("Outgoing: " + path);
       const arrPath = path.split('/');
       const devId = arrPath[arrPath.length - 1];
       if (!ws || ws.readyState !== WebSocket.OPEN) {
-        // эквивалент MQTT publish с qos 0 в офлайне — молча дропаем
+        // в офлайне ответ не ставится в очередь — молча дропаем
         this.debug("WS not connected, command_result dropped. devId:" + devId);
         return;
       }

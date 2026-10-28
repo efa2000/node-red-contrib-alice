@@ -6,7 +6,7 @@
 
 Плагин для Node-RED (`node-red-contrib-alice`), интегрирующий IoT-устройства, управляемые через Node-RED, с голосовым помощником Яндекс Алиса для управления умным домом. Опубликован в npm как `node-red-contrib-alice`.
 
-С версии **3.0.0** (2026-07-09) транспорт команд — WebSocket вместо MQTT (миграция с закрывающегося Yandex IoT Core; план и протокол — `MIGRATION-IOT-CORE.md` в корне NodeRedHome). Версии ≤2.x работают через MQTT до 01.11.2026.
+Транспорт команд — WebSocket (с версии **3.0.0**, 2026-07-09). Серверная сторона и протокол — `NodeRedHome-Core/README.md`, раздел «Протокол WS-канала». Версии ≤2.x (MQTT) сервером не обслуживаются с 08.10.2026, поэтому README плагина держит инструкцию по обновлению.
 
 ## Команды сборки и разработки
 
@@ -26,7 +26,7 @@ npm run copy-html      # Копирование src/*.html в nodes/
 
 Каждый тип ноды состоит из пары файлов: `.ts` (логика) и `.html` (UI конфигурации):
 
-- **Сервисная нода** (`alice.ts`): Центральный узел — управляет OAuth Яндекса, WebSocket-подключением к `wss://ws.nodered-home.ru/v1/ws` (Bearer OAuth-токен; для отладки endpoint переопределяется переменной окружения `ALICE_WS_URL`), HTTP-эндпоинтами администрирования, валидацией подписки. Выступает как источник событий для всех нод устройств. Контракт для остальных нод (isOnline, getToken, send2gate, события online/offline/{devId}) сохранён с MQTT-версии — при смене транспорта другие ноды не менялись. Реконнект: экспоненциальный backoff 1–60 с + джиттер, keep-alive ping/pong, handshakeTimeout 15 с. В credentials остаются поля `id`/`password` — легаси MQTT-эпохи, транспортом не используются.
+- **Сервисная нода** (`alice.ts`): Центральный узел — управляет OAuth Яндекса, WebSocket-подключением к `wss://ws.nodered-home.ru/v1/ws` (Bearer OAuth-токен; для отладки endpoint переопределяется переменной окружения `ALICE_WS_URL`), HTTP-эндпоинтами администрирования, валидацией подписки. Выступает как источник событий для всех нод устройств: контракт isOnline, getToken, send2gate, события online/offline/{devId}. Реконнект: экспоненциальный backoff 1–60 с + джиттер, keep-alive ping/pong, handshakeTimeout 15 с. Поля credentials `id`/`password` транспортом не используются (остались ради совместимости сохранённых настроек).
 - **Нода устройства** (`alice-device.ts`): Группирует умения/сенсоры, управляет регистрацией устройства на шлюзе (`api.nodered-home.ru`), дебаунсит обновления состояния (1000мс).
 - **Ноды умений** (`alice-onoff`, `alice-range`, `alice-color`, `alice-mode`, `alice-togle`, `alice-video`): Двунаправленные — принимают голосовые команды от Алисы и отправляют обновления состояния на шлюз.
 - **Нода сенсора** (`alice-sensor`): Передача свойств только для чтения (температура, влажность и т.д.).
@@ -35,7 +35,7 @@ npm run copy-html      # Копирование src/*.html в nodes/
 ### Коммуникация
 
 - **WebSocket**: Команды устройствам в реальном времени — `wss://ws.nodered-home.ru/v1/ws`, JSON-кадры v1: сервер шлёт `{"v":1,"type":"command","reqId","devId","payload"}`, клиент отвечает `{"v":1,"type":"command_result","devId","payload"}` (один capability-объект на кадр), плюс `hello` при подключении и `message` (админ-broadcast → `this.warn`)
-- **HTTP REST**: Конфигурация устройств и синхронизация состояния со шлюзом `api.nodered-home.ru` (состояния новых клиентов — напрямую `state.nodered-home.ru`)
+- **HTTP REST**: Конфигурация и состояния устройств — `api.nodered-home.ru/gtw/device/{config,state,clearallconfigs}` (Bearer)
 - **OAuth 2.0**: Аутентификация через Яндекс, обмен токенами через `nodered-home.ru/api/v1/getyatoken`
 
 ### Структура HTML UI
@@ -46,7 +46,7 @@ npm run copy-html      # Копирование src/*.html в nodes/
 
 ### Основные зависимости
 
-- `ws` — WebSocket-клиент (заменил `mqtt` в v3.0.0)
+- `ws` — WebSocket-клиент
 - `axios` — HTTP-клиент для вызовов API шлюза
 
 ## Заметки
